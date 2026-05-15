@@ -1,0 +1,129 @@
+{
+  "login": {
+    "title": "TrinityCore Editor",
+    "subtitle": "Connect to your game server database",
+    "host": "Database Host",
+    "hostPlaceholder": "127.0.0.1",
+    "port": "Port",
+    "database": "Database",
+    "databasePlaceholder": "world",
+    "username": "Username",
+    "usernamePlaceholder": "root",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "connect": "Connect to Database",
+    "connecting": "Connecting...",
+    "connectionError": "Failed to connect to database",
+    "info": "Make sure your database is accessible and credentials are correct",
+    "footer": "TrinityCore Database Editor v1.0",
+    "advancedSettings": "Advanced Settings"
+  },
+  "sidebar": {
+    "appTitle": "Game DB Editor",
+    "appSubtitle": "SQL Management",
+    "connected": "Connected",
+    "host": "Host:",
+    "database": "DB:",
+    "user": "User:",
+    "disconnect": "Disconnect",
+    "sql": {
+      "title": "SQL Session",
+      "changes": "change(s)",
+      "noChanges": "No changes",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "open": "Open"
+    },
+    "modules": {
+      "npc": "NPCs",
+      "gameobject": "Game Objects",
+      "item": "Items",
+      "quests": "Quests",
+      "maps": "Maps",
+      "loot-items": "Loot & Items",
+      "spells": "Spells",
+      "misc": "Misc"
+    },
+    "sections": {
+      "loot": "Loot & Items",
+      "system": "System"
+    }
+  },
+  "modules": {
+    "gameobject": {
+      "title": "Game Objects",
+      "description": "Edit world objects, containers, and interactive elements"
+    },
+    "item": {
+      "title": "Items Database",
+      "description": "Configure items, weapons, armor, and consumables"
+    },
+    "quests": {
+      "title": "Quests Editor",
+      "description": "Design quest chains, objectives, and rewards"
+    },
+    "maps": {
+      "title": "Maps & Zones",
+      "description": "Manage world maps, zones, and area definitions"
+    },
+    "spells": {
+      "title": "Spells",
+      "description": "Configure spells, effects and spell chains"
+    },
+    "server": {
+      "title": "Misc",
+      "description": "Miscellaneous settings and server configuration"
+    },
+    "settings": {
+      "title": "Application Settings",
+      "description": "Configure editor preferences and connection options"
+    },
+    "placeholder": "Module content will be implemented here"
+  },
+  "sqlPanel": {
+    "title": "SQL Query",
+    "diffQuery": "Diff Query",
+    "fullQuery": "Full Query",
+    "changedFields": "Changed Fields",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "execute": "Execute",
+    "noChanges": "No changes",
+    "noData": "No data",
+    "changes": "change(s)"
+  },
+  "sqlSession": {
+    "title": "SQL Session",
+    "description": "Overview of all pending SQL modifications for this session",
+    "copyAll": "Copy all",
+    "entries": "modified entry(ies)",
+    "fullScript": "Full Script",
+    "fullScriptDesc": "All queries combined, ready to execute",
+    "emptyTitle": "No pending changes",
+    "emptyDescription": "SQL queries will appear here when you modify entries"
+  },
+  "bitmaskField": {
+    "currentValue": "Current value:",
+    "done": "Done"
+  },
+  "common": {
+    "search": "Search...",
+    "filter": "Filter",
+    "noEntries": "No entries",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "settings": {
+    "title": "Settings",
+    "sqlDebug": "SQL Debug Mode",
+    "sqlDebugDesc": "Log all SQL queries executed by the backend in real-time"
+  },
+  "sqlDebug": {
+    "title": "SQL Debug Log",
+    "entries": "queries",
+    "empty": "No queries logged yet. Execute some actions to see logs here.",
+    "clear": "Clear",
+    "copy": "Copy all logs",
+    "openViewer": "Open SQL Debug Log"
+  }
+}

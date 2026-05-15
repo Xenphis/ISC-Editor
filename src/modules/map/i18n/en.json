@@ -1,0 +1,33 @@
+{
+  "map": {
+    "title": "Maps & Zones",
+    "description": "Manage world maps, zones, teleportation and exploration data",
+    "submodules": {
+      "teleport": {
+        "title": "Teleportation",
+        "description": "Teleport points, starting positions and waypoints"
+      },
+      "explorationXP": {
+        "title": "Exploration XP",
+        "description": "Experience granted upon discovering zones and sub-zones"
+      },
+      "instances": {
+        "title": "Instances",
+        "description": "Dungeons, raids, reset settings and difficulty modes"
+      },
+      "areaTrigger": {
+        "title": "Area Triggers",
+        "description": "Event trigger zones, teleporters and transitions"
+      },
+      "accessRequirement": {
+        "title": "Access Requirements",
+        "description": "Instance access prerequisites: levels, quests, items and reputations"
+      },
+      "outdoorPvP": {
+        "title": "Outdoor PvP",
+        "description": "Open world PvP zones, objectives and rewards"
+      }
+    },
+    "comingSoon": "Coming soon"
+  }
+}

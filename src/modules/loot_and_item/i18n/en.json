@@ -1,0 +1,38 @@
+{
+  "lootAndItem": {
+    "title": "Loot & Items",
+    "description": "Manage items, loot tables and acquisition methods",
+    "submodules": {
+      "items": {
+        "title": "Items",
+        "description": "Items database: weapons, armor, consumables and more"
+      },
+      "fishing": {
+        "title": "Fishing",
+        "description": "Loot tables obtained through the fishing skill"
+      },
+      "disenchant": {
+        "title": "Disenchant",
+        "description": "Loot tables obtained by disenchanting magical items"
+      },
+      "milling": {
+        "title": "Milling",
+        "description": "Loot tables obtained by milling herbs"
+      },
+      "pickpocketing": {
+        "title": "Pickpocketing",
+        "description": "Loot tables obtained by pickpocketing monsters"
+      },
+      "prospecting": {
+        "title": "Prospecting",
+        "description": "Loot tables obtained by prospecting ore"
+      },
+      "skinning": {
+        "title": "Skinning",
+        "description": "Loot tables obtained by skinning creatures"
+      }
+    },
+    "comingSoon": "Coming soon",
+    "openModule": "Open"
+  }
+}

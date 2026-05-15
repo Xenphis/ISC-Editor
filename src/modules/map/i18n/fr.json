@@ -1,0 +1,33 @@
+{
+  "map": {
+    "title": "Cartes & Zones",
+    "description": "Gérer les cartes du monde, zones, téléportations et données d'exploration",
+    "submodules": {
+      "teleport": {
+        "title": "Téléportation",
+        "description": "Points de téléportation, positions de départ et waypoints"
+      },
+      "explorationXP": {
+        "title": "XP d'exploration",
+        "description": "Expérience attribuée à la découverte de zones et sous-zones"
+      },
+      "instances": {
+        "title": "Instances",
+        "description": "Donjons, raids, paramètres de réinitialisation et modes de difficulté"
+      },
+      "areaTrigger": {
+        "title": "Déclencheurs de zone",
+        "description": "Zones de déclenchement d'événements, téléporteurs et transitions"
+      },
+      "accessRequirement": {
+        "title": "Conditions d'accès",
+        "description": "Prérequis d'accès aux instances : niveaux, quêtes, items et réputations"
+      },
+      "outdoorPvP": {
+        "title": "PvP en extérieur",
+        "description": "Zones de PvP en monde ouvert, objectifs et récompenses"
+      }
+    },
+    "comingSoon": "À venir"
+  }
+}

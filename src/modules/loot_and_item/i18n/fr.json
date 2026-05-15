@@ -1,0 +1,38 @@
+{
+  "lootAndItem": {
+    "title": "Loot & Items",
+    "description": "Gérer les objets, tables de butin et méthodes d'obtention",
+    "submodules": {
+      "items": {
+        "title": "Items",
+        "description": "Base de données des objets, armes, armures et consommables"
+      },
+      "fishing": {
+        "title": "Pêche",
+        "description": "Tables de butin obtenues par la compétence de pêche"
+      },
+      "disenchant": {
+        "title": "Désenchantement",
+        "description": "Tables de butin obtenues en désenchantant des objets magiques"
+      },
+      "milling": {
+        "title": "Broyage",
+        "description": "Tables de butin obtenues par le broyage d'herbes"
+      },
+      "pickpocketing": {
+        "title": "Pickpocket",
+        "description": "Tables de butin obtenues en volant à la tire des monstres"
+      },
+      "prospecting": {
+        "title": "Prospection",
+        "description": "Tables de butin obtenues en prospectant des minerais"
+      },
+      "skinning": {
+        "title": "Dépeçage",
+        "description": "Tables de butin obtenues en dépeçant des créatures"
+      }
+    },
+    "comingSoon": "À venir",
+    "openModule": "Ouvrir"
+  }
+}

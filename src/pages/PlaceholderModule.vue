@@ -1,0 +1,56 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+
+const { t } = useI18n()
+const route = useRoute()
+
+const moduleId = route.path.replace('/', '')
+</script>
+
+<template>
+  <div class="placeholder-module">
+    <div class="content-header">
+      <h1 class="content-title">{{ t(`modules.${moduleId}.title`) }}</h1>
+      <p class="content-description">{{ t(`modules.${moduleId}.description`) }}</p>
+    </div>
+    <div class="content-placeholder">
+      <i class="pi pi-wrench" style="font-size: 3rem; color: #334155"></i>
+      <p>{{ t('modules.placeholder') }}</p>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.content-header {
+  margin-bottom: 2rem;
+}
+
+.content-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.content-description {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.content-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  height: 50vh;
+  border: 2px dashed rgba(51, 65, 85, 0.5);
+  border-radius: 1rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+</style>
