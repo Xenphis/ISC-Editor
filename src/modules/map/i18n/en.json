@@ -29,5 +29,44 @@
       }
     },
     "comingSoon": "Coming soon"
+  },
+  "access_requirement": {
+    "title": "Access Requirements",
+    "description": "Instance access prerequisites: levels, quests, items and reputations",
+    "searchPlaceholder": "Search by mapId or comment...",
+    "addNew": "New requirement",
+    "editorTitle": "Access Requirement",
+    "newEntry": "New requirement",
+    "fields": {
+      "mapId": "Map ID",
+      "difficulty": "Difficulty",
+      "level_min": "Minimum level",
+      "level_max": "Maximum level",
+      "item": "Required item 1",
+      "item2": "Required item 2",
+      "quest_done_A": "Alliance quest",
+      "quest_done_H": "Horde quest",
+      "completed_achievement": "Required achievement",
+      "quest_failed_text": "Access failure text",
+      "comment": "Comment"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Map and difficulty identifying this access requirement",
+      "levels": "Levels",
+      "levelsDesc": "Minimum and maximum levels to access the instance",
+      "items": "Required Items",
+      "itemsDesc": "Items required to enter the instance",
+      "quests": "Quests & Achievements",
+      "questsDesc": "Quests and achievements required to access the instance"
+    },
+    "difficulty": {
+      "0": "Normal",
+      "1": "Heroic",
+      "2": "10-player",
+      "3": "25-player",
+      "4": "10-player Heroic",
+      "5": "25-player Heroic"
+    }
   }
 }

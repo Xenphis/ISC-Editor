@@ -24,6 +24,7 @@ use commands::npc::{get_npcs, get_npc, save_npc, delete_npc};
 use commands::locale::{get_npc_locales, save_npc_locales};
 use commands::movement::{get_npc_movement, save_npc_movement};
 use commands::resistance::{get_npc_resistances, save_npc_resistances};
+use commands::access_requirement::{get_access_requirements, get_access_requirement, save_access_requirement, delete_access_requirement};
 use commands::quest::{get_quests, get_quest, save_quest, delete_quest};
 use commands::quest_template_addon::{get_quest_addon, save_quest_addon};
 use commands::quest_template_locale::{get_quest_locales, save_quest_locales};
@@ -95,6 +96,10 @@ pub fn run() {
       delete_item,
       set_debug_mode,
       get_debug_mode,
+      get_access_requirements,
+      get_access_requirement,
+      save_access_requirement,
+      delete_access_requirement,
       get_quests,
       get_quest,
       save_quest,

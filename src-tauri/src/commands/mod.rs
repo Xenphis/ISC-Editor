@@ -1,3 +1,4 @@
+pub mod access_requirement;
 pub mod addon;
 pub mod connection;
 pub mod creature;

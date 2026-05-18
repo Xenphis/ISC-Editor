@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 const { t } = useI18n()
+const router = useRouter()
 
 const submodules = [
   {
@@ -42,7 +44,8 @@ const submodules = [
     color: '#f43f5e',
     gradient: 'linear-gradient(135deg, #be123c, #f43f5e)',
     shadow: 'rgba(244, 63, 94, 0.25)',
-    available: false,
+    available: true,
+    route: '/maps/access-requirement',
   },
   {
     key: 'outdoorPvP',
@@ -73,6 +76,8 @@ const submodules = [
         :key="mod.key"
         class="submodule-card"
         :class="{ 'card-disabled': !mod.available }"
+        @click="mod.available && mod.route ? router.push(mod.route) : undefined"
+        :style="mod.available ? { cursor: 'pointer' } : {}"
       >
         <div class="card-icon-wrapper" :style="{ background: mod.gradient, boxShadow: `0 4px 16px ${mod.shadow}` }">
           <i :class="mod.icon" class="card-icon"></i>

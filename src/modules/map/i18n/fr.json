@@ -29,5 +29,44 @@
       }
     },
     "comingSoon": "À venir"
+  },
+  "access_requirement": {
+    "title": "Conditions d'accès",
+    "description": "Prérequis d'accès aux instances : niveaux, quêtes, items et réputations",
+    "searchPlaceholder": "Rechercher par mapId ou commentaire...",
+    "addNew": "Nouvelle condition",
+    "editorTitle": "Condition d'accès",
+    "newEntry": "Nouvelle condition",
+    "fields": {
+      "mapId": "Map ID",
+      "difficulty": "Difficulté",
+      "level_min": "Niveau minimum",
+      "level_max": "Niveau maximum",
+      "item": "Item requis 1",
+      "item2": "Item requis 2",
+      "quest_done_A": "Quête Alliance",
+      "quest_done_H": "Quête Horde",
+      "completed_achievement": "Succès requis",
+      "quest_failed_text": "Texte d'échec d'accès",
+      "comment": "Commentaire"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Map et difficulté identifiant cette condition d'accès",
+      "levels": "Niveaux",
+      "levelsDesc": "Niveaux minimum et maximum pour accéder à l'instance",
+      "items": "Items requis",
+      "itemsDesc": "Items requis pour entrer dans l'instance",
+      "quests": "Quêtes et succès",
+      "questsDesc": "Quêtes et succès nécessaires pour accéder à l'instance"
+    },
+    "difficulty": {
+      "0": "Normal",
+      "1": "Héroïque",
+      "2": "10 joueurs",
+      "3": "25 joueurs",
+      "4": "10 héroïque",
+      "5": "25 héroïque"
+    }
   }
 }
