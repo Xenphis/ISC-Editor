@@ -39,8 +39,8 @@ const submodules = [
     color: '#f59e0b',
     gradient: 'linear-gradient(135deg, #b45309, #f59e0b)',
     shadow: 'rgba(245, 158, 11, 0.25)',
-    available: false,
-    route: null,
+    available: true,
+    route: '/npc/creature-classlevelstats',
   },
 ]
 

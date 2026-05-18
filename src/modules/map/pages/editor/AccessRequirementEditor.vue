@@ -196,6 +196,48 @@ onMounted(() => {
   max-width: 80rem;
 }
 
+/* Override PrimeVue input styles for dark theme */
+:deep(.p-inputtext),
+:deep(.p-inputnumber-input) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(51, 65, 85, 0.6) !important;
+  color: #e2e8f0 !important;
+  height: 2.6rem !important;
+}
+
+:deep(.p-inputtext:focus),
+:deep(.p-inputnumber-input:focus) {
+  border-color: rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
+}
+
+:deep(.p-inputtext::placeholder),
+:deep(.p-inputnumber-input::placeholder) {
+  color: #475569 !important;
+}
+
+:deep(.p-select) {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 1px solid rgba(51, 65, 85, 0.6) !important;
+  color: #e2e8f0 !important;
+  height: 2.6rem !important;
+}
+
+:deep(.p-select .p-select-label) {
+  padding: 0 0.75rem !important;
+  line-height: 2.6rem !important;
+}
+
+:deep(.p-select:focus),
+:deep(.p-select.p-focus) {
+  border-color: rgba(6, 182, 212, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
+}
+
+:deep(.p-select-label) {
+  color: #e2e8f0 !important;
+}
+
 .loading-state {
   display: flex;
   justify-content: center;

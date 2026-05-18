@@ -87,6 +87,16 @@ const router = createRouter({
           name: 'quests-edit',
           component: () => import('@/modules/quests/pages/QuestEditor.vue'),
         },
+        {
+          path: 'npc/creature-classlevelstats',
+          name: 'creature-classlevelstats-list',
+          component: () => import('@/modules/npc/pages/CreatureClassLevelStatsModule.vue'),
+        },
+        {
+          path: 'npc/creature-classlevelstats/:level/:classId',
+          name: 'creature-classlevelstats-edit',
+          component: () => import('@/modules/npc/pages/editor/ClassLevelStatsEditor.vue'),
+        },
         { path: 'maps', name: 'maps', component: () => import('@/modules/map/pages/MapModule.vue') },
         { path: 'maps/access-requirement', name: 'access-requirement-list', component: () => import('@/modules/map/pages/AccessRequirementModule.vue') },
         { path: 'maps/access-requirement/new', name: 'access-requirement-new', component: () => import('@/modules/map/pages/editor/AccessRequirementEditor.vue') },

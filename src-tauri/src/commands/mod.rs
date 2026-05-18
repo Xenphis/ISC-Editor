@@ -1,5 +1,6 @@
 pub mod access_requirement;
 pub mod addon;
+pub mod creature_classlevelstats;
 pub mod connection;
 pub mod creature;
 pub mod creature_addon;

@@ -11,6 +11,7 @@ import type { CreatureAddon } from '@/modules/npc/types/creature/creature_addon'
 import type { CreatureMovementOverride } from '@/modules/npc/types/creature/creature_movement_override'
 import type { CreatureText } from '@/modules/npc/types/creature_template/creature_text'
 import type { CreatureTextLocale } from '@/modules/npc/types/creature_template/creature_text_locale'
+import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
 
 export interface NpcListResult {
   data: CreatureTemplate[]
@@ -128,4 +129,18 @@ export async function getCreatureMovementOverride(spawnId: number): Promise<Crea
 
 export async function saveCreatureMovementOverride(spawnId: number, movement: CreatureMovementOverride): Promise<void> {
   return invoke('save_creature_movement_override', { spawnId, movement })
+}
+
+// ─── creature_classlevelstats ─────────────────────────────────────────────────
+
+export async function getCreatureClassLevelStats(): Promise<CreatureClassLevelStats[]> {
+  return invoke('get_creature_classlevelstats')
+}
+
+export async function getCreatureClassLevelStat(level: number, classId: number): Promise<CreatureClassLevelStats> {
+  return invoke('get_creature_classlevelstat', { level, classId })
+}
+
+export async function saveCreatureClassLevelStat(data: CreatureClassLevelStats): Promise<void> {
+  return invoke('save_creature_classlevelstat', { data })
 }
