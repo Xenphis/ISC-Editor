@@ -499,19 +499,6 @@ onMounted(async () => {
 
         <!-- ==================== ADDON ==================== -->
         <TabPanel value="addon">
-          <!-- Equipment -->
-          <div class="field-group">
-            <div class="field-group-header">
-              <h4>{{ t('creature.fields.equipment') }}</h4>
-              <p>{{ t('creature.fields.equipmentDesc') }}</p>
-            </div>
-            <div class="field-grid">
-              <EditorField :label="t('creature.fields.equipment_id')" :modified="isFieldModified('equipment_id')">
-                <Select v-model="form.equipment_id" :options="equipmentOptions" optionLabel="label" optionValue="value" fluid />
-              </EditorField>
-            </div>
-          </div>
-
           <!-- Creature Addon -->
           <div class="field-group">
             <div class="field-group-header">
