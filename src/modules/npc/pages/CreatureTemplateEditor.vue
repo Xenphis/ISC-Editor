@@ -10,11 +10,11 @@ import TabPanel from 'primevue/tabpanel'
 import EditorHeader from '@/components/EditorHeader.vue'
 import { type CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { Creature } from '@/modules/npc/types/creature/creature'
-import { getNpc, getNpcResistances, getNpcMovement, getNpcLocales, getNpcAddon, getNpcEquip, getNpcSpells, getCreatureTexts, getCreatureTextLocales, getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn } from '@/modules/npc/service'
+import { getNpc, getNpcResistances, getNpcMovement, getNpcLocales, getNpcAddon, getNpcEquip, getNpcSpells, getCreatureTexts, getCreatureTextLocales, getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn, getCreatureQuestItems } from '@/modules/npc/service'
 import CreatureEditor from './CreatureEditor.vue'
 import { useQueryGenerator } from '@/composables/useQueryGenerator'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
-import { useNpcModuleStore, type ResistanceEntry, type MovementForm, type AddonForm, type EquipEntry, type SpellEntry, type LocaleEntry, type TextEntry, type TextLocaleEntry } from '@/modules/npc/store'
+import { useNpcModuleStore, type ResistanceEntry, type MovementForm, type AddonForm, type EquipEntry, type SpellEntry, type LocaleEntry, type TextEntry, type TextLocaleEntry, type QuestItemEntry } from '@/modules/npc/store'
 import NpcTabGeneral from './editor/creature_template/GeneralTab.vue'
 import NpcTabCombat from './editor/creature_template/CombatTab.vue'
 import NpcTabAppearance from './editor/creature_template/AppearanceTab.vue'
@@ -183,7 +183,7 @@ onMounted(async () => {
 
     try {
       const entry = npcEntry.value
-      const [data, resistanceRows, movementData, localeRows, addonData, equipRows, spellRows, textRows, textLocaleRows] = await Promise.all([
+      const [data, resistanceRows, movementData, localeRows, addonData, equipRows, spellRows, textRows, textLocaleRows, questItemRows] = await Promise.all([
         getNpc(entry),
         getNpcResistances(entry).catch(() => []),
         getNpcMovement(entry).catch(() => null),
@@ -193,6 +193,7 @@ onMounted(async () => {
         getNpcSpells(entry).catch(() => []),
         getCreatureTexts(entry).catch(() => []),
         getCreatureTextLocales(entry).catch(() => []),
+        getCreatureQuestItems(entry).catch(() => []),
       ])
 
       Object.assign(form, data)
@@ -247,6 +248,12 @@ onMounted(async () => {
         Text: r.Text ?? null,
       }))
       store.textLocales.load(textLocaleEntries)
+
+      const questItemEntries: QuestItemEntry[] = questItemRows.map(r => ({
+        Idx: r.Idx,
+        ItemId: r.ItemId,
+      }))
+      store.questItems.load(questItemEntries)
 
     } catch (e) {
       console.error('Failed to load NPC:', e)

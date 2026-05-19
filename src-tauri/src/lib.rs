@@ -29,6 +29,7 @@ use commands::creature_classlevelstats::{get_creature_classlevelstats, get_creat
 use commands::quest::{get_quests, get_quest, save_quest, delete_quest};
 use commands::quest_template_addon::{get_quest_addon, save_quest_addon};
 use commands::quest_template_locale::{get_quest_locales, save_quest_locales};
+use commands::creature_questitem::{get_creature_questitem, save_creature_questitem};
 use commands::trainer::{get_trainers, get_trainer, save_trainer, delete_trainer, get_trainer_spells, save_trainer_spells, get_creature_default_trainers, save_creature_default_trainers};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -121,6 +122,8 @@ pub fn run() {
       save_trainer_spells,
       get_creature_default_trainers,
       save_creature_default_trainers,
+      get_creature_questitem,
+      save_creature_questitem,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

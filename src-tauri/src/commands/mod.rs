@@ -20,6 +20,7 @@ pub mod movement;
 pub mod npc;
 pub mod resistance;
 pub mod spell;
+pub mod creature_questitem;
 pub mod quest;
 pub mod quest_template_addon;
 pub mod quest_template_locale;

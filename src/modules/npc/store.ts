@@ -63,6 +63,11 @@ export interface TextLocaleEntry {
   Text: string | null
 }
 
+export interface QuestItemEntry {
+  Idx: number
+  ItemId: number
+}
+
 export interface TextEntry {
   GroupID: number
   ID: number
@@ -203,6 +208,15 @@ const equipConfig: Omit<CompositeKeyConfig<EquipEntry>, 'parentId'> = {
   toSqlValues: (e) => [e.ItemID1, e.ItemID2, e.ItemID3, 0],
 }
 
+const questItemConfig: Omit<CompositeKeyConfig<QuestItemEntry>, 'parentId'> = {
+  table: 'creature_questitem',
+  parentKey: 'CreatureEntry',
+  childKey: 'Idx',
+  columns: ['ItemId', 'VerifiedBuild'],
+  isEqual: (a, b) => a.ItemId === b.ItemId,
+  toSqlValues: (e) => [e.ItemId, 0],
+}
+
 // ─── EditorCache (generic via SubTableSnapshot map) ─────────────────
 
 interface EditorCache {
@@ -282,8 +296,15 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     summarize: (e) => `[${e.GroupID}:${e.ID}] ${e.Text || '(empty)'}`,
   })
 
+  const questItems = new ArraySubTable<QuestItemEntry>({
+    tableName: 'creature_questitem',
+    compositeConfig: questItemConfig,
+    fieldPrefix: 'quest_item',
+    summarize: (e) => String(e.ItemId),
+  })
+
   /** All sub-table managers, iterated generically in cache/reset operations */
-  const subTables: SubTableManager[] = [resistances, movement, addon, locales, equips, spells, texts, textLocales]
+  const subTables: SubTableManager[] = [resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems]
 
   // --- Multi-entry cache: persists modifications across NPC switches ---
   const dirtyCache = ref<Map<number, EditorCache>>(new Map())
@@ -438,7 +459,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     editing, editingEntry, formData, originalValue, editorDataLoaded,
     // Sub-table managers
     subTables,
-    resistances, movement, addon, locales, equips, spells, texts, textLocales,
+    resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems,
     // Cache
     dirtyCache,
     // Actions

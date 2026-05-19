@@ -12,6 +12,7 @@ import type { CreatureMovementOverride } from '@/modules/npc/types/creature/crea
 import type { CreatureText } from '@/modules/npc/types/creature_template/creature_text'
 import type { CreatureTextLocale } from '@/modules/npc/types/creature_template/creature_text_locale'
 import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
+import type { CreatureQuestItem } from '@/modules/npc/types/creature_template/creature_questitem'
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
 import type { TrainerSpell } from '@/modules/npc/types/trainer/trainer_spell'
 import type { CreatureDefaultTrainer } from '@/modules/npc/types/trainer/creature_default_trainer'
@@ -99,6 +100,14 @@ export async function getNpcSpells(entry: number): Promise<CreatureTemplateSpell
 
 export async function saveNpcSpells(entry: number, spells: CreatureTemplateSpell[]): Promise<void> {
   return invoke('save_npc_spells', { entry, spells })
+}
+
+export async function getCreatureQuestItems(entry: number): Promise<CreatureQuestItem[]> {
+  return invoke('get_creature_questitem', { entry })
+}
+
+export async function saveCreatureQuestItems(entry: number, items: CreatureQuestItem[]): Promise<void> {
+  return invoke('save_creature_questitem', { entry, items })
 }
 
 export async function getCreatureTexts(entry: number): Promise<CreatureText[]> {
