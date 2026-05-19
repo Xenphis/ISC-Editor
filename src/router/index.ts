@@ -93,6 +93,21 @@ const router = createRouter({
           component: () => import('@/modules/npc/pages/CreatureClassLevelStatsModule.vue'),
         },
         {
+          path: 'npc/trainer',
+          name: 'trainer-list',
+          component: () => import('@/modules/npc/pages/TrainerModule.vue'),
+        },
+        {
+          path: 'npc/trainer/new',
+          name: 'trainer-new',
+          component: () => import('@/modules/npc/pages/TrainerEditor.vue'),
+        },
+        {
+          path: 'npc/trainer/:id',
+          name: 'trainer-edit',
+          component: () => import('@/modules/npc/pages/TrainerEditor.vue'),
+        },
+        {
           path: 'npc/creature-classlevelstats/:level/:classId',
           name: 'creature-classlevelstats-edit',
           component: () => import('@/modules/npc/pages/editor/class_level_stats/ClassLevelStatsEditor.vue'),

@@ -12,6 +12,9 @@ import type { CreatureMovementOverride } from '@/modules/npc/types/creature/crea
 import type { CreatureText } from '@/modules/npc/types/creature_template/creature_text'
 import type { CreatureTextLocale } from '@/modules/npc/types/creature_template/creature_text_locale'
 import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
+import type { Trainer } from '@/modules/npc/types/trainer/trainer'
+import type { TrainerSpell } from '@/modules/npc/types/trainer/trainer_spell'
+import type { CreatureDefaultTrainer } from '@/modules/npc/types/trainer/creature_default_trainer'
 
 export interface NpcListResult {
   data: CreatureTemplate[]
@@ -143,4 +146,38 @@ export async function getCreatureClassLevelStat(level: number, classId: number):
 
 export async function saveCreatureClassLevelStat(data: CreatureClassLevelStats): Promise<void> {
   return invoke('save_creature_classlevelstat', { data })
+}
+
+// ─── trainer ─────────────────────────────────────────────────────────────────
+
+export async function getTrainers(): Promise<Trainer[]> {
+  return invoke('get_trainers')
+}
+
+export async function getTrainer(id: number): Promise<Trainer> {
+  return invoke('get_trainer', { id })
+}
+
+export async function saveTrainer(data: Trainer): Promise<void> {
+  return invoke('save_trainer', { data })
+}
+
+export async function deleteTrainer(id: number): Promise<void> {
+  return invoke('delete_trainer', { id })
+}
+
+export async function getTrainerSpells(trainerId: number): Promise<TrainerSpell[]> {
+  return invoke('get_trainer_spells', { trainerId })
+}
+
+export async function saveTrainerSpells(trainerId: number, spells: TrainerSpell[]): Promise<void> {
+  return invoke('save_trainer_spells', { trainerId, spells })
+}
+
+export async function getCreatureDefaultTrainers(trainerId: number): Promise<CreatureDefaultTrainer[]> {
+  return invoke('get_creature_default_trainers', { trainerId })
+}
+
+export async function saveCreatureDefaultTrainers(trainerId: number, entries: CreatureDefaultTrainer[]): Promise<void> {
+  return invoke('save_creature_default_trainers', { trainerId, entries })
 }

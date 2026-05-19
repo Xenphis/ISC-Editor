@@ -23,3 +23,4 @@ pub mod spell;
 pub mod quest;
 pub mod quest_template_addon;
 pub mod quest_template_locale;
+pub mod trainer;

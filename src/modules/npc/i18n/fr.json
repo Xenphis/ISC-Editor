@@ -425,5 +425,69 @@
       "misc": "Divers",
       "miscDesc": "Commentaire optionnel pour cette entrée"
     }
+  },
+  "trainer": {
+    "title": "Trainer",
+    "description": "Gérer les PNJ entraîneurs et leurs sorts d'entraînement disponibles",
+    "searchPlaceholder": "Rechercher par ID, type ou message...",
+    "addButton": "Ajouter un Trainer",
+    "editorTitle": "Trainer",
+    "back": "Retour",
+    "discard": "Annuler",
+    "execute": "Exécuter",
+    "columns": {
+      "id": "ID",
+      "type": "Type",
+      "requirement": "Prérequis",
+      "greeting": "Message",
+      "actions": "Actions"
+    },
+    "tabs": {
+      "general": "Général",
+      "spells": "Sorts",
+      "creature": "Créatures"
+    },
+    "types": {
+      "class": "Classe",
+      "mount": "Monture",
+      "tradeskill": "Métier",
+      "pet": "Familier"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Identifiant unique du trainer et configuration du type",
+      "greeting": "Message d'accueil",
+      "greetingDesc": "Texte affiché en haut de la fenêtre de l'entraîneur (ce n'est pas le texte de gossip)",
+      "spells": "Sorts",
+      "spellsDesc": "Sorts disponibles à l'entraînement (table trainer_spell)",
+      "creatures": "Créatures liées",
+      "creaturesDesc": "Créatures utilisant cet entraîneur par défaut (table creature_default_trainer)",
+      "misc": "Divers",
+      "miscDesc": "Vérification du build et autres champs techniques"
+    },
+    "fields": {
+      "id": "ID",
+      "type": "Type",
+      "requirement": "Prérequis",
+      "requirementClass": "Prérequis (ID de classe)",
+      "greeting": "Message d'accueil",
+      "verifiedBuild": "Build vérifié"
+    },
+    "tooltips": {
+      "requirement": "Dépend du Type : ID de classe pour les entraîneurs de classe, ou 0 si aucun prérequis."
+    },
+    "creature": {
+      "creatureId": "ID Créature"
+    },
+    "spell": {
+      "spellId": "Spell ID",
+      "moneyCost": "Coût (cuivre)",
+      "reqLevel": "Niveau requis",
+      "reqSkillLine": "Compétence requise",
+      "reqSkillRank": "Rang requis",
+      "reqAbility1": "Capacité req. 1",
+      "reqAbility2": "Capacité req. 2",
+      "reqAbility3": "Capacité req. 3"
+    }
   }
 }

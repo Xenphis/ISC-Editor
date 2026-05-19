@@ -21,8 +21,8 @@ const submodules = [
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6)',
     shadow: 'rgba(139, 92, 246, 0.25)',
-    available: false,
-    route: null,
+    available: true,
+    route: '/npc/trainer',
   },
   {
     key: 'formation',

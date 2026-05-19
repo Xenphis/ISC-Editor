@@ -428,5 +428,69 @@
       "misc": "Miscellaneous",
       "miscDesc": "Optional comment for this entry"
     }
+  },
+  "trainer": {
+    "title": "Trainer",
+    "description": "Manage NPC trainers and their available training spells",
+    "searchPlaceholder": "Search by ID, type or greeting...",
+    "addButton": "Add Trainer",
+    "editorTitle": "Trainer",
+    "back": "Back",
+    "discard": "Discard",
+    "execute": "Execute",
+    "columns": {
+      "id": "ID",
+      "type": "Type",
+      "requirement": "Requirement",
+      "greeting": "Greeting",
+      "actions": "Actions"
+    },
+    "tabs": {
+      "general": "General",
+      "spells": "Spells",
+      "creature": "Creatures"
+    },
+    "types": {
+      "class": "Class",
+      "mount": "Mount",
+      "tradeskill": "Tradeskill",
+      "pet": "Pet"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Unique trainer identifier and type configuration",
+      "greeting": "Greeting",
+      "greetingDesc": "Text displayed at the top of the trainer window (not the gossip text)",
+      "spells": "Spells",
+      "spellsDesc": "Spells available for training (trainer_spell table)",
+      "creatures": "Linked Creatures",
+      "creaturesDesc": "Creatures that use this trainer by default (creature_default_trainer table)",
+      "misc": "Miscellaneous",
+      "miscDesc": "Build verification and other technical fields"
+    },
+    "fields": {
+      "id": "ID",
+      "type": "Type",
+      "requirement": "Requirement",
+      "requirementClass": "Requirement (Class ID)",
+      "greeting": "Greeting",
+      "verifiedBuild": "Verified Build"
+    },
+    "tooltips": {
+      "requirement": "Depends on Type: class ID for Class trainers, or 0 if no requirement."
+    },
+    "creature": {
+      "creatureId": "Creature ID"
+    },
+    "spell": {
+      "spellId": "Spell ID",
+      "moneyCost": "Cost (copper)",
+      "reqLevel": "Req. Level",
+      "reqSkillLine": "Req. Skill",
+      "reqSkillRank": "Req. Rank",
+      "reqAbility1": "Req. Ability 1",
+      "reqAbility2": "Req. Ability 2",
+      "reqAbility3": "Req. Ability 3"
+    }
   }
 }
