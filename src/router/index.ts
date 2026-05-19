@@ -95,7 +95,7 @@ const router = createRouter({
         {
           path: 'npc/creature-classlevelstats/:level/:classId',
           name: 'creature-classlevelstats-edit',
-          component: () => import('@/modules/npc/pages/editor/ClassLevelStatsEditor.vue'),
+          component: () => import('@/modules/npc/pages/editor/class_level_stats/ClassLevelStatsEditor.vue'),
         },
         { path: 'maps', name: 'maps', component: () => import('@/modules/map/pages/MapModule.vue') },
         { path: 'maps/access-requirement', name: 'access-requirement-list', component: () => import('@/modules/map/pages/AccessRequirementModule.vue') },
