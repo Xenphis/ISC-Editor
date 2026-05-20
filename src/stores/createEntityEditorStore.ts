@@ -16,7 +16,8 @@ export interface EntityEditorCache<T extends object> {
 
 export interface EntitySubTableBinding<T extends object, TLoaded = unknown> {
   manager: SubTableManager
-  load?: (id: number) => Promise<TLoaded>
+  getParentId?: (formData: T, editingId: number | null) => number
+  load?: (id: number, formData: T) => Promise<TLoaded>
   mapLoaded?: (data: TLoaded, id: number, formData: T) => unknown
   commitWhenMissing?: boolean
   save?: (id: number, manager: SubTableManager, formData: T) => Promise<void>
@@ -50,12 +51,15 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
   let pendingOpen: Promise<void> | null = null
   let pendingOpenId: number | null = null
 
-  const currentParentId = computed(() => {
-    if (options.getParentId) {
-      return options.getParentId(formData, editingId.value)
+  function getBindingParentId(binding: EntitySubTableBinding<T>, data: T = formData, id: number | null = editingId.value): number {
+    if (binding.getParentId) {
+      return binding.getParentId(data, id)
     }
-    return Number((formData as Record<string, unknown>)[options.primaryKey])
-  })
+    if (options.getParentId) {
+      return options.getParentId(data, id)
+    }
+    return Number((data as Record<string, unknown>)[options.primaryKey])
+  }
 
   const changedFields = computed<FieldChange[]>(() => {
     if (!originalValue.value) return []
@@ -89,9 +93,8 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
     if (diffQuery.value) {
       parts.push(diffQuery.value)
     }
-    const parentId = currentParentId.value
-    for (const subTable of subTables) {
-      const sql = subTable.getSqlDiff(parentId)
+    for (const binding of subTableBindings) {
+      const sql = binding.manager.getSqlDiff(getBindingParentId(binding))
       if (sql) {
         parts.push(sql)
       }
@@ -101,15 +104,13 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
 
   const combinedHasChanges = computed(() => {
     if (hasChanges.value) return true
-    const parentId = currentParentId.value
-    return subTables.some(subTable => Boolean(subTable.getSqlDiff(parentId)))
+    return subTableBindings.some(binding => Boolean(binding.manager.getSqlDiff(getBindingParentId(binding))))
   })
 
   const combinedChangedFields = computed<FieldChange[]>(() => {
     const fields = [...changedFields.value]
-    const parentId = currentParentId.value
-    for (const subTable of subTables) {
-      fields.push(...subTable.getChangedFields(parentId))
+    for (const binding of subTableBindings) {
+      fields.push(...binding.manager.getChangedFields(getBindingParentId(binding)))
     }
     return fields
   })
@@ -171,7 +172,7 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
   async function loadSubTables(id: number) {
     await Promise.all(subTableBindings.map(async binding => {
       if (!binding.load) return
-      const data = await binding.load(id)
+      const data = await binding.load(id, formData)
       if (data == null) {
         if (binding.commitWhenMissing) {
           binding.manager.commit()
@@ -276,8 +277,9 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
   async function saveCurrent() {
     if (!options.save) return
     await options.save(cloneEntity(formData))
-    const parentId = currentParentId.value
-    await Promise.all(subTableBindings.map(binding => binding.save?.(parentId, binding.manager, formData)))
+    await Promise.all(subTableBindings.map(binding => (
+      binding.save?.(getBindingParentId(binding), binding.manager, formData)
+    )))
     commitEditor()
   }
 
@@ -305,18 +307,19 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
   function pushSubTableDiffQueriesForEntry(
     queries: SessionQuery[],
     id: number,
+    formSnapshot: T,
     snapshots: Record<string, SubTableSnapshot>,
   ) {
-    for (const [tableName, snapshot] of Object.entries(snapshots)) {
-      const subTable = subTables.find(candidate => candidate.tableName === tableName)
-      if (!subTable) continue
-      const currentSnapshot = subTable.snapshot()
-      subTable.restore(snapshot)
-      const sql = subTable.getSqlDiff(id)
+    for (const binding of subTableBindings) {
+      const snapshot = snapshots[binding.manager.tableName]
+      if (!snapshot) continue
+      const currentSnapshot = binding.manager.snapshot()
+      binding.manager.restore(snapshot)
+      const sql = binding.manager.getSqlDiff(getBindingParentId(binding, formSnapshot, id))
       if (sql) {
-        queries.push({ table: tableName, entry: id, query: sql })
+        queries.push({ table: binding.manager.tableName, entry: id, query: sql })
       }
-      subTable.restore(currentSnapshot)
+      binding.manager.restore(currentSnapshot)
     }
   }
 
@@ -325,10 +328,10 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
 
     if (editingId.value != null && editorDataLoaded.value && originalValue.value) {
       pushDiffQueriesForEntry(queries, editingId.value, originalValue.value, formData)
-      for (const subTable of subTables) {
-        const sql = subTable.getSqlDiff(editingId.value)
+      for (const binding of subTableBindings) {
+        const sql = binding.manager.getSqlDiff(getBindingParentId(binding))
         if (sql) {
-          queries.push({ table: subTable.tableName, entry: editingId.value, query: sql })
+          queries.push({ table: binding.manager.tableName, entry: editingId.value, query: sql })
         }
       }
     }
@@ -338,7 +341,7 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
         continue
       }
       pushDiffQueriesForEntry(queries, id, cached.originalValue, cached.formData)
-      pushSubTableDiffQueriesForEntry(queries, id, cached.subTables)
+      pushSubTableDiffQueriesForEntry(queries, id, cached.formData, cached.subTables)
     }
 
     return queries

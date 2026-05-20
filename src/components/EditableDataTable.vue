@@ -28,12 +28,18 @@ const props = withDefaults(defineProps<{
   description?: string
   dataKey?: string
   showHeaderAdd?: boolean
+  showFooterAdd?: boolean
   showDetailButton?: boolean
+  showRemoveButton?: boolean
+  embedded?: boolean
 }>(), {
   hasChanges: false,
   dataKey: 'id',
   showHeaderAdd: false,
+  showFooterAdd: true,
   showDetailButton: false,
+  showRemoveButton: true,
+  embedded: false,
 })
 
 const emit = defineEmits<{
@@ -63,7 +69,7 @@ function updateField(index: number, field: string, value: any) {
 </script>
 
 <template>
-  <div class="editable-table-wrapper" :class="{ 'editable-table-modified': hasChanges }">
+  <div class="editable-table-wrapper" :class="{ 'editable-table-modified': hasChanges, 'editable-table-embedded': embedded }">
     <!-- Header -->
     <div v-if="title" class="editable-table-header">
       <div class="editable-table-title-row">
@@ -137,7 +143,7 @@ function updateField(index: number, field: string, value: any) {
       </Column>
 
       <!-- Actions column -->
-      <Column header="" :style="{ width: showDetailButton ? '5.5rem' : '3.5rem' }" bodyStyle="text-align: center; padding: 0.25rem">
+      <Column v-if="showDetailButton || showRemoveButton" header="" :style="{ width: showDetailButton && showRemoveButton ? '5.5rem' : '3.5rem' }" bodyStyle="text-align: center; padding: 0.25rem">
         <template #body="{ index }">
           <div class="action-buttons">
             <Button
@@ -151,6 +157,7 @@ function updateField(index: number, field: string, value: any) {
               @click="emit('detail', index)"
             />
             <Button
+              v-if="showRemoveButton"
               icon="pi pi-trash"
               severity="danger"
               text
@@ -175,7 +182,7 @@ function updateField(index: number, field: string, value: any) {
     </DataTable>
 
     <!-- Add row -->
-    <div v-if="!showHeaderAdd" class="editable-table-footer">
+    <div v-if="showFooterAdd && !showHeaderAdd" class="editable-table-footer">
       <slot name="add-row">
         <Button
           icon="pi pi-plus"
@@ -200,6 +207,18 @@ function updateField(index: number, field: string, value: any) {
   margin-bottom: 1.5rem;
 }
 
+.editable-table-wrapper.editable-table-embedded {
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+.editable-table-wrapper.editable-table-embedded.editable-table-modified {
+  border-color: transparent;
+}
+
 .editable-table-modified {
   border-color: rgba(6, 182, 212, 0.4);
 }
@@ -207,6 +226,10 @@ function updateField(index: number, field: string, value: any) {
 /* Header */
 .editable-table-header {
   padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.editable-table-embedded .editable-table-header {
+  padding: 0 0 0.75rem;
 }
 
 .editable-table-title-row {
@@ -256,6 +279,11 @@ function updateField(index: number, field: string, value: any) {
   background: transparent;
   margin: 0 1rem 1rem;
   width: calc(100% - 2rem);
+}
+
+.editable-table-embedded .editable-datatable {
+  margin: 0;
+  width: 100%;
 }
 
 :deep(.p-datatable-table-container) {
@@ -406,6 +434,10 @@ function updateField(index: number, field: string, value: any) {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.editable-table-embedded .editable-table-footer {
+  padding: 0.6rem 0 0;
 }
 
 .editable-table-count-footer {

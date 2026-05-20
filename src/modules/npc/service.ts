@@ -17,6 +17,11 @@ import type { CreatureOnkillReputation } from '@/modules/npc/types/creature_temp
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
 import type { TrainerSpell } from '@/modules/npc/types/trainer/trainer_spell'
 import type { CreatureDefaultTrainer } from '@/modules/npc/types/trainer/creature_default_trainer'
+import type { GossipMenu } from '@/modules/npc/types/gossip/gossip_menu'
+import type { GossipMenuOption } from '@/modules/npc/types/gossip/gossip_menu_option'
+import type { GossipMenuOptionLocale } from '@/modules/npc/types/gossip/gossip_menu_option_locale'
+import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
+import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
 
 export interface NpcListResult {
   data: CreatureTemplate[]
@@ -135,6 +140,56 @@ export async function getCreatureTextLocales(entry: number): Promise<CreatureTex
 
 export async function saveCreatureTextLocales(entry: number, locales: CreatureTextLocale[]): Promise<void> {
   return invoke('save_creature_text_locales', { entry, locales })
+}
+
+// ─── gossip_menu / npc_text ─────────────────────────────────────────────────
+
+export async function getGossipMenuIds(search?: string, limit?: number): Promise<number[]> {
+  return invoke('get_gossip_menu_ids', { search, limit })
+}
+
+export async function getNextCustomGossipMenuId(minId = 50000): Promise<number> {
+  return invoke('get_next_custom_gossip_menu_id', { minId })
+}
+
+export async function getGossipMenu(menuId: number): Promise<GossipMenu[]> {
+  return invoke('get_gossip_menu', { menuId })
+}
+
+export async function saveGossipMenu(menuId: number, rows: GossipMenu[]): Promise<void> {
+  return invoke('save_gossip_menu', { menuId, rows })
+}
+
+export async function getGossipMenuOptions(menuId: number): Promise<GossipMenuOption[]> {
+  return invoke('get_gossip_menu_options', { menuId })
+}
+
+export async function saveGossipMenuOptions(menuId: number, options: GossipMenuOption[]): Promise<void> {
+  return invoke('save_gossip_menu_options', { menuId, options })
+}
+
+export async function getGossipMenuOptionLocales(menuId: number): Promise<GossipMenuOptionLocale[]> {
+  return invoke('get_gossip_menu_option_locales', { menuId })
+}
+
+export async function saveGossipMenuOptionLocales(menuId: number, locales: GossipMenuOptionLocale[]): Promise<void> {
+  return invoke('save_gossip_menu_option_locales', { menuId, locales })
+}
+
+export async function getNpcTexts(ids: number[]): Promise<NpcText[]> {
+  return invoke('get_npc_texts', { ids })
+}
+
+export async function saveNpcTexts(texts: NpcText[]): Promise<void> {
+  return invoke('save_npc_texts', { texts })
+}
+
+export async function getNpcTextLocales(ids: number[]): Promise<NpcTextLocale[]> {
+  return invoke('get_npc_text_locales', { ids })
+}
+
+export async function saveNpcTextLocales(locales: NpcTextLocale[], deleted: NpcTextLocaleKey[] = []): Promise<void> {
+  return invoke('save_npc_text_locales', { locales, deleted })
 }
 
 export async function getCreatureAddon(guid: number): Promise<CreatureAddon | null> {

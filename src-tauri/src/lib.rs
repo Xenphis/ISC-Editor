@@ -17,10 +17,15 @@ use commands::gameobject_addon::{get_gameobject_spawn_addon, save_gameobject_spa
 use commands::gameobject_overrides::{get_gameobject_overrides, save_gameobject_overrides};
 use commands::gameobject_spawn::{get_gameobject_spawns, save_gameobject_spawn, delete_gameobject_spawn};
 use commands::gameobject_loot::{get_gameobject_loot, save_gameobject_loot};
+use commands::gossip_menu::{get_gossip_menu_ids, get_next_custom_gossip_menu_id, get_gossip_menu, save_gossip_menu};
+use commands::gossip_menu_option::{get_gossip_menu_options, save_gossip_menu_options};
+use commands::gossip_menu_option_locale::{get_gossip_menu_option_locales, save_gossip_menu_option_locales};
 use commands::equip::{get_npc_equip, save_npc_equip};
 use commands::item::{get_items, get_item, save_item, delete_item};
 use commands::spell::{get_npc_spells, save_npc_spells};
 use commands::npc::{get_npcs, get_npc, save_npc, delete_npc};
+use commands::npc_text::{get_npc_texts, save_npc_texts};
+use commands::npc_text_locale::{get_npc_text_locales, save_npc_text_locales};
 use commands::locale::{get_npc_locales, save_npc_locales};
 use commands::movement::{get_npc_movement, save_npc_movement};
 use commands::resistance::{get_npc_resistances, save_npc_resistances};
@@ -94,10 +99,22 @@ pub fn run() {
       delete_gameobject_spawn,
       get_gameobject_loot,
       save_gameobject_loot,
+      get_gossip_menu_ids,
+      get_next_custom_gossip_menu_id,
+      get_gossip_menu,
+      save_gossip_menu,
+      get_gossip_menu_options,
+      save_gossip_menu_options,
+      get_gossip_menu_option_locales,
+      save_gossip_menu_option_locales,
       get_items,
       get_item,
       save_item,
       delete_item,
+      get_npc_texts,
+      save_npc_texts,
+      get_npc_text_locales,
+      save_npc_text_locales,
       set_debug_mode,
       get_debug_mode,
       get_access_requirements,

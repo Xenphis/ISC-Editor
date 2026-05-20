@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
+import Button from 'primevue/button'
 import { locale_options } from '@/types/common'
 import { pvp_flags_options,rank_options, unit_class_options, type_options, family_options, icon_name } from '@/modules/npc/types/defines'
 import EditorField from '@/components/EditorField.vue'
@@ -35,6 +36,17 @@ const localeHasChanges = computed(() => store.locales.getSqlDiff(form.entry).len
 
 const localeSelectOptions = locale_options.map(o => ({ value: o.value, label: `${o.value} — ${o.comment}` }))
 
+const gossipMenuOptions = computed(() => {
+  const ids = new Set(store.gossipMenuIds)
+  if (form.gossip_menu_id > 0) {
+    ids.add(form.gossip_menu_id)
+  }
+  return [
+    { value: 0, label: t('creature_template.gossip.noMenu') },
+    ...[...ids].sort((a, b) => a - b).map(id => ({ value: id, label: `#${id}` })),
+  ]
+})
+
 const localeColumns: ColumnDef[] = [
   { field: 'locale', header: 'Locale', type: 'select', width: '12rem', options: localeSelectOptions },
   { field: 'Name', header: t('creature_template.fields.locale_name'), type: 'text' },
@@ -48,6 +60,18 @@ function addLocale() {
 function removeLocale(index: number) {
   store.locales.removeNewEntry(index)
 }
+
+async function onGossipMenuChange(value: number | string | null) {
+  await store.setGossipMenuId(value)
+}
+
+async function createGossipMenu() {
+  await store.createNextCustomGossipMenu()
+}
+
+onMounted(() => {
+  store.loadGossipMenuIds()
+})
 </script>
 
 <template>
@@ -96,7 +120,27 @@ function removeLocale(index: number) {
         <Select v-model="form.IconName" :options="iconOptions" optionLabel="label" optionValue="value" fluid editable />
       </EditorField>
       <EditorField :label="t('creature_template.fields.gossip_menu_id')" :modified="isFieldModified('gossip_menu_id')">
-        <InputNumber v-model="form.gossip_menu_id" :useGrouping="false" fluid />
+        <div class="gossip-menu-field">
+          <Select
+            :modelValue="form.gossip_menu_id"
+            :options="gossipMenuOptions"
+            optionLabel="label"
+            optionValue="value"
+            :loading="store.gossipMenuIdsLoading"
+            filter
+            editable
+            fluid
+            @update:modelValue="onGossipMenuChange"
+          />
+          <Button
+            icon="pi pi-plus"
+            severity="secondary"
+            text
+            rounded
+            :title="t('creature_template.gossip.createMenu')"
+            @click="createGossipMenu"
+          />
+        </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.addon_pvpflags')" :modified="isAddonModified('PvPFlags')">
         <BitmaskField v-model="addonForm.PvPFlags" :options="pvp_flags_options" :label="t('creature_template.fields.addon_pvpflags')" />
@@ -167,4 +211,11 @@ function removeLocale(index: number) {
 
 <style scoped>
 @import '../npc-editor.css';
+
+.gossip-menu-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 2.5rem;
+  gap: 0.5rem;
+  align-items: center;
+}
 </style>

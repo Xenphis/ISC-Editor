@@ -7,7 +7,9 @@ import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import EditorField from '@/components/EditorField.vue'
 import EditableDataTable, { type ColumnDef } from '@/components/EditableDataTable.vue'
+import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
 import { useNpcModuleStore, type TextEntry, type TextLocaleEntry } from '@/modules/npc/store'
+import NpcTabGossip from './GossipTab.vue'
 import {
   creature_text_type_options,
   creature_text_language_options,
@@ -17,6 +19,8 @@ import { locale_options } from '@/modules/npc/types/creature_template/creature_t
 
 const { t } = useI18n()
 const store = useNpcModuleStore()
+
+const hasGossipMenu = computed(() => store.formData.gossip_menu_id > 0)
 
 const textEntries = computed<TextEntry[]>(() => store.texts.getNewEntries())
 const textLocaleEntries = computed<TextLocaleEntry[]>(() => store.textLocales.getNewEntries())
@@ -90,33 +94,62 @@ function addTextLocale() {
 function removeTextLocale(index: number) {
   store.textLocales.removeNewEntry(index)
 }
+
+const textSectionTabs = computed<SectionTabItem[]>(() => [
+  {
+    value: 'text',
+    label: t('creature_template.groups.creatureText'),
+    count: textEntries.value.length,
+    modified: hasChanges.value,
+  },
+  {
+    value: 'locale',
+    label: t('creature_template.groups.creatureTextLocale'),
+    count: textLocaleEntries.value.length,
+    modified: hasLocaleChanges.value,
+  },
+])
 </script>
 
 <template>
   <div>
-    <EditableDataTable
-      :entries="textEntries"
-      :columns="textColumns"
-      :hasChanges="hasChanges"
-      :title="t('creature_template.groups.creatureText')"
-      :description="t('creature_template.groups.creatureTextDesc')"
-      showHeaderAdd
-      showDetailButton
-      @add="addText"
-      @remove="removeText"
-      @detail="openDetail"
-    />
+    <SectionTabs
+      :tabs="textSectionTabs"
+      defaultValue="text"
+      :modified="hasChanges || hasLocaleChanges"
+    >
+      <template #text>
+        <EditableDataTable
+          :entries="textEntries"
+          :columns="textColumns"
+          :hasChanges="hasChanges"
+          :description="t('creature_template.groups.creatureTextDesc')"
+          showHeaderAdd
+          showDetailButton
+          embedded
+          @add="addText"
+          @remove="removeText"
+          @detail="openDetail"
+        />
+      </template>
 
-    <EditableDataTable
-      :entries="textLocaleEntries"
-      :columns="textLocaleColumns"
-      :hasChanges="hasLocaleChanges"
-      :title="t('creature_template.groups.creatureTextLocale')"
-      :description="t('creature_template.groups.creatureTextLocaleDesc')"
-      showHeaderAdd
-      @add="addTextLocale"
-      @remove="removeTextLocale"
-    />
+      <template #locale>
+        <EditableDataTable
+          :entries="textLocaleEntries"
+          :columns="textLocaleColumns"
+          :hasChanges="hasLocaleChanges"
+          :description="t('creature_template.groups.creatureTextLocaleDesc')"
+          showHeaderAdd
+          embedded
+          @add="addTextLocale"
+          @remove="removeTextLocale"
+        />
+      </template>
+    </SectionTabs>
+
+    <div v-if="hasGossipMenu" class="gossip-section">
+      <NpcTabGossip />
+    </div>
 
     <!-- Creature Text Detail Dialog -->
     <Dialog
@@ -182,6 +215,10 @@ function removeTextLocale(index: number) {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
+}
+
+.gossip-section {
+  margin-top: 1.5rem;
 }
 
 /* Dark-theme styling for Dialog fields (teleported outside parent scope) */

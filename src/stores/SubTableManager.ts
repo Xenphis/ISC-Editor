@@ -289,3 +289,177 @@ export class ArraySubTable<T extends Record<string, any>> implements SubTableMan
     return changes
   }
 }
+
+// ─── DetachedArraySubTable: multi-row tables keyed by their own columns ─────
+
+export interface DetachedArraySubTableConfig<T extends Record<string, any>> {
+  tableName: string
+  columns: string[]
+  getUniqueKey: (entry: T) => string
+  buildWhereClause: (entry: T) => string
+  isEqual: (a: T, b: T) => boolean
+  toSqlValues: (entry: T) => (string | number | null)[]
+  fieldPrefix: string
+  summarize: (entry: T) => string
+  deleteMissing?: boolean
+}
+
+function formatDetachedSqlValue(value: string | number | null): string | number {
+  return value == null ? 'NULL' : value
+}
+
+export class DetachedArraySubTable<T extends Record<string, any>> implements SubTableManager {
+  readonly tableName: string
+  readonly newEntries: Ref<T[]>
+  readonly originalEntries: Ref<T[] | null>
+  private readonly columns: string[]
+  private readonly getUniqueKey: (entry: T) => string
+  private readonly buildWhereClause: (entry: T) => string
+  private readonly isEqual: (a: T, b: T) => boolean
+  private readonly toSqlValues: (entry: T) => (string | number | null)[]
+  private readonly fieldPrefix: string
+  private readonly summarize: (entry: T) => string
+  private readonly deleteMissing: boolean
+
+  constructor(config: DetachedArraySubTableConfig<T>) {
+    this.tableName = config.tableName
+    this.columns = config.columns
+    this.getUniqueKey = config.getUniqueKey
+    this.buildWhereClause = config.buildWhereClause
+    this.isEqual = config.isEqual
+    this.toSqlValues = config.toSqlValues
+    this.fieldPrefix = config.fieldPrefix
+    this.summarize = config.summarize
+    this.deleteMissing = config.deleteMissing ?? true
+    this.newEntries = ref<T[]>([]) as Ref<T[]>
+    this.originalEntries = ref<T[] | null>(null) as Ref<T[] | null>
+    markRaw(this)
+  }
+
+  snapshot(): SubTableSnapshot {
+    return {
+      new: this.newEntries.value.map(e => ({ ...e })),
+      original: this.originalEntries.value
+        ? this.originalEntries.value.map(e => ({ ...e }))
+        : this.newEntries.value.map(e => ({ ...e })),
+    }
+  }
+
+  restore(cached: SubTableSnapshot): void {
+    this.newEntries.value = (cached.new as T[]).map(e => ({ ...e }))
+    this.originalEntries.value = (cached.original as T[]).map(e => ({ ...e }))
+  }
+
+  reset(): void {
+    this.originalEntries.value = null
+    this.newEntries.value = []
+  }
+
+  load(data: T[]): void {
+    this.newEntries.value = data.map(e => ({ ...e }))
+    this.commit()
+  }
+
+  revert(): void {
+    if (this.originalEntries.value) {
+      this.newEntries.value = this.originalEntries.value.map(e => ({ ...e }))
+    } else {
+      this.newEntries.value = []
+    }
+  }
+
+  commit(): void {
+    this.originalEntries.value = this.newEntries.value.map(e => ({ ...e }))
+  }
+
+  getOriginalEntries(): T[] | null {
+    return this.originalEntries.value
+  }
+
+  setOriginalEntries(data: T[]): void {
+    this.originalEntries.value = data.map(e => ({ ...e }))
+  }
+
+  getNewEntries(): T[] {
+    return this.newEntries.value
+  }
+
+  setNewEntries(data: T[]): void {
+    this.newEntries.value = data.map(e => ({ ...e }))
+  }
+
+  pushNewEntry(entry: T): void {
+    this.newEntries.value.push(entry)
+  }
+
+  removeNewEntry(index: number): void {
+    this.newEntries.value.splice(index, 1)
+  }
+
+  getDeletedEntries(): T[] {
+    if (!this.deleteMissing || !this.originalEntries.value) {
+      return []
+    }
+    const currentKeys = new Set(this.newEntries.value.map(entry => this.getUniqueKey(entry)))
+    return this.originalEntries.value.filter(entry => !currentKeys.has(this.getUniqueKey(entry)))
+  }
+
+  getSqlDiff(_parentId: number): string {
+    if (!this.originalEntries.value) {
+      return ''
+    }
+
+    const lines: string[] = []
+    const originalMap = new Map(this.originalEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+    const currentMap = new Map(this.newEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+
+    if (this.deleteMissing) {
+      for (const [key, original] of originalMap) {
+        if (!currentMap.has(key)) {
+          lines.push(`DELETE FROM \`${this.tableName}\` WHERE ${this.buildWhereClause(original)};`)
+        }
+      }
+    }
+
+    for (const [key, current] of currentMap) {
+      const original = originalMap.get(key)
+      if (!original || !this.isEqual(original, current)) {
+        lines.push(`DELETE FROM \`${this.tableName}\` WHERE ${this.buildWhereClause(current)};`)
+        const columnNames = this.columns.map(column => `\`${column}\``).join(', ')
+        const values = this.toSqlValues(current).map(formatDetachedSqlValue).join(', ')
+        lines.push(`INSERT INTO \`${this.tableName}\` (${columnNames}) VALUES (${values});`)
+      }
+    }
+
+    return lines.join('\n')
+  }
+
+  getChangedFields(_parentId: number): FieldChange[] {
+    if (!this.originalEntries.value) {
+      return []
+    }
+
+    const changes: FieldChange[] = []
+    const originalMap = new Map(this.originalEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+    const currentMap = new Map(this.newEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+
+    if (this.deleteMissing) {
+      for (const [key, original] of originalMap) {
+        if (!currentMap.has(key)) {
+          changes.push({ field: `${this.fieldPrefix}_${key}`, oldValue: this.summarize(original), newValue: '(deleted)' })
+        }
+      }
+    }
+
+    for (const [key, current] of currentMap) {
+      const original = originalMap.get(key)
+      if (!original) {
+        changes.push({ field: `${this.fieldPrefix}_${key}`, oldValue: '(none)', newValue: this.summarize(current) })
+      } else if (!this.isEqual(original, current)) {
+        changes.push({ field: `${this.fieldPrefix}_${key}`, oldValue: this.summarize(original), newValue: this.summarize(current) })
+      }
+    }
+
+    return changes
+  }
+}

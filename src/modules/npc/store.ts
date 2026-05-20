@@ -2,10 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
-import { ReactiveSubTable, ArraySubTable } from '@/stores/SubTableManager'
+import { ReactiveSubTable, ArraySubTable, DetachedArraySubTable } from '@/stores/SubTableManager'
 import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
 import * as npcService from '@/modules/npc/service'
+import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
+import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -95,6 +97,34 @@ export interface TextEntry {
   comment: string | null
 }
 
+export interface GossipMenuEntry {
+  TextID: number
+  VerifiedBuild: number
+}
+
+export interface GossipOptionEntry {
+  OptionID: number
+  OptionIcon: number
+  OptionText: string | null
+  OptionBroadcastTextID: number
+  OptionType: number
+  OptionNpcFlag: number
+  ActionMenuID: number
+  ActionPoiID: number
+  BoxCoded: number
+  BoxMoney: number
+  BoxText: string | null
+  BoxBroadcastTextID: number
+  VerifiedBuild: number
+}
+
+export interface GossipOptionLocaleEntry {
+  OptionID: number
+  Locale: string
+  OptionText: string | null
+  BoxText: string | null
+}
+
 // ─── Default factories ──────────────────────────────────────────────
 
 export function createDefaultMovementForm(): MovementForm {
@@ -117,6 +147,52 @@ function createDefaultOnKillRepForm(): OnKillRepForm {
     RewOnKillRepValue2: 0,
     TeamDependent: 0,
   }
+}
+
+export function createDefaultNpcText(id: number): NpcText {
+  return {
+    ID: id,
+    text0_0: '', text0_1: null, BroadcastTextID0: 0, lang0: 0, Probability0: 1, EmoteDelay0_0: 0, Emote0_0: 0, EmoteDelay0_1: 0, Emote0_1: 0, EmoteDelay0_2: 0, Emote0_2: 0,
+    text1_0: null, text1_1: null, BroadcastTextID1: 0, lang1: 0, Probability1: 0, EmoteDelay1_0: 0, Emote1_0: 0, EmoteDelay1_1: 0, Emote1_1: 0, EmoteDelay1_2: 0, Emote1_2: 0,
+    text2_0: null, text2_1: null, BroadcastTextID2: 0, lang2: 0, Probability2: 0, EmoteDelay2_0: 0, Emote2_0: 0, EmoteDelay2_1: 0, Emote2_1: 0, EmoteDelay2_2: 0, Emote2_2: 0,
+    text3_0: null, text3_1: null, BroadcastTextID3: 0, lang3: 0, Probability3: 0, EmoteDelay3_0: 0, Emote3_0: 0, EmoteDelay3_1: 0, Emote3_1: 0, EmoteDelay3_2: 0, Emote3_2: 0,
+    text4_0: null, text4_1: null, BroadcastTextID4: 0, lang4: 0, Probability4: 0, EmoteDelay4_0: 0, Emote4_0: 0, EmoteDelay4_1: 0, Emote4_1: 0, EmoteDelay4_2: 0, Emote4_2: 0,
+    text5_0: null, text5_1: null, BroadcastTextID5: 0, lang5: 0, Probability5: 0, EmoteDelay5_0: 0, Emote5_0: 0, EmoteDelay5_1: 0, Emote5_1: 0, EmoteDelay5_2: 0, Emote5_2: 0,
+    text6_0: null, text6_1: null, BroadcastTextID6: 0, lang6: 0, Probability6: 0, EmoteDelay6_0: 0, Emote6_0: 0, EmoteDelay6_1: 0, Emote6_1: 0, EmoteDelay6_2: 0, Emote6_2: 0,
+    text7_0: null, text7_1: null, BroadcastTextID7: 0, lang7: 0, Probability7: 0, EmoteDelay7_0: 0, Emote7_0: 0, EmoteDelay7_1: 0, Emote7_1: 0, EmoteDelay7_2: 0, Emote7_2: 0,
+    VerifiedBuild: 0,
+  }
+}
+
+export function createDefaultNpcTextLocale(id: number, locale = ''): NpcTextLocale {
+  return {
+    ID: id,
+    Locale: locale,
+    Text0_0: null,
+    Text0_1: null,
+    Text1_0: null,
+    Text1_1: null,
+    Text2_0: null,
+    Text2_1: null,
+    Text3_0: null,
+    Text3_1: null,
+    Text4_0: null,
+    Text4_1: null,
+    Text5_0: null,
+    Text5_1: null,
+    Text6_0: null,
+    Text6_1: null,
+    Text7_0: null,
+    Text7_1: null,
+  }
+}
+
+function sqlText(value: string | null | undefined): string {
+  return value != null && value !== '' ? `'${escapeSQL(value)}'` : 'NULL'
+}
+
+function sqlNumber(value: number | null | undefined): string | number {
+  return value == null ? 'NULL' : value
 }
 
 function createDefaultForm(): CreatureTemplate {
@@ -243,6 +319,105 @@ const questItemConfig: Omit<CompositeKeyConfig<QuestItemEntry>, 'parentId'> = {
   toSqlValues: (e) => [e.ItemId, 0],
 }
 
+const gossipMenuConfig: Omit<CompositeKeyConfig<GossipMenuEntry>, 'parentId'> = {
+  table: 'gossip_menu',
+  parentKey: 'MenuID',
+  childKey: 'TextID',
+  columns: ['VerifiedBuild'],
+  isEqual: (a, b) => a.VerifiedBuild === b.VerifiedBuild,
+  toSqlValues: (e) => [e.VerifiedBuild],
+}
+
+const gossipOptionConfig: Omit<CompositeKeyConfig<GossipOptionEntry>, 'parentId'> = {
+  table: 'gossip_menu_option',
+  parentKey: 'MenuID',
+  childKey: 'OptionID',
+  columns: [
+    'OptionIcon', 'OptionText', 'OptionBroadcastTextID', 'OptionType', 'OptionNpcFlag',
+    'ActionMenuID', 'ActionPoiID', 'BoxCoded', 'BoxMoney', 'BoxText', 'BoxBroadcastTextID', 'VerifiedBuild',
+  ],
+  isEqual: (a, b) =>
+    a.OptionIcon === b.OptionIcon &&
+    a.OptionText === b.OptionText &&
+    a.OptionBroadcastTextID === b.OptionBroadcastTextID &&
+    a.OptionType === b.OptionType &&
+    a.OptionNpcFlag === b.OptionNpcFlag &&
+    a.ActionMenuID === b.ActionMenuID &&
+    a.ActionPoiID === b.ActionPoiID &&
+    a.BoxCoded === b.BoxCoded &&
+    a.BoxMoney === b.BoxMoney &&
+    a.BoxText === b.BoxText &&
+    a.BoxBroadcastTextID === b.BoxBroadcastTextID &&
+    a.VerifiedBuild === b.VerifiedBuild,
+  toSqlValues: (e) => [
+    e.OptionIcon,
+    sqlText(e.OptionText),
+    e.OptionBroadcastTextID,
+    e.OptionType,
+    e.OptionNpcFlag,
+    e.ActionMenuID,
+    e.ActionPoiID,
+    e.BoxCoded,
+    e.BoxMoney,
+    sqlText(e.BoxText),
+    e.BoxBroadcastTextID,
+    e.VerifiedBuild,
+  ],
+}
+
+const gossipOptionLocaleConfig: Omit<CompositeKeyConfig<GossipOptionLocaleEntry>, 'parentId'> = {
+  table: 'gossip_menu_option_locale',
+  parentKey: 'MenuID',
+  childKey: 'OptionID',
+  columns: ['Locale', 'OptionText', 'BoxText'],
+  isEqual: (a, b) => a.Locale === b.Locale && a.OptionText === b.OptionText && a.BoxText === b.BoxText,
+  toSqlValues: (e) => [
+    `'${escapeSQL(e.Locale)}'`,
+    sqlText(e.OptionText),
+    sqlText(e.BoxText),
+  ],
+  getUniqueKey: (e) => `${e.OptionID}:${e.Locale}`,
+  buildWhereClause: (e, parentId) =>
+    `\`MenuID\` = ${parentId} AND \`OptionID\` = ${e.OptionID} AND \`Locale\` = '${escapeSQL(e.Locale)}'`,
+}
+
+const npcTextColumns = [
+  'ID',
+  'text0_0', 'text0_1', 'BroadcastTextID0', 'lang0', 'Probability0', 'EmoteDelay0_0', 'Emote0_0', 'EmoteDelay0_1', 'Emote0_1', 'EmoteDelay0_2', 'Emote0_2',
+  'text1_0', 'text1_1', 'BroadcastTextID1', 'lang1', 'Probability1', 'EmoteDelay1_0', 'Emote1_0', 'EmoteDelay1_1', 'Emote1_1', 'EmoteDelay1_2', 'Emote1_2',
+  'text2_0', 'text2_1', 'BroadcastTextID2', 'lang2', 'Probability2', 'EmoteDelay2_0', 'Emote2_0', 'EmoteDelay2_1', 'Emote2_1', 'EmoteDelay2_2', 'Emote2_2',
+  'text3_0', 'text3_1', 'BroadcastTextID3', 'lang3', 'Probability3', 'EmoteDelay3_0', 'Emote3_0', 'EmoteDelay3_1', 'Emote3_1', 'EmoteDelay3_2', 'Emote3_2',
+  'text4_0', 'text4_1', 'BroadcastTextID4', 'lang4', 'Probability4', 'EmoteDelay4_0', 'Emote4_0', 'EmoteDelay4_1', 'Emote4_1', 'EmoteDelay4_2', 'Emote4_2',
+  'text5_0', 'text5_1', 'BroadcastTextID5', 'lang5', 'Probability5', 'EmoteDelay5_0', 'Emote5_0', 'EmoteDelay5_1', 'Emote5_1', 'EmoteDelay5_2', 'Emote5_2',
+  'text6_0', 'text6_1', 'BroadcastTextID6', 'lang6', 'Probability6', 'EmoteDelay6_0', 'Emote6_0', 'EmoteDelay6_1', 'Emote6_1', 'EmoteDelay6_2', 'Emote6_2',
+  'text7_0', 'text7_1', 'BroadcastTextID7', 'lang7', 'Probability7', 'EmoteDelay7_0', 'Emote7_0', 'EmoteDelay7_1', 'Emote7_1', 'EmoteDelay7_2', 'Emote7_2',
+  'VerifiedBuild',
+] as const satisfies readonly (keyof NpcText)[]
+
+const npcTextLocaleColumns = [
+  'ID', 'Locale',
+  'Text0_0', 'Text0_1', 'Text1_0', 'Text1_1', 'Text2_0', 'Text2_1', 'Text3_0', 'Text3_1',
+  'Text4_0', 'Text4_1', 'Text5_0', 'Text5_1', 'Text6_0', 'Text6_1', 'Text7_0', 'Text7_1',
+] as const satisfies readonly (keyof NpcTextLocale)[]
+
+function rowValuesEqual<T extends object>(columns: readonly (keyof T)[], a: T, b: T): boolean {
+  return columns.every(column => a[column] === b[column])
+}
+
+function toNpcTextSqlValues(entry: NpcText): (string | number | null)[] {
+  return npcTextColumns.map(column => {
+    const value = entry[column]
+    return typeof value === 'string' || value == null ? sqlText(value as string | null | undefined) : sqlNumber(value as number | null | undefined)
+  })
+}
+
+function toNpcTextLocaleSqlValues(entry: NpcTextLocale): (string | number | null)[] {
+  return npcTextLocaleColumns.map(column => {
+    const value = entry[column]
+    return typeof value === 'string' || value == null ? sqlText(value as string | null | undefined) : sqlNumber(value as number | null | undefined)
+  })
+}
+
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useNpcModuleStore = defineStore('npcModule', () => {
@@ -251,6 +426,8 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
   const loading = ref(false)
   const currentSearch = ref('')
   const listLoaded = ref(false)
+  const gossipMenuIds = ref<number[]>([])
+  const gossipMenuIdsLoading = ref(false)
 
   // --- Sub-table managers ---
   const resistances = new ArraySubTable<ResistanceEntry>({
@@ -319,6 +496,146 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     fieldPrefix: 'quest_item',
     summarize: (e) => String(e.ItemId),
   })
+
+  const gossipMenus = new ArraySubTable<GossipMenuEntry>({
+    tableName: 'gossip_menu',
+    compositeConfig: gossipMenuConfig,
+    fieldPrefix: 'gossip_text',
+    summarize: (e) => `TextID ${e.TextID}`,
+  })
+
+  const gossipOptions = new ArraySubTable<GossipOptionEntry>({
+    tableName: 'gossip_menu_option',
+    compositeConfig: gossipOptionConfig,
+    fieldPrefix: 'gossip_option',
+    summarize: (e) => `[${e.OptionID}] ${e.OptionText || '(empty)'}`,
+  })
+
+  const gossipOptionLocales = new ArraySubTable<GossipOptionLocaleEntry>({
+    tableName: 'gossip_menu_option_locale',
+    compositeConfig: gossipOptionLocaleConfig,
+    fieldPrefix: 'gossip_option_locale',
+    summarize: (e) => `[${e.OptionID}:${e.Locale}] ${e.OptionText || e.BoxText || '(empty)'}`,
+  })
+
+  const npcTexts = new DetachedArraySubTable<NpcText>({
+    tableName: 'npc_text',
+    columns: [...npcTextColumns],
+    getUniqueKey: (e) => String(e.ID),
+    buildWhereClause: (e) => `\`ID\` = ${e.ID}`,
+    isEqual: (a, b) => rowValuesEqual(npcTextColumns, a, b),
+    toSqlValues: toNpcTextSqlValues,
+    fieldPrefix: 'npc_text',
+    summarize: (e) => `#${e.ID} ${e.text0_0 || e.text0_1 || '(empty)'}`,
+    deleteMissing: false,
+  })
+
+  const npcTextLocales = new DetachedArraySubTable<NpcTextLocale>({
+    tableName: 'npc_text_locale',
+    columns: [...npcTextLocaleColumns],
+    getUniqueKey: (e) => `${e.ID}:${e.Locale}`,
+    buildWhereClause: (e) => `\`ID\` = ${e.ID} AND \`Locale\` = '${escapeSQL(e.Locale)}'`,
+    isEqual: (a, b) => rowValuesEqual(npcTextLocaleColumns, a, b),
+    toSqlValues: toNpcTextLocaleSqlValues,
+    fieldPrefix: 'npc_text_locale',
+    summarize: (e) => `#${e.ID}:${e.Locale}`,
+  })
+
+  function getGossipMenuParentId(formData: CreatureTemplate): number {
+    const menuId = Number(formData.gossip_menu_id)
+    return Number.isFinite(menuId) ? menuId : 0
+  }
+
+  function getGossipTextIds(rows: GossipMenuEntry[] = gossipMenus.getNewEntries()): number[] {
+    return [...new Set(rows.map(row => Number(row.TextID)).filter(id => Number.isFinite(id) && id > 0))]
+  }
+
+  function ensureGossipMenuIdOption(menuId: number) {
+    if (menuId > 0 && !gossipMenuIds.value.includes(menuId)) {
+      gossipMenuIds.value = [...gossipMenuIds.value, menuId].sort((a, b) => a - b)
+    }
+  }
+
+  async function fetchGossipMenuRows(menuId: number): Promise<GossipMenuEntry[]> {
+    if (menuId <= 0) return []
+    const rows = await npcService.getGossipMenu(menuId).catch(() => [])
+    return rows.map(row => ({ TextID: row.TextID, VerifiedBuild: row.VerifiedBuild })) satisfies GossipMenuEntry[]
+  }
+
+  async function fetchNpcTextsForMenu(menuId: number): Promise<NpcText[]> {
+    const menuRows = await fetchGossipMenuRows(menuId)
+    const textIds = getGossipTextIds(menuRows)
+    if (textIds.length === 0) return []
+    const rows = await npcService.getNpcTexts(textIds).catch(() => [])
+    const rowMap = new Map(rows.map(row => [row.ID, row]))
+    return textIds.map(id => rowMap.get(id) ?? createDefaultNpcText(id))
+  }
+
+  async function fetchNpcTextLocalesForMenu(menuId: number): Promise<NpcTextLocale[]> {
+    const menuRows = await fetchGossipMenuRows(menuId)
+    const textIds = getGossipTextIds(menuRows)
+    if (textIds.length === 0) return []
+    return npcService.getNpcTextLocales(textIds).catch(() => [])
+  }
+
+  async function loadGossipMenu(menuId: number) {
+    if (menuId <= 0) {
+      gossipMenus.load([])
+      gossipOptions.load([])
+      gossipOptionLocales.load([])
+      npcTexts.load([])
+      npcTextLocales.load([])
+      return
+    }
+
+    ensureGossipMenuIdOption(menuId)
+    const [menuRows, optionRows, optionLocaleRows] = await Promise.all([
+      fetchGossipMenuRows(menuId),
+      npcService.getGossipMenuOptions(menuId).catch(() => []),
+      npcService.getGossipMenuOptionLocales(menuId).catch(() => []),
+    ])
+    const textIds = getGossipTextIds(menuRows)
+    const [textRows, textLocaleRows] = await Promise.all([
+      textIds.length > 0 ? npcService.getNpcTexts(textIds).catch(() => []) : Promise.resolve([]),
+      textIds.length > 0 ? npcService.getNpcTextLocales(textIds).catch(() => []) : Promise.resolve([]),
+    ])
+    const textMap = new Map(textRows.map(row => [row.ID, row]))
+
+    gossipMenus.load(menuRows)
+    gossipOptions.load(optionRows.map(row => ({
+      OptionID: row.OptionID,
+      OptionIcon: row.OptionIcon,
+      OptionText: row.OptionText,
+      OptionBroadcastTextID: row.OptionBroadcastTextID,
+      OptionType: row.OptionType,
+      OptionNpcFlag: row.OptionNpcFlag,
+      ActionMenuID: row.ActionMenuID,
+      ActionPoiID: row.ActionPoiID,
+      BoxCoded: row.BoxCoded,
+      BoxMoney: row.BoxMoney,
+      BoxText: row.BoxText,
+      BoxBroadcastTextID: row.BoxBroadcastTextID,
+      VerifiedBuild: row.VerifiedBuild,
+    })))
+    gossipOptionLocales.load(optionLocaleRows.map(row => ({
+      OptionID: row.OptionID,
+      Locale: row.Locale,
+      OptionText: row.OptionText,
+      BoxText: row.BoxText,
+    })))
+    npcTexts.load(textIds.map(id => textMap.get(id) ?? createDefaultNpcText(id)))
+    npcTextLocales.load(textLocaleRows)
+  }
+
+  async function loadGossipMenuIds(search = '') {
+    gossipMenuIdsLoading.value = true
+    try {
+      gossipMenuIds.value = await npcService.getGossipMenuIds(search || undefined, 100)
+      ensureGossipMenuIdOption(getGossipMenuParentId(editor.formData))
+    } finally {
+      gossipMenuIdsLoading.value = false
+    }
+  }
 
   const editor = createEntityEditorStore<CreatureTemplate>({
     tableName: 'creature_template',
@@ -431,8 +748,114 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
           })
         },
       },
+      {
+        manager: gossipMenus,
+        getParentId: getGossipMenuParentId,
+        load: async (_entry, formData) => fetchGossipMenuRows(getGossipMenuParentId(formData)),
+        save: async (menuId) => {
+          if (menuId <= 0 || !gossipMenus.getSqlDiff(menuId)) return
+          await npcService.saveGossipMenu(menuId, gossipMenus.getNewEntries().map(row => ({
+            MenuID: menuId,
+            ...row,
+          })))
+        },
+      },
+      {
+        manager: gossipOptions,
+        getParentId: getGossipMenuParentId,
+        load: async (_entry, formData) => {
+          const menuId = getGossipMenuParentId(formData)
+          if (menuId <= 0) return []
+          const rows = await npcService.getGossipMenuOptions(menuId).catch(() => [])
+          return rows.map(row => ({
+            OptionID: row.OptionID,
+            OptionIcon: row.OptionIcon,
+            OptionText: row.OptionText,
+            OptionBroadcastTextID: row.OptionBroadcastTextID,
+            OptionType: row.OptionType,
+            OptionNpcFlag: row.OptionNpcFlag,
+            ActionMenuID: row.ActionMenuID,
+            ActionPoiID: row.ActionPoiID,
+            BoxCoded: row.BoxCoded,
+            BoxMoney: row.BoxMoney,
+            BoxText: row.BoxText,
+            BoxBroadcastTextID: row.BoxBroadcastTextID,
+            VerifiedBuild: row.VerifiedBuild,
+          })) satisfies GossipOptionEntry[]
+        },
+        save: async (menuId) => {
+          if (menuId <= 0 || !gossipOptions.getSqlDiff(menuId)) return
+          await npcService.saveGossipMenuOptions(menuId, gossipOptions.getNewEntries().map(row => ({
+            MenuID: menuId,
+            ...row,
+          })))
+        },
+      },
+      {
+        manager: gossipOptionLocales,
+        getParentId: getGossipMenuParentId,
+        load: async (_entry, formData) => {
+          const menuId = getGossipMenuParentId(formData)
+          if (menuId <= 0) return []
+          const rows = await npcService.getGossipMenuOptionLocales(menuId).catch(() => [])
+          return rows.map(row => ({
+            OptionID: row.OptionID,
+            Locale: row.Locale,
+            OptionText: row.OptionText,
+            BoxText: row.BoxText,
+          })) satisfies GossipOptionLocaleEntry[]
+        },
+        save: async (menuId) => {
+          if (menuId <= 0 || !gossipOptionLocales.getSqlDiff(menuId)) return
+          await npcService.saveGossipMenuOptionLocales(menuId, gossipOptionLocales.getNewEntries().map(row => ({
+            MenuID: menuId,
+            ...row,
+          })))
+        },
+      },
+      {
+        manager: npcTexts,
+        getParentId: () => 0,
+        load: async (_entry, formData) => fetchNpcTextsForMenu(getGossipMenuParentId(formData)),
+        save: async () => {
+          if (!npcTexts.getSqlDiff(0)) return
+          await npcService.saveNpcTexts(npcTexts.getNewEntries())
+        },
+      },
+      {
+        manager: npcTextLocales,
+        getParentId: () => 0,
+        load: async (_entry, formData) => fetchNpcTextLocalesForMenu(getGossipMenuParentId(formData)),
+        save: async () => {
+          if (!npcTextLocales.getSqlDiff(0)) return
+          const deleted = npcTextLocales.getDeletedEntries().map(row => ({ ID: row.ID, Locale: row.Locale })) satisfies NpcTextLocaleKey[]
+          await npcService.saveNpcTextLocales(npcTextLocales.getNewEntries(), deleted)
+        },
+      },
     ],
   })
+
+  async function setGossipMenuId(menuId: number | string | null | undefined) {
+    const nextMenuId = Number(menuId) || 0
+    editor.formData.gossip_menu_id = nextMenuId
+    await loadGossipMenu(nextMenuId)
+  }
+
+  async function createNextCustomGossipMenu() {
+    const menuId = await npcService.getNextCustomGossipMenuId(50000)
+    editor.formData.gossip_menu_id = menuId
+    ensureGossipMenuIdOption(menuId)
+    gossipMenus.setOriginalEntries([])
+    gossipMenus.setNewEntries([{ TextID: menuId, VerifiedBuild: 0 }])
+    gossipOptions.setOriginalEntries([])
+    gossipOptions.setNewEntries([])
+    gossipOptionLocales.setOriginalEntries([])
+    gossipOptionLocales.setNewEntries([])
+    npcTexts.setOriginalEntries([])
+    npcTexts.setNewEntries([createDefaultNpcText(menuId)])
+    npcTextLocales.setOriginalEntries([])
+    npcTextLocales.setNewEntries([])
+  }
 
   function markListLoaded() {
     listLoaded.value = true
@@ -444,11 +867,12 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
 
   return {
     // List state
-    npcs, loading, currentSearch, listLoaded,
+    npcs, loading, currentSearch, listLoaded, gossipMenuIds, gossipMenuIdsLoading,
     // Sub-table managers
     resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, onKillRep,
+    gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales,
     ...editor,
     editingEntry: editor.editingId,
-    markListLoaded, setNpcs,
+    markListLoaded, setNpcs, loadGossipMenuIds, loadGossipMenu, setGossipMenuId, createNextCustomGossipMenu,
   }
 })
