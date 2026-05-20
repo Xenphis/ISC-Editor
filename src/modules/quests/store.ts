@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import type { QuestTemplate } from '@/modules/quests/types/quest_template'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
-import { ReactiveSubTable, ArraySubTable, type SubTableManager, type SubTableSnapshot } from '@/stores/SubTableManager'
-import { generateDiffQuery } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
+import { ReactiveSubTable, ArraySubTable } from '@/stores/SubTableManager'
+import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
+import * as questService from '@/modules/quests/service'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -135,14 +135,6 @@ const localeConfig: Omit<CompositeKeyConfig<LocaleEntry>, 'parentId'> = {
   ],
 }
 
-// ─── EditorCache ────────────────────────────────────────────────────
-
-interface EditorCache {
-  formData: QuestTemplate
-  originalValue: QuestTemplate
-  subTables: Record<string, SubTableSnapshot>
-}
-
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useQuestModuleStore = defineStore('questModule', () => {
@@ -151,13 +143,6 @@ export const useQuestModuleStore = defineStore('questModule', () => {
   const loading = ref(false)
   const currentSearch = ref('')
   const listLoaded = ref(false)
-
-  // --- Editor state ---
-  const editing = ref(false)
-  const editingId = ref<number | null>(null)
-  const formData = reactive<QuestTemplate>(createDefaultForm())
-  const originalValue = ref<QuestTemplate | null>(null)
-  const editorDataLoaded = ref(false)
 
   // --- Sub-table managers ---
   const addon = new ReactiveSubTable<AddonForm>({
@@ -173,87 +158,44 @@ export const useQuestModuleStore = defineStore('questModule', () => {
     summarize: (e) => `${e.Title ?? ''} / ${e.Details ?? ''}`,
   })
 
-  const subTables: SubTableManager[] = [addon, locales]
-
-  // --- Multi-entry cache ---
-  const dirtyCache = ref<Map<number, EditorCache>>(new Map())
-
-  function saveToCache() {
-    if (editingId.value != null && editorDataLoaded.value) {
-      const subTableSnapshots: Record<string, SubTableSnapshot> = {}
-      for (const st of subTables) {
-        subTableSnapshots[st.tableName] = st.snapshot()
-      }
-      dirtyCache.value.set(editingId.value, {
-        formData: { ...formData },
-        originalValue: originalValue.value ? { ...originalValue.value } : { ...formData },
-        subTables: subTableSnapshots,
-      })
-    }
-  }
-
-  function restoreFromCache(id: number): boolean {
-    const cached = dirtyCache.value.get(id)
-    if (cached) {
-      Object.assign(formData, cached.formData)
-      originalValue.value = { ...cached.originalValue }
-      for (const st of subTables) {
-        const snap = cached.subTables[st.tableName]
-        if (snap) st.restore(snap)
-      }
-      editorDataLoaded.value = true
-      return true
-    }
-    return false
-  }
-
-  function openEditor(id: number | null) {
-    saveToCache()
-    editingId.value = id
-    editing.value = true
-
-    if (id != null && restoreFromCache(id)) {
-      return
-    }
-
-    editorDataLoaded.value = false
-    originalValue.value = null
-    Object.assign(formData, createDefaultForm())
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
-  function closeEditor() {
-    saveToCache()
-    editing.value = false
-  }
-
-  function discardEditor() {
-    if (editingId.value != null) {
-      dirtyCache.value.delete(editingId.value)
-    }
-    editing.value = false
-    editingId.value = null
-    originalValue.value = null
-    editorDataLoaded.value = false
-    Object.assign(formData, createDefaultForm())
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
-  function setFormData(data: QuestTemplate) {
-    Object.assign(formData, data)
-  }
-
-  function setOriginalValue(data: QuestTemplate) {
-    originalValue.value = { ...data }
-  }
-
-  function markEditorLoaded() {
-    editorDataLoaded.value = true
-  }
+  const editor = createEntityEditorStore<QuestTemplate>({
+    tableName: 'quest_template',
+    primaryKey: 'ID',
+    createDefault: createDefaultForm,
+    load: questService.getQuest,
+    save: questService.saveQuest,
+    delete: questService.deleteQuest,
+    subTables: [
+      {
+        manager: addon,
+        load: async (id) => {
+          const data = await questService.getQuestAddon(id).catch(() => null)
+          if (!data) return null
+          const { ID: _id, ...addonFields } = data
+          return addonFields as AddonForm
+        },
+        commitWhenMissing: true,
+      },
+      {
+        manager: locales,
+        load: async (id) => {
+          const rows = await questService.getQuestLocales(id).catch(() => [])
+          return rows.map(row => ({
+            locale: row.locale,
+            Title: row.Title ?? null,
+            Details: row.Details ?? null,
+            Objectives: row.Objectives ?? null,
+            EndText: row.EndText ?? null,
+            CompletedText: row.CompletedText ?? null,
+            ObjectiveText1: row.ObjectiveText1 ?? null,
+            ObjectiveText2: row.ObjectiveText2 ?? null,
+            ObjectiveText3: row.ObjectiveText3 ?? null,
+            ObjectiveText4: row.ObjectiveText4 ?? null,
+          })) satisfies LocaleEntry[]
+        },
+      },
+    ],
+  })
 
   function markListLoaded() {
     listLoaded.value = true
@@ -263,67 +205,10 @@ export const useQuestModuleStore = defineStore('questModule', () => {
     quests.value = data
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    const queries: SessionQuery[] = []
-
-    if (editingId.value != null && editorDataLoaded.value && originalValue.value) {
-      const q = generateDiffQuery(
-        'quest_template',
-        'ID',
-        originalValue.value as Record<string, unknown>,
-        formData as unknown as Record<string, unknown>,
-      )
-      if (q) {
-        queries.push({ table: 'quest_template', entry: editingId.value, query: q })
-      }
-      for (const st of subTables) {
-        const sql = st.getSqlDiff(editingId.value)
-        if (sql) {
-          queries.push({ table: st.tableName, entry: editingId.value, query: sql })
-        }
-      }
-    }
-
-    for (const [id, cached] of dirtyCache.value) {
-      if (id === editingId.value && editorDataLoaded.value) {
-        continue
-      }
-
-      const q = generateDiffQuery(
-        'quest_template',
-        'ID',
-        cached.originalValue as Record<string, unknown>,
-        cached.formData as Record<string, unknown>,
-      )
-      if (q) {
-        queries.push({ table: 'quest_template', entry: id, query: q })
-      }
-
-      for (const [tableName, snap] of Object.entries(cached.subTables)) {
-        const st = subTables.find(s => s.tableName === tableName)
-        if (!st) continue
-        const currentSnap = st.snapshot()
-        st.restore(snap)
-        const sql = st.getSqlDiff(id)
-        if (sql) {
-          queries.push({ table: tableName, entry: id, query: sql })
-        }
-        st.restore(currentSnap)
-      }
-    }
-
-    return queries
-  }
-
   return {
     quests, loading, currentSearch, listLoaded,
-    editing, editingId, formData, originalValue, editorDataLoaded,
-    subTables,
     addon, locales,
-    dirtyCache,
-    openEditor, closeEditor, discardEditor,
-    setFormData, setOriginalValue,
-    markEditorLoaded, markListLoaded, setQuests,
-    getAllDiffQueries,
+    ...editor,
+    markListLoaded, setQuests,
   }
 })

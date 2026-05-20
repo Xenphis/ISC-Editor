@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, toRef } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
@@ -12,18 +12,16 @@ import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
-import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import { game_object_type_options } from '@/modules/game_objects/types/defines'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
-import { getGameObject, getGameObjectAddon, getGameObjectSpawns, getGameObjectLoot, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
+import { getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
 import GameObjectSpawnEditor from './GameObjectSpawnEditor.vue'
-import { useQueryGenerator } from '@/composables/useQueryGenerator'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
 import EditorField from '@/components/EditorField.vue'
 import StyledDataTable from '@/components/StyledDataTable.vue'
 import ActionsColumn from '@/components/ActionsColumn.vue'
 import EditableDataTable, { type ColumnDef } from '@/components/EditableDataTable.vue'
-import { useGameObjectModuleStore, type AddonForm, type LootEntry } from '@/modules/game_objects/store'
+import { useGameObjectModuleStore } from '@/modules/game_objects/store'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -39,47 +37,11 @@ const goEntry = computed(() => {
 
 const loading = ref(false)
 const form = store.formData
-const originalValue = toRef(store, 'originalValue')
 
 const typeOptions = game_object_type_options.map(o => ({ value: o.value, label: o.name }))
 
-// --- SQL generation (main table) ---
-const { diffQuery, fullQuery, hasChanges, changedFields } = useQueryGenerator<GameObjectTemplate>(
-  'gameobject_template',
-  'entry',
-  originalValue,
-  form,
-)
-
-// --- Combined SQL ---
-const combinedDiffQuery = computed(() => {
-  const parts: string[] = []
-  if (diffQuery.value) parts.push(diffQuery.value)
-  for (const st of store.subTables) {
-    const sql = st.getSqlDiff(form.entry)
-    if (sql) parts.push(sql)
-  }
-  return parts.join('\n')
-})
-
-const combinedHasChanges = computed(() => {
-  if (hasChanges.value) return true
-  for (const st of store.subTables) {
-    if (st.getSqlDiff(form.entry)) return true
-  }
-  return false
-})
-
-const combinedChangedFields = computed(() => {
-  const fields = [...changedFields.value]
-  for (const st of store.subTables) {
-    fields.push(...st.getChangedFields(form.entry))
-  }
-  return fields
-})
-
 // --- Field modification helpers ---
-const modifiedFieldSet = computed(() => new Set(changedFields.value.map(c => c.field)))
+const modifiedFieldSet = computed(() => new Set(store.changedFields.map(c => c.field)))
 function isFieldModified(field: string): boolean {
   return modifiedFieldSet.value.has(field)
 }
@@ -163,9 +125,8 @@ async function onSpawnEditorSave(data: GameObject) {
 
 // --- Save / Close ---
 async function onSave() {
-  const { saveGameObject } = await import('@/modules/game_objects/service')
   try {
-    await saveGameObject({ ...form })
+    await store.saveCurrent()
     store.discardEditor()
     router.push('/gameobject')
   } catch (e) {
@@ -179,66 +140,25 @@ function onClose() {
 }
 
 function onDiscard() {
-  if (goEntry.value != null) {
-    Object.assign(form, originalValue.value)
-    for (const st of store.subTables) {
-      st.reset()
-    }
-  }
+  store.discardChanges()
 }
 
 // --- Load data ---
 onMounted(async () => {
-  if (store.editorDataLoaded) {
+  if (store.editorDataLoaded && store.editingEntry === goEntry.value) {
     loadSpawns()
     return
   }
 
-  if (!store.editing || store.editingEntry !== goEntry.value) {
-    store.openEditor(goEntry.value)
+  loading.value = true
+  try {
+    await store.openEditor(goEntry.value)
+  } catch (e) {
+    console.error('Failed to load game object:', e)
+  } finally {
+    loading.value = false
   }
 
-  if (goEntry.value != null) {
-    loading.value = true
-    try {
-      const entry = goEntry.value
-      const [data, addonData, lootRows] = await Promise.all([
-        getGameObject(entry),
-        getGameObjectAddon(entry).catch(() => null),
-        getGameObjectLoot(entry).catch(() => []),
-      ])
-
-      Object.assign(form, data)
-      originalValue.value = { ...data }
-
-      if (addonData) {
-        const { entry: _e, ...addonFields } = addonData
-        store.addon.load(addonFields as AddonForm)
-      } else {
-        store.addon.commit()
-      }
-
-      const lootData: LootEntry[] = lootRows.map(r => ({
-        Item: r.Item, Reference: r.Reference, Chance: r.Chance,
-        QuestRequired: r.QuestRequired, LootMode: r.LootMode,
-        GroupId: r.GroupId, MinCount: r.MinCount, MaxCount: r.MaxCount,
-        Comment: r.Comment,
-      }))
-      store.loot.load(lootData)
-
-    } catch (e) {
-      console.error('Failed to load game object:', e)
-    } finally {
-      loading.value = false
-    }
-  } else {
-    originalValue.value = { ...form }
-    for (const st of store.subTables) {
-      st.commit()
-    }
-  }
-
-  store.markEditorLoaded()
   loadSpawns()
 })
 </script>
@@ -273,14 +193,14 @@ onMounted(async () => {
           icon="pi pi-undo"
           :label="t('gameobjectEditor.discard')"
           @click="onDiscard"
-          :disabled="!combinedHasChanges"
+          :disabled="!store.combinedHasChanges"
           class="discard-button"
         />
         <Button
           icon="pi pi-play"
           :label="t('gameobjectEditor.execute')"
           @click="onSave"
-          :disabled="!combinedHasChanges"
+          :disabled="!store.combinedHasChanges"
           class="execute-button"
         />
       </div>
@@ -288,10 +208,10 @@ onMounted(async () => {
 
     <!-- SQL Query Panel -->
     <SqlQueryPanel
-      :diffQuery="combinedDiffQuery"
-      :fullQuery="fullQuery"
-      :hasChanges="combinedHasChanges"
-      :changedFields="combinedChangedFields"
+      :diffQuery="store.combinedDiffQuery"
+      :fullQuery="store.combinedFullQuery"
+      :hasChanges="store.combinedHasChanges"
+      :changedFields="store.combinedChangedFields"
     />
 
     <!-- Tabs -->

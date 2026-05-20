@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, toRef } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
@@ -9,10 +9,7 @@ import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import EditorHeader from '@/components/EditorHeader.vue'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
-import { useQueryGenerator } from '@/composables/useQueryGenerator'
-import type { QuestTemplate } from '@/modules/quests/types/quest_template'
-import { getQuest, getQuestAddon, getQuestLocales, saveQuest } from '@/modules/quests/service'
-import { useQuestModuleStore, type AddonForm, type LocaleEntry } from '@/modules/quests/store'
+import { useQuestModuleStore } from '@/modules/quests/store'
 import QuestTabGeneral from './editor/quest_template/GeneralTab.vue'
 import QuestTabObjectives from './editor/quest_template/ObjectivesTab.vue'
 import QuestTabRewards from './editor/quest_template/RewardsTab.vue'
@@ -33,44 +30,10 @@ const questId = computed(() => {
 
 const loading = ref(false)
 const form = store.formData
-const originalValue = toRef(store, 'originalValue')
-
-const { diffQuery, fullQuery, hasChanges, changedFields } = useQueryGenerator<QuestTemplate>(
-  'quest_template',
-  'ID',
-  originalValue,
-  form,
-)
-
-const combinedDiffQuery = computed(() => {
-  const parts: string[] = []
-  if (diffQuery.value) parts.push(diffQuery.value)
-  for (const st of store.subTables) {
-    const sql = st.getSqlDiff(form.ID)
-    if (sql) parts.push(sql)
-  }
-  return parts.join('\n')
-})
-
-const combinedHasChanges = computed(() => {
-  if (hasChanges.value) return true
-  for (const st of store.subTables) {
-    if (st.getSqlDiff(form.ID)) return true
-  }
-  return false
-})
-
-const combinedChangedFields = computed(() => {
-  const fields = [...changedFields.value]
-  for (const st of store.subTables) {
-    fields.push(...st.getChangedFields(form.ID))
-  }
-  return fields
-})
 
 async function onSave() {
   try {
-    await saveQuest({ ...form })
+    await store.saveCurrent()
     store.discardEditor()
     router.push('/quests')
   } catch (e) {
@@ -84,68 +47,20 @@ function onClose() {
 }
 
 function onDiscard() {
-  if (questId.value != null) {
-    Object.assign(form, originalValue.value)
-    for (const st of store.subTables) {
-      st.revert()
-    }
-  }
+  store.discardChanges()
 }
 
 onMounted(async () => {
-  if (store.editorDataLoaded) return
+  if (store.editorDataLoaded && store.editing && store.editingId === questId.value) return
 
-  if (!store.editing || store.editingId !== questId.value) {
-    store.openEditor(questId.value)
+  loading.value = true
+  try {
+    await store.openEditor(questId.value)
+  } catch (e) {
+    console.error('Failed to load quest:', e)
+  } finally {
+    loading.value = false
   }
-
-  if (questId.value != null) {
-    loading.value = true
-    try {
-      const id = questId.value
-      const [data, addonData, localeRows] = await Promise.all([
-        getQuest(id),
-        getQuestAddon(id).catch(() => null),
-        getQuestLocales(id).catch(() => []),
-      ])
-
-      Object.assign(form, data)
-      originalValue.value = { ...data }
-
-      if (addonData) {
-        const { ID: _id, ...addonFields } = addonData
-        store.addon.load(addonFields as AddonForm)
-      } else {
-        store.addon.commit()
-      }
-
-      const locEntries: LocaleEntry[] = localeRows.map(r => ({
-        locale: r.locale,
-        Title: r.Title ?? null,
-        Details: r.Details ?? null,
-        Objectives: r.Objectives ?? null,
-        EndText: r.EndText ?? null,
-        CompletedText: r.CompletedText ?? null,
-        ObjectiveText1: r.ObjectiveText1 ?? null,
-        ObjectiveText2: r.ObjectiveText2 ?? null,
-        ObjectiveText3: r.ObjectiveText3 ?? null,
-        ObjectiveText4: r.ObjectiveText4 ?? null,
-      }))
-      store.locales.load(locEntries)
-
-    } catch (e) {
-      console.error('Failed to load quest:', e)
-    } finally {
-      loading.value = false
-    }
-  } else {
-    originalValue.value = { ...form }
-    for (const st of store.subTables) {
-      st.commit()
-    }
-  }
-
-  store.markEditorLoaded()
 })
 </script>
 
@@ -158,7 +73,7 @@ onMounted(async () => {
       :backLabel="t('quest_template.back')"
       :discardLabel="t('quest_template.discard')"
       :executeLabel="t('quest_template.execute')"
-      :hasChanges="combinedHasChanges"
+      :hasChanges="store.combinedHasChanges"
       @back="onClose"
       @discard="onDiscard"
       @execute="onSave"
@@ -170,10 +85,10 @@ onMounted(async () => {
 
     <template v-else>
       <SqlQueryPanel
-        :diffQuery="combinedDiffQuery"
-        :fullQuery="fullQuery"
-        :changedFields="combinedChangedFields"
-        :hasChanges="combinedHasChanges"
+        :diffQuery="store.combinedDiffQuery"
+        :fullQuery="store.combinedFullQuery"
+        :changedFields="store.combinedChangedFields"
+        :hasChanges="store.combinedHasChanges"
       />
 
       <Tabs value="general">

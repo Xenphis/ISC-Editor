@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
-import { ArraySubTable, type SubTableManager } from '@/stores/SubTableManager'
+import { ArraySubTable } from '@/stores/SubTableManager'
+import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
+import * as npcService from '@/modules/npc/service'
 
 // ─── TrainerSpellEntry (store-side, no TrainerId needed) ─────────────────────
 
@@ -59,13 +61,6 @@ export const useTrainerStore = defineStore('trainer', () => {
   const loading = ref(false)
   const listLoaded = ref(false)
 
-  // --- Editor state ---
-  const editing = ref(false)
-  const editingId = ref<number | null>(null)
-  const formData = reactive<Trainer>(createDefaultForm())
-  const originalValue = ref<Trainer | null>(null)
-  const editorDataLoaded = ref(false)
-
   // --- Sub-table: trainer_spell ---
   const spells = new ArraySubTable<TrainerSpellEntry>({
     tableName: 'trainer_spell',
@@ -89,7 +84,61 @@ export const useTrainerStore = defineStore('trainer', () => {
     summarize: (e) => String(e.CreatureId),
   })
 
-  const subTables: SubTableManager[] = [spells, creatureLinks]
+  const editor = createEntityEditorStore<Trainer>({
+    tableName: 'trainer',
+    primaryKey: 'Id',
+    createDefault: createDefaultForm,
+    load: npcService.getTrainer,
+    save: npcService.saveTrainer,
+    delete: npcService.deleteTrainer,
+    subTables: [
+      {
+        manager: spells,
+        load: async (id) => {
+          const rows = await npcService.getTrainerSpells(id).catch(() => [])
+          return rows.map(row => ({
+            SpellId: row.SpellId,
+            MoneyCost: row.MoneyCost,
+            ReqSkillLine: row.ReqSkillLine,
+            ReqSkillRank: row.ReqSkillRank,
+            ReqAbility1: row.ReqAbility1,
+            ReqAbility2: row.ReqAbility2,
+            ReqAbility3: row.ReqAbility3,
+            ReqLevel: row.ReqLevel,
+          })) satisfies TrainerSpellEntry[]
+        },
+        save: async (id) => {
+          const rows = spells.getNewEntries().map(entry => ({
+            TrainerId: id,
+            SpellId: entry.SpellId,
+            MoneyCost: entry.MoneyCost,
+            ReqSkillLine: entry.ReqSkillLine,
+            ReqSkillRank: entry.ReqSkillRank,
+            ReqAbility1: entry.ReqAbility1,
+            ReqAbility2: entry.ReqAbility2,
+            ReqAbility3: entry.ReqAbility3,
+            ReqLevel: entry.ReqLevel,
+            VerifiedBuild: null,
+          }))
+          await npcService.saveTrainerSpells(id, rows)
+        },
+      },
+      {
+        manager: creatureLinks,
+        load: async (id) => {
+          const rows = await npcService.getCreatureDefaultTrainers(id).catch(() => [])
+          return rows.map(row => ({ CreatureId: row.CreatureId })) satisfies CreatureDefaultTrainerEntry[]
+        },
+        save: async (id) => {
+          const rows = creatureLinks.getNewEntries().map(entry => ({
+            CreatureId: entry.CreatureId,
+            TrainerId: id,
+          }))
+          await npcService.saveCreatureDefaultTrainers(id, rows)
+        },
+      },
+    ],
+  })
 
   // --- List actions ---
   function setTrainers(data: Trainer[]) {
@@ -100,53 +149,17 @@ export const useTrainerStore = defineStore('trainer', () => {
     listLoaded.value = true
   }
 
-  // --- Editor actions ---
-  function openEditor(id: number | null) {
-    editingId.value = id
-    editing.value = true
-    editorDataLoaded.value = false
-    originalValue.value = null
-    Object.assign(formData, createDefaultForm())
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
-  function closeEditor() {
-    editing.value = false
-  }
-
-  function discardEditor() {
-    editing.value = false
-    editingId.value = null
-    editorDataLoaded.value = false
-    originalValue.value = null
-    Object.assign(formData, createDefaultForm())
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
   return {
     // list
     trainers,
     loading,
     listLoaded,
-    // editor
-    editing,
-    editingId,
-    formData,
-    originalValue,
-    editorDataLoaded,
     // sub-tables
     spells,
     creatureLinks,
-    subTables,
+    ...editor,
     // actions
     setTrainers,
     markListLoaded,
-    openEditor,
-    closeEditor,
-    discardEditor,
   }
 })

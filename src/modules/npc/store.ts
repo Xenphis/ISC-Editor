@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
-import { ReactiveSubTable, ArraySubTable, type SubTableManager, type SubTableSnapshot } from '@/stores/SubTableManager'
-import { generateDiffQuery } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
+import { ReactiveSubTable, ArraySubTable } from '@/stores/SubTableManager'
+import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
+import * as npcService from '@/modules/npc/service'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -217,14 +217,6 @@ const questItemConfig: Omit<CompositeKeyConfig<QuestItemEntry>, 'parentId'> = {
   toSqlValues: (e) => [e.ItemId, 0],
 }
 
-// ─── EditorCache (generic via SubTableSnapshot map) ─────────────────
-
-interface EditorCache {
-  formData: CreatureTemplate
-  originalValue: CreatureTemplate
-  subTables: Record<string, SubTableSnapshot>
-}
-
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useNpcModuleStore = defineStore('npcModule', () => {
@@ -233,13 +225,6 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
   const loading = ref(false)
   const currentSearch = ref('')
   const listLoaded = ref(false)
-
-  // --- Editor state ---
-  const editing = ref(false)
-  const editingEntry = ref<number | null>(null)
-  const formData = reactive<CreatureTemplate>(createDefaultForm())
-  const originalValue = ref<CreatureTemplate | null>(null)
-  const editorDataLoaded = ref(false)
 
   // --- Sub-table managers ---
   const resistances = new ArraySubTable<ResistanceEntry>({
@@ -303,90 +288,103 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     summarize: (e) => String(e.ItemId),
   })
 
-  /** All sub-table managers, iterated generically in cache/reset operations */
-  const subTables: SubTableManager[] = [resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems]
-
-  // --- Multi-entry cache: persists modifications across NPC switches ---
-  const dirtyCache = ref<Map<number, EditorCache>>(new Map())
-
-  function saveToCache() {
-    if (editingEntry.value != null && editorDataLoaded.value) {
-      const subTableSnapshots: Record<string, SubTableSnapshot> = {}
-      for (const st of subTables) {
-        subTableSnapshots[st.tableName] = st.snapshot()
-      }
-      dirtyCache.value.set(editingEntry.value, {
-        formData: { ...formData },
-        originalValue: originalValue.value ? { ...originalValue.value } : { ...formData },
-        subTables: subTableSnapshots,
-      })
-    }
-  }
-
-  function restoreFromCache(entry: number): boolean {
-    const cached = dirtyCache.value.get(entry)
-    if (cached) {
-      Object.assign(formData, cached.formData)
-      originalValue.value = { ...cached.originalValue }
-      for (const st of subTables) {
-        const snap = cached.subTables[st.tableName]
-        if (snap) st.restore(snap)
-      }
-      editorDataLoaded.value = true
-      return true
-    }
-    return false
-  }
-
-  function openEditor(entry: number | null) {
-    saveToCache()
-    editingEntry.value = entry
-    editing.value = true
-
-    if (entry != null && restoreFromCache(entry)) {
-      return
-    }
-
-    // New entry or null: reset form
-    editorDataLoaded.value = false
-    originalValue.value = null
-    Object.assign(formData, createDefaultForm())
-    
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
-  function closeEditor() {
-    saveToCache()
-    editing.value = false
-  }
-
-  function discardEditor() {
-    if (editingEntry.value != null) {
-      dirtyCache.value.delete(editingEntry.value)
-    }
-    editing.value = false
-    editingEntry.value = null
-    originalValue.value = null
-    editorDataLoaded.value = false
-    Object.assign(formData, createDefaultForm())
-    for (const st of subTables) {
-      st.reset()
-    }
-  }
-
-  function setFormData(data: CreatureTemplate) {
-    Object.assign(formData, data)
-  }
-
-  function setOriginalValue(data: CreatureTemplate) {
-    originalValue.value = { ...data }
-  }
-
-  function markEditorLoaded() {
-    editorDataLoaded.value = true
-  }
+  const editor = createEntityEditorStore<CreatureTemplate>({
+    tableName: 'creature_template',
+    primaryKey: 'entry',
+    createDefault: createDefaultForm,
+    load: npcService.getNpc,
+    save: npcService.saveNpc,
+    delete: npcService.deleteNpc,
+    subTables: [
+      {
+        manager: resistances,
+        load: async (entry) => {
+          const rows = await npcService.getNpcResistances(entry).catch(() => [])
+          return rows.map(row => ({ School: row.School, Resistance: row.Resistance })) satisfies ResistanceEntry[]
+        },
+      },
+      {
+        manager: movement,
+        load: async (entry) => {
+          const data = await npcService.getNpcMovement(entry).catch(() => null)
+          if (!data) return null
+          const { CreatureId: _creatureId, ...movementFields } = data
+          return movementFields as MovementForm
+        },
+        commitWhenMissing: true,
+      },
+      {
+        manager: addon,
+        load: async (entry) => {
+          const data = await npcService.getNpcAddon(entry).catch(() => null)
+          if (!data) return null
+          const { entry: _entry, ...addonFields } = data
+          return addonFields as AddonForm
+        },
+        commitWhenMissing: true,
+      },
+      {
+        manager: locales,
+        load: async (entry) => {
+          const rows = await npcService.getNpcLocales(entry).catch(() => [])
+          return rows.map(row => ({ locale: row.locale, Name: row.Name, Title: row.Title })) satisfies LocaleEntry[]
+        },
+      },
+      {
+        manager: equips,
+        load: async (entry) => {
+          const rows = await npcService.getNpcEquip(entry).catch(() => [])
+          return rows.map(row => ({ ID: row.ID, ItemID1: row.ItemID1, ItemID2: row.ItemID2, ItemID3: row.ItemID3 })) satisfies EquipEntry[]
+        },
+      },
+      {
+        manager: spells,
+        load: async (entry) => {
+          const rows = await npcService.getNpcSpells(entry).catch(() => [])
+          return rows.map(row => ({ Index: row.Index, Spell: row.Spell })) satisfies SpellEntry[]
+        },
+      },
+      {
+        manager: texts,
+        load: async (entry) => {
+          const rows = await npcService.getCreatureTexts(entry).catch(() => [])
+          return rows.map(row => ({
+            GroupID: row.GroupID,
+            ID: row.ID,
+            Text: row.Text,
+            Type: row.Type,
+            Language: row.Language,
+            Probability: row.Probability,
+            Emote: row.Emote,
+            Duration: row.Duration,
+            Sound: row.Sound,
+            BroadcastTextId: row.BroadcastTextId,
+            TextRange: row.TextRange,
+            comment: row.comment,
+          })) satisfies TextEntry[]
+        },
+      },
+      {
+        manager: textLocales,
+        load: async (entry) => {
+          const rows = await npcService.getCreatureTextLocales(entry).catch(() => [])
+          return rows.map(row => ({
+            GroupID: row.GroupID,
+            ID: row.ID,
+            Locale: row.Locale,
+            Text: row.Text ?? null,
+          })) satisfies TextLocaleEntry[]
+        },
+      },
+      {
+        manager: questItems,
+        load: async (entry) => {
+          const rows = await npcService.getCreatureQuestItems(entry).catch(() => [])
+          return rows.map(row => ({ Idx: row.Idx, ItemId: row.ItemId })) satisfies QuestItemEntry[]
+        },
+      },
+    ],
+  })
 
   function markListLoaded() {
     listLoaded.value = true
@@ -396,77 +394,13 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     npcs.value = data
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    const queries: SessionQuery[] = []
-
-    // Current editor state
-    if (editingEntry.value != null && editorDataLoaded.value && originalValue.value) {
-      const q = generateDiffQuery(
-        'creature_template',
-        'entry',
-        originalValue.value as Record<string, unknown>,
-        formData as unknown as Record<string, unknown>,
-      )
-      if (q) {
-        queries.push({ table: 'creature_template', entry: editingEntry.value, query: q })
-      }
-      for (const st of subTables) {
-        const sql = st.getSqlDiff(editingEntry.value)
-        if (sql) {
-          queries.push({ table: st.tableName, entry: editingEntry.value, query: sql })
-        }
-      }
-    }
-
-    // Cached dirty entries
-    for (const [entry, cached] of dirtyCache.value) {
-      if (entry === editingEntry.value && editorDataLoaded.value) {
-        continue
-      }
-
-      const q = generateDiffQuery(
-        'creature_template',
-        'entry',
-        cached.originalValue as Record<string, unknown>,
-        cached.formData as Record<string, unknown>,
-      )
-      if (q) {
-        queries.push({ table: 'creature_template', entry, query: q })
-      }
-
-      for (const [tableName, snap] of Object.entries(cached.subTables)) {
-        const st = subTables.find(s => s.tableName === tableName)
-        if (!st) {
-          continue
-        }
-        const currentSnap = st.snapshot()
-        st.restore(snap)
-        const sql = st.getSqlDiff(entry)
-        if (sql) {
-          queries.push({ table: tableName, entry, query: sql })
-        }
-        st.restore(currentSnap)
-      }
-    }
-
-    return queries
-  }
-
   return {
     // List state
     npcs, loading, currentSearch, listLoaded,
-    // Editor state
-    editing, editingEntry, formData, originalValue, editorDataLoaded,
     // Sub-table managers
-    subTables,
     resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems,
-    // Cache
-    dirtyCache,
-    // Actions
-    openEditor, closeEditor, discardEditor,
-    setFormData, setOriginalValue,
-    markEditorLoaded, markListLoaded, setNpcs,
-    // ModuleStore interface
-    getAllDiffQueries,
+    ...editor,
+    editingEntry: editor.editingId,
+    markListLoaded, setNpcs,
   }
 })

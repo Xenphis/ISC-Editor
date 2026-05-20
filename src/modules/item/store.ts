@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia';
-import { reactive, ref, computed } from 'vue';
+import { ref, computed } from 'vue';
 import type { ItemTemplate } from './item_template';
-import { generateDiffQuery, generateFullQuery } from '@/composables/useQueryGenerator';
-import type { SessionQuery } from '@/stores/moduleStore';
+import { createEntityEditorStore } from '@/stores/createEntityEditorStore';
 import * as itemService from './service';
 
 // ─── Default factory ────────────────────────────────────────────────
@@ -151,13 +150,6 @@ function createDefaultItem(): ItemTemplate {
   };
 }
 
-// ─── EditorCache ────────────────────────────────────────────────────
-
-interface EditorCache {
-  formData: ItemTemplate;
-  originalValue: ItemTemplate;
-}
-
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useItemModuleStore = defineStore('itemModule', () => {
@@ -167,15 +159,14 @@ export const useItemModuleStore = defineStore('itemModule', () => {
   const currentSearch = ref('');
   const listLoaded = ref(false);
 
-  // --- Editor state ---
-  const editing = ref(false);
-  const editingEntry = ref<number | null>(null);
-  const formData = reactive<ItemTemplate>(createDefaultItem());
-  const originalValue = ref<ItemTemplate | null>(null);
-  const editorDataLoaded = ref(false);
-
-  // --- Cache for multi-entry editing ---
-  const dirtyCache = new Map<number, EditorCache>();
+  const editor = createEntityEditorStore<ItemTemplate>({
+    tableName: 'item_template',
+    primaryKey: 'entry',
+    createDefault: createDefaultItem,
+    load: itemService.getItem,
+    save: itemService.saveItem,
+    delete: itemService.deleteItem,
+  });
 
   // ─── Actions ────────────────────────────────────────────────────
 
@@ -193,83 +184,20 @@ export const useItemModuleStore = defineStore('itemModule', () => {
   }
 
   async function openEditor(entry: number | 'new') {
-    editing.value = true;
-    editorDataLoaded.value = false;
-
-    if (entry === 'new') {
-      editingEntry.value = null;
-      Object.assign(formData, createDefaultItem());
-      originalValue.value = null;
-      editorDataLoaded.value = true;
-      return;
-    }
-
-    editingEntry.value = entry;
-
-    // Check cache first
-    if (dirtyCache.has(entry)) {
-      const cached = dirtyCache.get(entry)!;
-      Object.assign(formData, cached.formData);
-      originalValue.value = cached.originalValue;
-      editorDataLoaded.value = true;
-      return;
-    }
-
-    // Load from backend
-    try {
-      const item = await itemService.getItem(entry);
-      Object.assign(formData, item);
-      originalValue.value = structuredClone(item);
-      editorDataLoaded.value = true;
-    } catch (error) {
-      console.error('Failed to load item:', error);
-      throw error;
-    }
-  }
-
-  function closeEditor() {
-    editing.value = false;
-    editingEntry.value = null;
-    editorDataLoaded.value = false;
-    Object.assign(formData, createDefaultItem());
-    originalValue.value = null;
-  }
-
-  function saveToCache() {
-    if (editingEntry.value == null) return;
-    
-    dirtyCache.set(editingEntry.value, {
-      formData: structuredClone(formData),
-      originalValue: originalValue.value ? structuredClone(originalValue.value) : createDefaultItem(),
-    });
-  }
-
-  function restoreFromCache(entry: number) {
-    const cached = dirtyCache.get(entry);
-    if (!cached) return;
-
-    Object.assign(formData, cached.formData);
-    originalValue.value = cached.originalValue;
+    await editor.openEditor(entry === 'new' ? null : entry);
   }
 
   function discardCache(entry: number) {
-    dirtyCache.delete(entry);
+    editor.dirtyCache.value.delete(entry);
   }
 
   function clearAllCaches() {
-    dirtyCache.clear();
+    editor.dirtyCache.value.clear();
   }
 
   async function saveItem() {
     try {
-      await itemService.saveItem(formData);
-      
-      // Clear cache for this entry
-      if (editingEntry.value != null) {
-        dirtyCache.delete(editingEntry.value);
-      }
-      
-      // Refresh list if loaded
+      await editor.saveCurrent();
       if (listLoaded.value) {
         await fetchItems(currentSearch.value);
       }
@@ -283,10 +211,7 @@ export const useItemModuleStore = defineStore('itemModule', () => {
 
   async function deleteItem(entry: number) {
     try {
-      await itemService.deleteItem(entry);
-      dirtyCache.delete(entry);
-      
-      // Refresh list if loaded
+      await editor.deleteCurrent(entry);
       if (listLoaded.value) {
         await fetchItems(currentSearch.value);
       }
@@ -298,68 +223,12 @@ export const useItemModuleStore = defineStore('itemModule', () => {
     }
   }
 
-  // ─── SQL Generation (for session tracking) ─────────────────────
-
-  function getAllDiffQueries(): SessionQuery[] {
-    const queries: SessionQuery[] = [];
-
-    if (!originalValue.value || !editingEntry.value) {
-      return queries;
-    }
-
-    // Main table diff
-    const mainDiff = generateDiffQuery(
-      'item_template',
-      'entry',
-      originalValue.value as Record<string, unknown>,
-      formData as unknown as Record<string, unknown>
-    );
-
-    if (mainDiff) {
-      queries.push({
-        query: mainDiff,
-        table: 'item_template',
-        entry: editingEntry.value,
-      });
-    }
-
-    return queries;
-  }
-
-  const combinedDiffQuery = computed(() => {
-    const queries = getAllDiffQueries();
-    return queries.map((q) => q.query).join('\n\n');
-  });
-
-  const combinedHasChanges = computed(() => {
-    return getAllDiffQueries().length > 0;
-  });
-
-  const combinedChangedFields = computed(() => {
-    if (!originalValue.value) return [];
-    
-    const changed: { field: string; oldValue: unknown; newValue: unknown }[] = [];
-    const keys = Object.keys(formData) as (keyof ItemTemplate)[];
-    
-    for (const key of keys) {
-      if (formData[key] !== originalValue.value[key]) {
-        changed.push({
-          field: key,
-          oldValue: originalValue.value[key],
-          newValue: formData[key],
-        });
-      }
-    }
-    
-    return changed;
-  });
-
   const combinedFullQuery = computed(() => {
-    if (!editingEntry.value && !formData.entry) {
+    if (!editor.editingId.value && !editor.formData.entry) {
       return '';
     }
 
-    return generateFullQuery('item_template', 'entry', formData);
+    return editor.combinedFullQuery.value;
   });
 
   return {
@@ -368,29 +237,18 @@ export const useItemModuleStore = defineStore('itemModule', () => {
     loading,
     currentSearch,
     listLoaded,
-    editing,
-    editingEntry,
-    formData,
-    originalValue,
-    editorDataLoaded,
-    dirtyCache,
+    ...editor,
+    editingEntry: editor.editingId,
 
     // Actions
     fetchItems,
     openEditor,
-    closeEditor,
-    saveToCache,
-    restoreFromCache,
     discardCache,
     clearAllCaches,
     saveItem,
     deleteItem,
 
     // SQL Generation
-    getAllDiffQueries,
-    combinedDiffQuery,
-    combinedHasChanges,
-    combinedChangedFields,
     combinedFullQuery,
   };
 });

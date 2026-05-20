@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, toRef } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
@@ -9,10 +9,7 @@ import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import EditorHeader from '@/components/EditorHeader.vue'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
-import { useQueryGenerator } from '@/composables/useQueryGenerator'
-import type { Trainer } from '@/modules/npc/types/trainer/trainer'
-import { getTrainer, saveTrainer, getTrainerSpells, saveTrainerSpells, getCreatureDefaultTrainers, saveCreatureDefaultTrainers } from '@/modules/npc/service'
-import { useTrainerStore, type TrainerSpellEntry, type CreatureDefaultTrainerEntry } from '@/modules/npc/stores/trainerStore'
+import { useTrainerStore } from '@/modules/npc/stores/trainerStore'
 import TrainerGeneralTab from './editor/trainer/GeneralTab.vue'
 import TrainerSpellsTab from './editor/trainer/SpellsTab.vue'
 import TrainerCreatureTab from './editor/trainer/CreatureTab.vue'
@@ -31,66 +28,11 @@ const trainerId = computed(() => {
 
 const loading = ref(false)
 const form = store.formData
-const originalValue = toRef(store, 'originalValue')
-
-// --- SQL generation (main trainer table) ---
-const { diffQuery, fullQuery, hasChanges, changedFields } = useQueryGenerator<Trainer>(
-  'trainer',
-  'Id',
-  originalValue,
-  form,
-)
-
-// --- Combined SQL: main table + trainer_spell sub-table ---
-const combinedDiffQuery = computed(() => {
-  const parts: string[] = []
-  if (diffQuery.value) parts.push(diffQuery.value)
-  for (const st of store.subTables) {
-    const sql = st.getSqlDiff(form.Id)
-    if (sql) parts.push(sql)
-  }
-  return parts.join('\n')
-})
-
-const combinedHasChanges = computed(() => {
-  if (hasChanges.value) return true
-  for (const st of store.subTables) {
-    if (st.getSqlDiff(form.Id)) return true
-  }
-  return false
-})
-
-const combinedChangedFields = computed(() => {
-  const fields = [...changedFields.value]
-  for (const st of store.subTables) {
-    fields.push(...st.getChangedFields(form.Id))
-  }
-  return fields
-})
 
 // --- Save ---
 async function onExecute() {
   try {
-    await saveTrainer({ ...form })
-    // Build TrainerSpell rows from store entries
-    const spellRows = store.spells.getNewEntries().map((e: TrainerSpellEntry) => ({
-      TrainerId: form.Id,
-      SpellId: e.SpellId,
-      MoneyCost: e.MoneyCost,
-      ReqSkillLine: e.ReqSkillLine,
-      ReqSkillRank: e.ReqSkillRank,
-      ReqAbility1: e.ReqAbility1,
-      ReqAbility2: e.ReqAbility2,
-      ReqAbility3: e.ReqAbility3,
-      ReqLevel: e.ReqLevel,
-      VerifiedBuild: null,
-    }))
-    await saveTrainerSpells(form.Id, spellRows)
-    const creatureRows = store.creatureLinks.getNewEntries().map((e: CreatureDefaultTrainerEntry) => ({
-      CreatureId: e.CreatureId,
-      TrainerId: form.Id,
-    }))
-    await saveCreatureDefaultTrainers(form.Id, creatureRows)
+    await store.saveCurrent()
     store.discardEditor()
     router.push('/npc/trainer')
   } catch (e) {
@@ -104,55 +46,19 @@ function onBack() {
 }
 
 function onDiscard() {
-  if (trainerId.value != null && originalValue.value) {
-    Object.assign(form, originalValue.value)
-    for (const st of store.subTables) {
-      st.revert()
-    }
-  }
+  store.discardChanges()
 }
 
 onMounted(async () => {
-  if (store.editorDataLoaded) return
+  if (store.editorDataLoaded && store.editing && store.editingId === trainerId.value) return
 
-  if (!store.editing || store.editingId !== trainerId.value) {
-    store.openEditor(trainerId.value)
-  }
-
-  if (trainerId.value != null) {
-    loading.value = true
-    try {
-      const id = trainerId.value
-      const [data, spellRows, creatureRows] = await Promise.all([
-        getTrainer(id),
-        getTrainerSpells(id).catch(() => []),
-        getCreatureDefaultTrainers(id).catch(() => []),
-      ])
-
-      Object.assign(form, data)
-      originalValue.value = { ...data }
-
-      const entries: TrainerSpellEntry[] = spellRows.map(s => ({
-        SpellId: s.SpellId,
-        MoneyCost: s.MoneyCost,
-        ReqSkillLine: s.ReqSkillLine,
-        ReqSkillRank: s.ReqSkillRank,
-        ReqAbility1: s.ReqAbility1,
-        ReqAbility2: s.ReqAbility2,
-        ReqAbility3: s.ReqAbility3,
-        ReqLevel: s.ReqLevel,
-      }))
-      store.spells.load(entries)
-
-      const creatureEntries: CreatureDefaultTrainerEntry[] = creatureRows.map(c => ({ CreatureId: c.CreatureId }))
-      store.creatureLinks.load(creatureEntries)
-
-      store.editorDataLoaded = true
-    } catch (e) {
-      console.error('Failed to load trainer:', e)
-    } finally {
-      loading.value = false
-    }
+  loading.value = true
+  try {
+    await store.openEditor(trainerId.value)
+  } catch (e) {
+    console.error('Failed to load trainer:', e)
+  } finally {
+    loading.value = false
   }
 })
 </script>
@@ -164,7 +70,7 @@ onMounted(async () => {
       :subtitle="form.Greeting ?? undefined"
       :id="trainerId ?? undefined"
       :backLabel="t('trainer.back')"
-      :hasChanges="combinedHasChanges"
+      :hasChanges="store.combinedHasChanges"
       :discardLabel="t('trainer.discard')"
       :executeLabel="t('trainer.execute')"
       @back="onBack"
@@ -173,10 +79,10 @@ onMounted(async () => {
     />
 
     <SqlQueryPanel
-      :diffQuery="combinedDiffQuery"
-      :fullQuery="fullQuery"
-      :hasChanges="combinedHasChanges"
-      :changedFields="combinedChangedFields"
+      :diffQuery="store.combinedDiffQuery"
+      :fullQuery="store.combinedFullQuery"
+      :hasChanges="store.combinedHasChanges"
+      :changedFields="store.combinedChangedFields"
     />
 
     <Tabs value="general">

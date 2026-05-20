@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, toRef } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import Tabs from 'primevue/tabs'
@@ -8,13 +8,11 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import EditorHeader from '@/components/EditorHeader.vue'
-import { type CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { Creature } from '@/modules/npc/types/creature/creature'
-import { getNpc, getNpcResistances, getNpcMovement, getNpcLocales, getNpcAddon, getNpcEquip, getNpcSpells, getCreatureTexts, getCreatureTextLocales, getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn, getCreatureQuestItems } from '@/modules/npc/service'
+import { getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn } from '@/modules/npc/service'
 import CreatureEditor from './CreatureEditor.vue'
-import { useQueryGenerator } from '@/composables/useQueryGenerator'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
-import { useNpcModuleStore, type ResistanceEntry, type MovementForm, type AddonForm, type EquipEntry, type SpellEntry, type LocaleEntry, type TextEntry, type TextLocaleEntry, type QuestItemEntry } from '@/modules/npc/store'
+import { useNpcModuleStore } from '@/modules/npc/store'
 import NpcTabGeneral from './editor/creature_template/GeneralTab.vue'
 import NpcTabCombat from './editor/creature_template/CombatTab.vue'
 import NpcTabAppearance from './editor/creature_template/AppearanceTab.vue'
@@ -42,57 +40,6 @@ const npcEntry = computed(() => {
 
 const loading = ref(false)
 const form = store.formData
-const originalValue = toRef(store, 'originalValue')
-
-// --- SQL generation (main table) ---
-const { diffQuery, fullQuery, hasChanges, changedFields } = useQueryGenerator<CreatureTemplate>(
-  'creature_template',
-  'entry',
-  originalValue,
-  form,
-)
-
-// --- Combined SQL from main table + all sub-tables (generic iteration) ---
-const combinedDiffQuery = computed(() => {
-  const parts: string[] = []
-
-  if (diffQuery.value) {
-    parts.push(diffQuery.value)
-  }
-
-  for (const st of store.subTables) {
-    const sql = st.getSqlDiff(form.entry)
-    if (sql) {
-      parts.push(sql)
-    }
-  }
-
-  return parts.join('\n')
-})
-
-const combinedHasChanges = computed(() => {
-  if (hasChanges.value) {
-    return true
-  }
-
-  for (const st of store.subTables) {
-    if (st.getSqlDiff(form.entry)) {
-      return true
-    }
-  }
-
-  return false
-})
-
-const combinedChangedFields = computed(() => {
-  const fields = [...changedFields.value]
-
-  for (const st of store.subTables) {
-    fields.push(...st.getChangedFields(form.entry))
-  }
-
-  return fields
-})
 
 // --- Spawn state ---
 const spawns = ref<Creature[]>([])
@@ -142,9 +89,8 @@ async function onCreatureEditorSave(data: Creature) {
 }
 
 async function onSave() {
-  const { saveNpc } = await import('@/modules/npc/service')
   try {
-    await saveNpc({ ...form })
+    await store.saveCurrent()
     store.discardEditor()
     router.push('/npc/creature-template')
   } catch (e) {
@@ -158,116 +104,24 @@ function onClose() {
 }
 
 function onDiscard() {
-  if (npcEntry.value != null) {
-    Object.assign(form, originalValue.value)
-    for (const st of store.subTables) {
-      st.revert()
-    }
-  }
+  store.discardChanges()
 }
 
 onMounted(async () => {
-  if (store.editorDataLoaded) {
+  if (store.editorDataLoaded && store.editingEntry === npcEntry.value) {
     loadSpawns()
     return
   }
 
-  // Ensure store is in editor mode for this entry
-  if (!store.editing || store.editingEntry !== npcEntry.value) {
-    store.openEditor(npcEntry.value)
+  loading.value = true
+  try {
+    await store.openEditor(npcEntry.value)
+  } catch (e) {
+    console.error('Failed to load NPC:', e)
+  } finally {
+    loading.value = false
   }
 
-  if (npcEntry.value != null) {
-
-    loading.value = true
-
-    try {
-      const entry = npcEntry.value
-      const [data, resistanceRows, movementData, localeRows, addonData, equipRows, spellRows, textRows, textLocaleRows, questItemRows] = await Promise.all([
-        getNpc(entry),
-        getNpcResistances(entry).catch(() => []),
-        getNpcMovement(entry).catch(() => null),
-        getNpcLocales(entry).catch(() => []),
-        getNpcAddon(entry).catch(() => null),
-        getNpcEquip(entry).catch(() => []),
-        getNpcSpells(entry).catch(() => []),
-        getCreatureTexts(entry).catch(() => []),
-        getCreatureTextLocales(entry).catch(() => []),
-        getCreatureQuestItems(entry).catch(() => []),
-      ])
-
-      Object.assign(form, data)
-      originalValue.value = { ...data }
-
-      const resEntries: ResistanceEntry[] = resistanceRows.map(r => ({ School: r.School, Resistance: r.Resistance }))
-      store.resistances.load(resEntries)
-
-      if (movementData) {
-        const { CreatureId, ...movFields } = movementData
-        store.movement.load(movFields as MovementForm)
-      } else {
-        store.movement.commit()
-      }
-
-      const locEntries: LocaleEntry[] = localeRows.map(r => ({ locale: r.locale, Name: r.Name, Title: r.Title }))
-      store.locales.load(locEntries)
-
-      if (addonData) {
-        const { entry: _e, ...addonFields } = addonData
-        store.addon.load(addonFields as AddonForm)
-      } else {
-        store.addon.commit()
-      }
-
-      const eqEntries: EquipEntry[] = equipRows.map(r => ({ ID: r.ID, ItemID1: r.ItemID1, ItemID2: r.ItemID2, ItemID3: r.ItemID3 }))
-      store.equips.load(eqEntries)
-
-      const spEntries: SpellEntry[] = spellRows.map(r => ({ Index: r.Index, Spell: r.Spell }))
-      store.spells.load(spEntries)
-
-      const textEntries: TextEntry[] = textRows.map(r => ({
-        GroupID: r.GroupID,
-        ID: r.ID,
-        Text: r.Text,
-        Type: r.Type,
-        Language: r.Language,
-        Probability: r.Probability,
-        Emote: r.Emote,
-        Duration: r.Duration,
-        Sound: r.Sound,
-        BroadcastTextId: r.BroadcastTextId,
-        TextRange: r.TextRange,
-        comment: r.comment,
-      }))
-      store.texts.load(textEntries)
-
-      const textLocaleEntries: TextLocaleEntry[] = textLocaleRows.map(r => ({
-        GroupID: r.GroupID,
-        ID: r.ID,
-        Locale: r.Locale,
-        Text: r.Text ?? null,
-      }))
-      store.textLocales.load(textLocaleEntries)
-
-      const questItemEntries: QuestItemEntry[] = questItemRows.map(r => ({
-        Idx: r.Idx,
-        ItemId: r.ItemId,
-      }))
-      store.questItems.load(questItemEntries)
-
-    } catch (e) {
-      console.error('Failed to load NPC:', e)
-    } finally {
-      loading.value = false
-    }
-  } else {
-    originalValue.value = { ...form }
-    for (const st of store.subTables) {
-      st.commit()
-    }
-  }
-
-  store.markEditorLoaded()
   loadSpawns()
 })
 </script>
@@ -289,7 +143,7 @@ onMounted(async () => {
       :subtitle="form.name || undefined"
       :id="form.entry"
       :backLabel="t('creature_template.back')"
-      :hasChanges="combinedHasChanges"
+      :hasChanges="store.combinedHasChanges"
       :discardLabel="t('creature_template.discard')"
       :executeLabel="t('creature_template.execute')"
       @back="onClose"
@@ -299,10 +153,10 @@ onMounted(async () => {
 
     <!-- SQL Query Panel -->
     <SqlQueryPanel
-      :diffQuery="combinedDiffQuery"
-      :fullQuery="fullQuery"
-      :hasChanges="combinedHasChanges"
-      :changedFields="combinedChangedFields"
+      :diffQuery="store.combinedDiffQuery"
+      :fullQuery="store.combinedFullQuery"
+      :hasChanges="store.combinedHasChanges"
+      :changedFields="store.combinedChangedFields"
     />
 
     <!-- Tabs -->

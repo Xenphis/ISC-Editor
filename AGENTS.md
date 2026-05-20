@@ -56,13 +56,129 @@ Each feature module lives in `src/modules/<module_name>/` and follows this layou
 
 ### SQL diff pattern
 
-Editors do not run SQL directly. They accumulate changes in Pinia stores (using `SubTableManager`) and generate diff queries via `useQueryGenerator`. Queries are staged in `sessionChanges` store and can be reviewed in the `SqlQueryPanel` before being applied.
+Editors do not run SQL directly. They accumulate changes in Pinia stores and generate diff queries through `createEntityEditorStore` and `useQueryGenerator`. Repeated child rows use `SubTableManager`. Queries are staged in `sessionChanges` store only for modules that explicitly opt into session aggregation, and can be reviewed in the `SqlQueryPanel` before being applied.
 
 ### Routing conventions
 
 - All authenticated routes are children of the `AppLayout` component.
-- Route paths follow the pattern `/<module>`, `/<module>/new`, `/<module>/:id`.
+- Each module owns its internal routes in `src/modules/<module>/routes.ts`.
+- `src/router/index.ts` only mounts `sqlSessionRoute` and `moduleRoutes` from `src/modules/registry.ts`.
+- Route paths usually follow the pattern `/<module>`, `/<module>/new`, `/<module>/:id`; nested tables may use `/<module>/<table>`, `/<module>/<table>/new`, `/<module>/<table>/:id`.
 - Auth guard in `src/router/index.ts` redirects unauthenticated users to `/login`.
+
+## Implementing a New Table
+
+Use this workflow when adding support for a database table. Prefer extending an existing feature module when the table belongs to an existing domain; create a new module only for a new top-level navigation area.
+
+### 1. Define table ownership
+
+- Existing domain table: add it under `src/modules/<module>/` and, if needed, under a focused subfolder such as `pages/editor/<table>/` or `stores/<table>Store.ts`.
+- New top-level module: create `src/modules/<module>/` with `service.ts`, `store.ts`, `routes.ts`, `types/`, `pages/`, and `i18n/`.
+- Keep DB table names and DB column names exact in TypeScript types. Do not rename DB columns to frontend-friendly names.
+
+### 2. Add backend commands
+
+- Add one Rust command file per DB table in `src-tauri/src/commands/`.
+- Define Rust structs matching the DB columns and derive `Serialize`, `Deserialize`, and `FromRow` as needed.
+- Use `debug_sql!` for every SQL query so it appears in `SqlDebugViewer`.
+- Register the command module in `src-tauri/src/commands/mod.rs` and register every command in `src-tauri/src/lib.rs` `invoke_handler!`.
+- Use `SELECT` for list/detail reads, `REPLACE INTO` or explicit `INSERT/UPDATE` for saves following the table's existing backend style, and targeted `DELETE` for deletes.
+- Composite-key tables must bind every key column in read/delete queries.
+
+### 3. Add frontend types and service
+
+- Add table types under `src/modules/<module>/types/`.
+- Add all frontend backend calls in the module `service.ts` with `invoke()` from `@tauri-apps/api/core`.
+- Never call Tauri commands directly from Vue pages; pages use the Pinia store, and stores/services call `invoke()`.
+
+### 4. Create or extend the Pinia store
+
+Use `createEntityEditorStore<T>` for table editors whenever the table is edited as one main row plus optional child rows.
+
+For a simple primary key:
+
+```ts
+const editor = createEntityEditorStore<MyRow>({
+  tableName: 'my_table',
+  primaryKey: 'entry',
+  createDefault,
+  load: service.getRow,
+  save: service.saveRow,
+  delete: service.deleteRow,
+})
+```
+
+For a composite key, use the factory key configuration rather than pretending one column is unique:
+
+```ts
+type MyRowKey = `${number}:${number}`
+
+const editor = createEntityEditorStore<MyRow, MyRowKey>({
+  tableName: 'my_table',
+  key: {
+    fields: ['mapId', 'difficulty'],
+    getId: row => `${row.mapId}:${row.difficulty}`,
+    getEntry: id => id,
+  },
+  createDefault,
+  load: key => {
+    const [mapId, difficulty] = key.split(':').map(Number)
+    return service.getRow(mapId, difficulty)
+  },
+  save: service.saveRow,
+})
+```
+
+Store responsibilities:
+
+- Keep list state (`entries`, `loading`, `currentSearch`, `listLoaded`) in the module store.
+- Spread `...editor` from `createEntityEditorStore` into the store return.
+- Provide small compatibility wrappers such as `openEditor(id)`, `openNew()`, `saveEntry()`, and `deleteEntry(id)` when pages or list components already use them.
+- Refresh the list after save/delete only when `listLoaded` is true.
+- Use `SubTableManager` bindings for repeated child rows and let the factory combine parent and child SQL.
+
+### 5. Build pages around store state
+
+- List pages use `ModuleLayout`, `StyledDataTable`, and `ActionsColumn` before creating custom list UI.
+- Editor pages use `EditorHeader`, `SqlQueryPanel`, and `Tabs` when the table has multiple logical sections.
+- Editor pages should read SQL state from the store: `combinedDiffQuery`, `combinedFullQuery`, `combinedHasChanges`, and `combinedChangedFields`.
+- Save through store actions such as `saveCurrent()` or a module wrapper like `saveEntry()`.
+- Discard through `store.discardChanges()`.
+- Do not compute SQL diff, changed fields, or dirty state inline in Vue pages.
+
+### 6. Add field modifier composables
+
+Each editor should expose an `useXxxFieldModifiers()` composable. It should read the store's `changedFields` or `combinedChangedFields` and expose `isFieldModified(field)` helpers. Do not duplicate diff logic in the composable.
+
+### 7. Add routes and registry entries
+
+- Add table routes to the owning module's `routes.ts`.
+- For a new module, add one `AppModuleDefinition` in `src/modules/registry.ts` with `id`, `basePath`, `routes`, optional `navigation`, optional `i18n`, and optional `sessionStore`.
+- Do not add routes directly in `src/router/index.ts` unless the route is global shell infrastructure.
+- Add navigation only for top-level modules that should appear in the sidebar.
+
+### 8. Add i18n
+
+- Put module strings in `src/modules/<module>/i18n/en.json` and `fr.json`.
+- Add every user-visible label, header, button, tooltip, empty state, and column name to both locales.
+- New module locale files must be registered through `src/modules/registry.ts`.
+
+### 9. Decide session aggregation explicitly
+
+- A store can expose `getAllDiffQueries()` without being globally aggregated.
+- Add `sessionStore` in `src/modules/registry.ts` only when the module should appear in the global SQL session page.
+- Do not register child table stores globally if their parent module already aggregates their SQL.
+
+### 10. Validate
+
+Run focused diagnostics first, then full checks:
+
+```bash
+pnpm exec vue-tsc -b --pretty false
+pnpm build
+```
+
+For DB-backed behavior, run `pnpm tauri dev` and manually test list loading, opening existing rows, creating new rows, discard, SQL preview, save, delete, and SQL debug output.
 
 ## Conventions
 
@@ -77,13 +193,16 @@ Editors do not run SQL directly. They accumulate changes in Pinia stores (using 
 
 | File | Purpose |
 |------|---------|
+| `src/modules/registry.ts` | Module composition: routes, navigation, i18n, optional session stores |
+| `src/modules/<module>/routes.ts` | Module-owned route definitions |
+| `src/stores/createEntityEditorStore.ts` | Generic editor lifecycle, dirty cache, SQL aggregation, save/delete orchestration |
 | `src/stores/SubTableManager.ts` | Reactive sub-table diff tracking |
 | `src/composables/useQueryGenerator.ts` | SQL diff query generation |
 | `src/stores/sessionChanges.ts` | Staged SQL query session |
 | `src/stores/moduleStore.ts` | Cross-module state (active module, pending queries) |
 | `src-tauri/src/lib.rs` | Tauri app entry — all command registrations |
 | `src-tauri/src/debug.rs` | SQL debug event emission + `debug_sql!` macro |
-| `src/router/index.ts` | All route definitions |
+| `src/router/index.ts` | Router shell, auth guard, and module route mounting |
 
 ## Editor Page Structure
 

@@ -108,10 +108,7 @@ function onClose() {
 }
 
 function onDiscard() {
-  if (itemEntry.value != null && store.originalValue) {
-    // Reset main form data
-    Object.assign(form, store.originalValue);
-  }
+  store.discardChanges();
 }
 
 onMounted(() => {
