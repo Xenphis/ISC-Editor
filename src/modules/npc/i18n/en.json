@@ -102,7 +102,9 @@
       "creatureText": "Texts",
       "creatureTextDesc": "Dialogue and text spoken by the creature (creature_text table)",
       "creatureTextLocale": "Text Translations",
-      "creatureTextLocaleDesc": "Creature text translations per language (creature_text_locale table)"
+      "creatureTextLocaleDesc": "Creature text translations per language (creature_text_locale table)",
+      "reputations": "Reputations",
+      "reputationsDesc": "Reputation rewards granted to players when killing this creature (creature_onkill_reputation table)"
     },
     "spawnColumns": {
       "guid": "GUID",
@@ -253,7 +255,16 @@
       "text_locale_text": "Translated Text",
       "text_locale_add": "Add",
       "text_locale_select_group": "Select a text (Group:ID)",
-      "text_locale_select_locale": "Select a language"
+      "text_locale_select_locale": "Select a language",
+      "RewOnKillRepFaction1": "Faction 1 ID",
+      "RewOnKillRepFaction2": "Faction 2 ID",
+      "MaxStanding1": "Max Standing (Faction 1)",
+      "MaxStanding2": "Max Standing (Faction 2)",
+      "IsTeamAward1": "Team Award (Faction 1)",
+      "IsTeamAward2": "Team Award (Faction 2)",
+      "RewOnKillRepValue1": "Rep Value (Faction 1)",
+      "RewOnKillRepValue2": "Rep Value (Faction 2)",
+      "TeamDependent": "Team Dependent"
     }
   },
   "creature": {

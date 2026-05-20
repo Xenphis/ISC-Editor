@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
+import Select from 'primevue/select'
 import { npc_flags, unit_flags_options, unit_flags2_options, dynamicflags_options, type_flags_options, flags_extra_options } from '@/modules/npc/types/defines'
 import EditorField from '@/components/EditorField.vue'
 import BitmaskField from '@/components/BitmaskField.vue'
@@ -10,9 +11,21 @@ import { useNpcFieldModifiers } from '@/modules/npc/pages/useNpcFieldModifiers'
 
 const { t } = useI18n()
 const store = useNpcModuleStore()
-const { isFieldModified } = useNpcFieldModifiers()
+const { isFieldModified, isOnKillRepModified } = useNpcFieldModifiers()
 
 const form = store.formData
+const repForm = store.onKillRep.newEntry
+
+const maxStandingOptions = [
+  { label: 'Hated (0)',      value: 0 },
+  { label: 'Hostile (1)',    value: 1 },
+  { label: 'Unfriendly (2)', value: 2 },
+  { label: 'Neutral (3)',    value: 3 },
+  { label: 'Friendly (4)',   value: 4 },
+  { label: 'Honored (5)',    value: 5 },
+  { label: 'Revered (6)',    value: 6 },
+  { label: 'Exalted (7)',    value: 7 },
+]
 </script>
 
 <template>
@@ -65,8 +78,52 @@ const form = store.formData
       </EditorField>
     </div>
   </div>
+
+  <!-- Réputations -->
+  <div class="field-group">
+    <div class="field-group-header">
+      <h4>{{ t('creature_template.groups.reputations') }}</h4>
+      <p>{{ t('creature_template.groups.reputationsDesc') }}</p>
+    </div>
+    <div class="field-grid field-grid-4">
+      <!-- Faction 1 -->
+      <EditorField :label="t('creature_template.fields.RewOnKillRepFaction1')" :modified="isOnKillRepModified('RewOnKillRepFaction1')">
+        <InputNumber v-model="repForm.RewOnKillRepFaction1" :useGrouping="false" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.RewOnKillRepValue1')" :modified="isOnKillRepModified('RewOnKillRepValue1')">
+        <InputNumber v-model="repForm.RewOnKillRepValue1" :useGrouping="false" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.MaxStanding1')" :modified="isOnKillRepModified('MaxStanding1')">
+        <Select v-model="repForm.MaxStanding1" :options="maxStandingOptions" optionLabel="label" optionValue="value" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.IsTeamAward1')" :modified="isOnKillRepModified('IsTeamAward1')">
+        <InputNumber v-model="repForm.IsTeamAward1" :min="0" :max="1" :useGrouping="false" fluid />
+      </EditorField>
+      <!-- Faction 2 -->
+      <EditorField :label="t('creature_template.fields.RewOnKillRepFaction2')" :modified="isOnKillRepModified('RewOnKillRepFaction2')">
+        <InputNumber v-model="repForm.RewOnKillRepFaction2" :useGrouping="false" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.RewOnKillRepValue2')" :modified="isOnKillRepModified('RewOnKillRepValue2')">
+        <InputNumber v-model="repForm.RewOnKillRepValue2" :useGrouping="false" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.MaxStanding2')" :modified="isOnKillRepModified('MaxStanding2')">
+        <Select v-model="repForm.MaxStanding2" :options="maxStandingOptions" optionLabel="label" optionValue="value" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.IsTeamAward2')" :modified="isOnKillRepModified('IsTeamAward2')">
+        <InputNumber v-model="repForm.IsTeamAward2" :min="0" :max="1" :useGrouping="false" fluid />
+      </EditorField>
+      <!-- Team Dependent -->
+      <EditorField :label="t('creature_template.fields.TeamDependent')" :modified="isOnKillRepModified('TeamDependent')">
+        <InputNumber v-model="repForm.TeamDependent" :min="0" :max="1" :useGrouping="false" fluid />
+      </EditorField>
+    </div>
+  </div>
 </template>
 
 <style scoped>
 @import '../npc-editor.css';
+
+.field-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
 </style>

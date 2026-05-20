@@ -45,9 +45,22 @@ export function useNpcFieldModifiers() {
     )
   })
 
+  const onKillRepChangedFields = computed(() => {
+    const original = store.onKillRep.getOriginalEntry()
+    if (!original) return []
+    const current = store.onKillRep.newEntry
+    void Object.values(current)
+    return getChangedFields(
+      original as unknown as Record<string, unknown>,
+      current as unknown as Record<string, unknown>,
+      store.onKillRep.primaryKey,
+    )
+  })
+
   const modifiedFieldSet = computed(() => new Set(changedFields.value.map(c => c.field)))
   const movementModifiedFieldSet = computed(() => new Set(movementChangedFields.value.map(c => c.field)))
   const addonModifiedFieldSet = computed(() => new Set(addonChangedFields.value.map(c => c.field)))
+  const onKillRepModifiedFieldSet = computed(() => new Set(onKillRepChangedFields.value.map(c => c.field)))
 
   function isFieldModified(field: string): boolean {
     return modifiedFieldSet.value.has(field)
@@ -61,9 +74,14 @@ export function useNpcFieldModifiers() {
     return addonModifiedFieldSet.value.has(field)
   }
 
+  function isOnKillRepModified(field: string): boolean {
+    return onKillRepModifiedFieldSet.value.has(field)
+  }
+
   return {
     isFieldModified,
     isMovementModified,
     isAddonModified,
+    isOnKillRepModified,
   }
 }

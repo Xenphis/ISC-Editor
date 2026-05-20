@@ -13,6 +13,7 @@ import type { CreatureText } from '@/modules/npc/types/creature_template/creatur
 import type { CreatureTextLocale } from '@/modules/npc/types/creature_template/creature_text_locale'
 import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
 import type { CreatureQuestItem } from '@/modules/npc/types/creature_template/creature_questitem'
+import type { CreatureOnkillReputation } from '@/modules/npc/types/creature_template/creature_onkill_reputation'
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
 import type { TrainerSpell } from '@/modules/npc/types/trainer/trainer_spell'
 import type { CreatureDefaultTrainer } from '@/modules/npc/types/trainer/creature_default_trainer'
@@ -108,6 +109,16 @@ export async function getCreatureQuestItems(entry: number): Promise<CreatureQues
 
 export async function saveCreatureQuestItems(entry: number, items: CreatureQuestItem[]): Promise<void> {
   return invoke('save_creature_questitem', { entry, items })
+}
+
+// ─── creature_onkill_reputation ───────────────────────────────────────────────
+
+export async function getCreatureOnKillRep(entry: number): Promise<CreatureOnkillReputation | null> {
+  return invoke('get_creature_onkill_reputation', { entry })
+}
+
+export async function saveCreatureOnKillRep(entry: number, reputation: CreatureOnkillReputation): Promise<void> {
+  return invoke('save_creature_onkill_reputation', { entry, reputation })
 }
 
 export async function getCreatureTexts(entry: number): Promise<CreatureText[]> {

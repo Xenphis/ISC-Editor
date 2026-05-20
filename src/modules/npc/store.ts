@@ -68,6 +68,18 @@ export interface QuestItemEntry {
   ItemId: number
 }
 
+export interface OnKillRepForm {
+  RewOnKillRepFaction1: number
+  RewOnKillRepFaction2: number
+  MaxStanding1: number
+  IsTeamAward1: number
+  RewOnKillRepValue1: number
+  MaxStanding2: number
+  IsTeamAward2: number
+  RewOnKillRepValue2: number
+  TeamDependent: number
+}
+
 export interface TextEntry {
   GroupID: number
   ID: number
@@ -91,6 +103,20 @@ export function createDefaultMovementForm(): MovementForm {
 
 export function createDefaultAddonForm(): AddonForm {
   return { path_id: 0, mount: 0, MountCreatureID: 0, StandState: 0, AnimTier: 0, VisFlags: 0, SheathState: 0, PvPFlags: 0, emote: 0, visibilityDistanceType: 0, auras: null }
+}
+
+function createDefaultOnKillRepForm(): OnKillRepForm {
+  return {
+    RewOnKillRepFaction1: 0,
+    RewOnKillRepFaction2: 0,
+    MaxStanding1: 0,
+    IsTeamAward1: 0,
+    RewOnKillRepValue1: 0,
+    MaxStanding2: 0,
+    IsTeamAward2: 0,
+    RewOnKillRepValue2: 0,
+    TeamDependent: 0,
+  }
 }
 
 function createDefaultForm(): CreatureTemplate {
@@ -281,6 +307,12 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     summarize: (e) => `[${e.GroupID}:${e.ID}] ${e.Text || '(empty)'}`,
   })
 
+  const onKillRep = new ReactiveSubTable<OnKillRepForm>({
+    tableName: 'creature_onkill_reputation',
+    primaryKey: 'creature_id',
+    createDefault: createDefaultOnKillRepForm,
+  })
+
   const questItems = new ArraySubTable<QuestItemEntry>({
     tableName: 'creature_questitem',
     compositeConfig: questItemConfig,
@@ -383,6 +415,22 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
           return rows.map(row => ({ Idx: row.Idx, ItemId: row.ItemId })) satisfies QuestItemEntry[]
         },
       },
+      {
+        manager: onKillRep,
+        load: async (entry) => {
+          const data = await npcService.getCreatureOnKillRep(entry).catch(() => null)
+          if (!data) return null
+          const { creature_id: _creatureId, ...repFields } = data
+          return repFields as OnKillRepForm
+        },
+        commitWhenMissing: true,
+        save: async (entry) => {
+          await npcService.saveCreatureOnKillRep(entry, {
+            creature_id: entry,
+            ...onKillRep.newEntry,
+          })
+        },
+      },
     ],
   })
 
@@ -398,7 +446,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     // List state
     npcs, loading, currentSearch, listLoaded,
     // Sub-table managers
-    resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems,
+    resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, onKillRep,
     ...editor,
     editingEntry: editor.editingId,
     markListLoaded, setNpcs,
