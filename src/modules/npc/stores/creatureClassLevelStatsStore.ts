@@ -100,8 +100,8 @@ export const useCreatureClassLevelStatsStore = defineStore('creatureClassLevelSt
   const matrixData = computed(() => {
     const map: Record<number, Record<number, CreatureClassLevelStats>> = {}
     for (const row of entries.value) {
-      if (!map[row.level]) map[row.level] = {}
-      map[row.level][row.class] = row
+      const levelRows = map[row.level] ?? (map[row.level] = {})
+      levelRows[row.class] = row
     }
     return map
   })

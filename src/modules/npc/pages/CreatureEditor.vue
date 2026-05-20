@@ -14,7 +14,6 @@ import type { Creature } from '@/modules/npc/types/creature/creature'
 import {
   movement_type_options,
   spawn_mask_options,
-  equipment_id_options,
   stand_state_types as stand_state_options,
   anim_tier_types as anim_tier_options,
   vis_flags_options,
@@ -162,7 +161,6 @@ function isMovementOverrideFieldModified(field: string): boolean {
 }
 
 const movementTypeOptions = movement_type_options.map(o => ({ value: o.value, label: o.name }))
-const equipmentOptions = equipment_id_options.map(o => ({ value: o.value, label: o.name }))
 
 const { diffQuery, fullQuery, hasChanges, changedFields } = useQueryGenerator<Creature>(
   'creature',

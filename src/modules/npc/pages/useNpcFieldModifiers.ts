@@ -27,8 +27,8 @@ export function useNpcFieldModifiers() {
     // Touch all fields to ensure reactive tracking
     void Object.values(current)
     return getChangedFields(
-      original as Record<string, unknown>,
-      current as Record<string, unknown>,
+      original as unknown as Record<string, unknown>,
+      current as unknown as Record<string, unknown>,
       store.movement.primaryKey,
     )
   })
@@ -39,8 +39,8 @@ export function useNpcFieldModifiers() {
     // Touch all fields to ensure reactive tracking
     void Object.values(current)
     return getChangedFields(
-      original as Record<string, unknown>,
-      current as Record<string, unknown>,
+      original as unknown as Record<string, unknown>,
+      current as unknown as Record<string, unknown>,
       store.addon.primaryKey,
     )
   })

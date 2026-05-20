@@ -12,7 +12,7 @@ import {
   generateDiffQuery,
   generateFullQuery,
 } from '@/modules/npc/stores/creatureClassLevelStatsStore'
-import { useClassLevelStatsFieldModifiers } from '../useClassLevelStatsFieldModifiers'
+import { useClassLevelStatsFieldModifiers } from '../../useClassLevelStatsFieldModifiers'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -229,7 +229,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@import '../editor/npc-editor.css';
+@import '../npc-editor.css';
 
 .classlevelstats-editor {
   max-width: 80rem;
