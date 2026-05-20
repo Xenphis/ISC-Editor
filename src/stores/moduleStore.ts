@@ -1,6 +1,6 @@
 /**
- * Common interface that every module store (npc, gameobject, items…) must implement
- * so that sessionChanges.ts can aggregate queries without knowing module internals.
+ * Common interface for module stores that opt into global SQL session aggregation.
+ * Navigation modules are not required to implement this contract.
  */
 export interface SessionQuery {
   table: string

@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import { useSessionChangesStore } from '@/stores/sessionChanges'
 import { useConnectionStore } from '@/stores/connectionStore'
+import { moduleNavigationItems } from '@/modules/registry'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -15,16 +16,7 @@ const emit = defineEmits<{
 
 const session = useSessionChangesStore()
 const connection = useConnectionStore()
-
-const modules = [
-  { id: 'npc', icon: 'pi pi-users', path: '/npc' },
-  { id: 'gameobject', icon: 'pi pi-box', path: '/gameobject' },
-  { id: 'quests', icon: 'pi pi-compass', path: '/quests' },
-  { id: 'maps', icon: 'pi pi-map', path: '/maps' },
-  { id: 'loot-items', icon: 'pi pi-box', path: '/loot-items' },
-  { id: 'spells', icon: 'pi pi-star', path: '/spells' },
-  { id: 'misc', icon: 'pi pi-server', path: '/server' }
-]
+const modules = moduleNavigationItems
 
 function isActive(path: string): boolean {
   return route.path === path || route.path.startsWith(path + '/')

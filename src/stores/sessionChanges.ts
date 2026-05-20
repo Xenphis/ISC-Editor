@@ -1,21 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed } from 'vue'
-import { useNpcModuleStore } from '@/modules/npc/store'
-import { useGameObjectModuleStore } from '@/modules/game_objects/store'
-import { useQuestModuleStore } from '@/modules/quests/store'
+import { sessionModuleStores } from '@/modules/registry'
 import type { ModuleStore, SessionQuery } from '@/stores/moduleStore'
 
 export type { SessionQuery }
 
 export const useSessionChangesStore = defineStore('sessionChanges', () => {
-  /** All registered module stores. Add future modules here (gameobject, items…). */
   function getModuleStores(): ModuleStore[] {
-    return [
-      useNpcModuleStore(),
-      useGameObjectModuleStore(),
-      useQuestModuleStore(),
-      // useItemModuleStore(),
-    ]
+    return sessionModuleStores.map(useModuleStore => useModuleStore())
   }
 
   const allDiffQueries = computed<SessionQuery[]>(() => {
