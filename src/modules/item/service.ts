@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { invoke } from '@/utils/invoke';
 import type { ItemTemplate } from './item_template';
 
 export interface ItemListResult {

@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from '@/utils/invoke'
 import type { QuestTemplate } from '@/modules/quests/types/quest_template'
 import type { QuestTemplateAddon } from '@/modules/quests/types/quest_template_addon'
 import type { QuestTemplateLocale } from '@/modules/quests/types/quest_template_locale'

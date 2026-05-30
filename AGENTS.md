@@ -2,7 +2,9 @@
 
 ## Project Overview
 
-ISC Editor is a desktop application built with **Tauri** (Rust backend) + **Vue 3** (TypeScript frontend) for editing World of Warcraft emulator server databases (AzerothCore / TrinityCore). It allows server administrators to manage NPCs, game objects, items, quests, maps, loot, and spells through a GUI that generates and applies SQL queries.
+ISC Editor is a web application with a **Node.js backend** + **Vue 3 frontend** for editing World of Warcraft emulator server databases (AzerothCore / TrinityCore). It allows server administrators to manage NPCs, game objects, items, quests, maps, loot, and spells through a GUI that generates and applies SQL queries.
+
+> **Note:** The project was previously built with Tauri (Rust). The `src-tauri/` folder is kept as archive. All backend logic now lives in `server/`.
 
 ## Tech Stack
 
@@ -13,32 +15,39 @@ ISC Editor is a desktop application built with **Tauri** (Rust backend) + **Vue 
 | Routing | vue-router 4 (hash history, auth guard via `connectionStore.isConnected`) |
 | i18n | vue-i18n 11 — locales: `en`, `fr` (files under `src/i18n/locales/`) |
 | SQL generation | `squel-ts` + `useQueryGenerator` composable |
-| Backend | Tauri 2 (Rust) — communicates with a MySQL database |
-| Package manager | **pnpm** |
+| Backend | Node.js + Express + mysql2 (`server/`) |
+| Package manager | **pnpm** (workspace: root + `server/`) |
 
 ## Build & Run
 
 ```bash
-# Full Tauri dev app (required for DB features)
-pnpm tauri dev
+# Développement (deux terminaux)
+pnpm dev:server   # Terminal 1 — démarre le backend Node.js sur :3001
+pnpm dev          # Terminal 2 — démarre Vite sur :5173 avec proxy /api → :3001
 
-# Production build
-pnpm build          # vue-tsc + vite build
-pnpm tauri build    # Tauri production bundle
+# Ou en une commande (nécessite concurrently)
+pnpm dev:all
+
+# Production build (frontend uniquement)
+pnpm build        # vue-tsc + vite build
 ```
 
 ## Architecture
 
 ### Frontend → Backend communication
 
-All database operations go through `src-tauri/src/commands/`. The frontend calls them exclusively via `invoke()` from `@tauri-apps/api/core`:
+All database operations go through `server/src/handlers/`. The frontend calls them exclusively via `invoke()` from `@/utils/invoke` — a thin shim that posts to `POST /api/invoke`:
 
 ```ts
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from '@/utils/invoke'
 invoke('command_name', { param1, param2 })
 ```
 
-Never use `fetch` or direct database connections from the frontend.
+Never call the backend directly with `fetch` from Vue pages or stores — always go through `invoke()` in the module `service.ts`.
+
+The backend dispatcher (`server/src/routes/invoke.ts`) maps command names to handler functions. Each handler lives in `server/src/handlers/<domain>.ts`.
+
+**SQL Debug:** enabled via `invoke('set_debug_mode', { enabled: true })`. Logs stream to the frontend via Server-Sent Events at `GET /api/debug/stream`, consumed by `debugStore.ts` using the native browser `EventSource` API.
 
 ### Module structure
 
@@ -76,20 +85,21 @@ Use this workflow when adding support for a database table. Prefer extending an 
 - New top-level module: create `src/modules/<module>/` with `service.ts`, `store.ts`, `routes.ts`, `types/`, `pages/`, and `i18n/`.
 - Keep DB table names and DB column names exact in TypeScript types. Do not rename DB columns to frontend-friendly names.
 
-### 2. Add backend commands
+### 2. Add backend handler
 
-- Add one Rust command file per DB table in `src-tauri/src/commands/`.
-- Define Rust structs matching the DB columns and derive `Serialize`, `Deserialize`, and `FromRow` as needed.
-- Use `debug_sql!` for every SQL query so it appears in `SqlDebugViewer`.
-- Register the command module in `src-tauri/src/commands/mod.rs` and register every command in `src-tauri/src/lib.rs` `invoke_handler!`.
-- Use `SELECT` for list/detail reads, `REPLACE INTO` or explicit `INSERT/UPDATE` for saves following the table's existing backend style, and targeted `DELETE` for deletes.
+- Add one TypeScript handler file per DB table (or domain) in `server/src/handlers/`.
+- Export one async function per command, following the pattern: `export async function get_xxx(params: { id: number }): Promise<T>`
+- Wrap every SQL query with `withDebug(queryType, sql, fn)` from `../debug.js` so it appears in `SqlDebugViewer`.
+- Register each exported function in `server/src/handlers/index.ts` under its command name.
+- Use `SELECT` for list/detail reads, `REPLACE INTO` for saves, targeted `DELETE` for deletes.
 - Composite-key tables must bind every key column in read/delete queries.
+- SQL reserved words must be backtick-quoted: `` `type` ``, `` `rank` ``, `` `Index` ``, etc.
 
 ### 3. Add frontend types and service
 
 - Add table types under `src/modules/<module>/types/`.
-- Add all frontend backend calls in the module `service.ts` with `invoke()` from `@tauri-apps/api/core`.
-- Never call Tauri commands directly from Vue pages; pages use the Pinia store, and stores/services call `invoke()`.
+- Add all frontend backend calls in the module `service.ts` with `invoke()` from `@/utils/invoke`.
+- Never call `invoke()` directly from Vue pages; pages use the Pinia store, and stores/services call `invoke()`.
 
 ### 4. Create or extend the Pinia store
 
@@ -200,8 +210,11 @@ For DB-backed behavior, run `pnpm tauri dev` and manually test list loading, ope
 | `src/composables/useQueryGenerator.ts` | SQL diff query generation |
 | `src/stores/sessionChanges.ts` | Staged SQL query session |
 | `src/stores/moduleStore.ts` | Cross-module state (active module, pending queries) |
-| `src-tauri/src/lib.rs` | Tauri app entry — all command registrations |
-| `src-tauri/src/debug.rs` | SQL debug event emission + `debug_sql!` macro |
+| `src/utils/invoke.ts` | Shim `invoke()` → `POST /api/invoke` |
+| `server/src/index.ts` | Express entry point, port 3001 |
+| `server/src/handlers/index.ts` | Command name → handler function registry |
+| `server/src/db.ts` | MySQL pool singleton (`getPool()`) |
+| `server/src/debug.ts` | SQL debug SSE emission (`withDebug()`, `emitDebugLog()`) |
 | `src/router/index.ts` | Router shell, auth guard, and module route mounting |
 
 ## Editor Page Structure

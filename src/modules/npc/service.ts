@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from '@/utils/invoke'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { CreatureTemplateAddon } from '@/modules/npc/types/creature_template/creature_template_addon'
 import type { Creature } from '@/modules/npc/types/creature/creature'

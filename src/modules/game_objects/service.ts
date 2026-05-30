@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core'
+import { invoke } from '@/utils/invoke'
 import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import type { GameObjectTemplateAddon } from '@/modules/game_objects/types/gameobject_template/gameobject_template_addon'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
