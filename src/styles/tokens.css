@@ -1,0 +1,35 @@
+/* Design tokens — single source of truth for the dark theme.
+   Use these variables instead of hardcoding colors/sizes in component styles. */
+:root {
+  /* Surfaces */
+  --surface-base: #0f172a;
+  --surface-1: rgba(15, 23, 42, 0.6);
+  --surface-input: rgba(15, 23, 42, 0.8);
+  --surface-input-soft: rgba(15, 23, 42, 0.6);
+  --surface-disabled: rgba(15, 23, 42, 0.7);
+  --surface-hover: rgba(30, 41, 59, 0.3);
+
+  /* Borders */
+  --border-default: rgba(51, 65, 85, 0.4);
+  --border-input: rgba(51, 65, 85, 0.6);
+  --border-input-soft: rgba(51, 65, 85, 0.5);
+
+  /* Accent (cyan) */
+  --accent: #22d3ee;
+  --accent-strong: #06b6d4;
+  --accent-focus: rgba(6, 182, 212, 0.5);
+  --accent-ring: rgba(6, 182, 212, 0.15);
+  --accent-ring-soft: rgba(6, 182, 212, 0.1);
+  --accent-soft: rgba(6, 182, 212, 0.05);
+
+  /* Text */
+  --text: #e2e8f0;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-placeholder: #475569;
+
+  /* Sizing */
+  --input-height: 2.6rem;
+  --input-height-sm: 2rem;
+  --radius: 0.75rem;
+}

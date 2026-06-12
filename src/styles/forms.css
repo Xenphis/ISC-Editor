@@ -1,0 +1,212 @@
+/* Shared base styling for PrimeVue form/tab/panel components. */
+
+/* ------------------------------------------------------------------ *
+ * Form layout primitives (shared card + grid used by every editor)
+ * ------------------------------------------------------------------ */
+.field-group {
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.field-group-header {
+  margin-bottom: 1rem;
+}
+
+.field-group-header h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 0.25rem 0;
+}
+
+.field-group-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Text & number inputs
+ * ------------------------------------------------------------------ */
+.p-inputtext,
+.p-inputnumber-input {
+  background: var(--surface-input) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text) !important;
+  height: var(--input-height) !important;
+}
+
+.p-inputtext:focus,
+.p-inputnumber-input:focus {
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring) !important;
+}
+
+.p-inputtext::placeholder,
+.p-inputnumber-input::placeholder {
+  color: var(--text-placeholder) !important;
+}
+
+.p-inputtext:disabled,
+.p-inputnumber-input:disabled {
+  border: 1px solid var(--border-default);
+  background: var(--surface-disabled) !important;
+  color: var(--text-muted) !important;
+  opacity: 0.8 !important;
+  cursor: not-allowed !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Textarea
+ * ------------------------------------------------------------------ */
+.p-textarea {
+  background: var(--surface-input) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text) !important;
+  font-size: 0.875rem;
+  resize: vertical;
+}
+
+.p-textarea:enabled:focus {
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring) !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Select
+ * ------------------------------------------------------------------ */
+.p-select {
+  background: var(--surface-input) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text) !important;
+  height: var(--input-height) !important;
+}
+
+.p-select .p-select-label,
+.p-select-label {
+  color: var(--text) !important;
+}
+
+.p-select .p-select-label {
+  padding: 0 0.75rem !important;
+  line-height: var(--input-height) !important;
+}
+
+.p-select:focus,
+.p-select.p-focus {
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring) !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Tabs (editor look — underlined). SectionTabs overrides this with a
+ * pill variant via higher-specificity scoped selectors.
+ * ------------------------------------------------------------------ */
+.p-tabs,
+.p-tablist,
+.p-tablist-content,
+.p-tablist-tab-list,
+.p-tabpanels,
+.p-tabpanel {
+  background: transparent !important;
+}
+
+.p-tablist {
+  border-bottom: 1px solid var(--border-input-soft);
+}
+
+.p-tablist-tab-list {
+  border: none !important;
+}
+
+.p-tab {
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+}
+
+.p-tab:hover {
+  color: var(--text) !important;
+  background: var(--surface-hover) !important;
+  border-radius: var(--radius) var(--radius) 0 0 !important;
+}
+
+.p-tab-active,
+.p-tab[data-p-active="true"],
+.p-tab[aria-selected="true"] {
+  color: var(--accent) !important;
+  background: var(--surface-1) !important;
+  border-bottom: 2px solid var(--accent) !important;
+  border-radius: var(--radius) var(--radius) 0 0 !important;
+}
+
+.p-tablist-active-bar {
+  background: var(--accent) !important;
+}
+
+.p-tabpanels {
+  padding: 1.5rem 0 0 0 !important;
+}
+
+.p-tabpanel {
+  padding: 0 !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Panels
+ * ------------------------------------------------------------------ */
+.p-panel {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  margin-bottom: 1.5rem;
+}
+
+.p-panel * {
+  border-color: var(--border-default) !important;
+}
+
+.p-panel-header {
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border-default) !important;
+  border-radius: 8px 8px 0 0 !important;
+  color: var(--text) !important;
+}
+
+.p-panel-content-container {
+  border: none !important;
+  background: transparent !important;
+}
+
+.p-panel-content {
+  background: rgba(15, 23, 42, 0.3) !important;
+  border: 1px solid var(--border-default) !important;
+  border-top: none !important;
+  border-radius: 0 0 8px 8px !important;
+  color: var(--text) !important;
+}
+
+.p-panel-title {
+  color: var(--text) !important;
+}
+
+.p-panel-toggle-button {
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted) !important;
+}
+
+.locale-panel-modified .p-panel-header {
+  border-color: var(--accent-focus) !important;
+  background: var(--accent-soft) !important;
+}

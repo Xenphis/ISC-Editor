@@ -189,151 +189,22 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.npc-editor {
-  max-width: 80rem;
+/* Inputs, selects, tabs, panels: see src/styles/forms.css (global base) */
+
+.editor-split {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
 }
 
-/* Override PrimeVue input styles for dark theme */
-:deep(.p-inputtext),
-:deep(.p-inputnumber-input) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  height: 2.6rem !important;
+.editor-main {
+  flex: 1;
+  min-width: 0;
 }
 
-:deep(.p-inputtext:focus),
-:deep(.p-inputnumber-input:focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
-}
-
-:deep(.p-inputtext::placeholder),
-:deep(.p-inputnumber-input::placeholder) {
-  color: #475569 !important;
-}
-
-:deep(.p-select) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  height: 2.6rem !important;
-}
-
-:deep(.p-select .p-select-label) {
-  padding: 0 0.75rem !important;
-  line-height: 2.6rem !important;
-}
-
-:deep(.p-select:focus),
-:deep(.p-select.p-focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
-}
-
-:deep(.p-select-label) {
-  color: #e2e8f0 !important;
-}
-
-/* Tabs styling */
-:deep(.p-tabs) {
-  background: transparent !important;
-}
-
-:deep(.p-tablist) {
-  background: transparent !important;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
-}
-
-:deep(.p-tablist-content) {
-  background: transparent !important;
-}
-
-:deep(.p-tablist-tab-list) {
-  background: transparent !important;
-  border: none !important;
-}
-
-:deep(.p-tab) {
-  color: #94a3b8 !important;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-}
-
-:deep(.p-tab:hover) {
-  color: #e2e8f0 !important;
-  background: rgba(30, 41, 59, 0.3) !important;
-  border-radius: 0.75rem 0.75rem 0 0 !important;
-}
-
-:deep(.p-tab-active),
-:deep(.p-tab[data-p-active="true"]),
-:deep(.p-tab[aria-selected="true"]) {
-  color: #22d3ee !important;
-  background: rgba(15, 23, 42, 0.6) !important;
-  border-bottom: 2px solid #22d3ee !important;
-  border-radius: 0.75rem 0.75rem 0 0 !important;
-}
-
-:deep(.p-tablist-active-bar) {
-  background: #22d3ee !important;
-}
-
-:deep(.p-tabpanels) {
-  background: transparent !important;
-  padding: 1.5rem 0 0 0 !important;
-}
-
-:deep(.p-tabpanel) {
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-/* Panel overrides (penetrate into child tab components) */
-:deep(.p-panel) {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 8px !important;
-  margin-bottom: 1.5rem;
-}
-
-:deep(.p-panel *) {
-  border-color: rgba(51, 65, 85, 0.4) !important;
-}
-
-:deep(.p-panel-header) {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(51, 65, 85, 0.4) !important;
-  border-radius: 8px 8px 0 0 !important;
-  color: #e2e8f0 !important;
-}
-
-:deep(.p-panel-content-container) {
-  border: none !important;
-  background: transparent !important;
-}
-
-:deep(.p-panel-content) {
-  background: rgba(15, 23, 42, 0.3) !important;
-  border: 1px solid rgba(51, 65, 85, 0.4) !important;
-  border-top: none !important;
-  border-radius: 0 0 8px 8px !important;
-  color: #e2e8f0 !important;
-}
-
-:deep(.p-panel-title) {
-  color: #e2e8f0 !important;
-}
-
-:deep(.p-panel-toggle-button) {
-  background: transparent !important;
-  border: none !important;
-  color: #94a3b8 !important;
-}
-
-:deep(.locale-panel-modified .p-panel-header) {
-  border-color: rgba(6, 182, 212, 0.4) !important;
-  background: rgba(6, 182, 212, 0.05) !important;
+@media (max-width: 1100px) {
+  .editor-split {
+    flex-direction: column;
+  }
 }
 </style>

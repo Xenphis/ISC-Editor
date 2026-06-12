@@ -806,31 +806,6 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
   color: #e2e8f0 !important;
 }
 
-:deep(.p-inputtext),
-:deep(.p-inputnumber-input),
-:deep(.p-textarea) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-}
-
-:deep(.p-inputtext),
-:deep(.p-inputnumber-input) {
-  height: 2.6rem !important;
-}
-
-:deep(.p-select) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  height: 2.6rem !important;
-}
-
-:deep(.p-select .p-select-label) {
-  color: #e2e8f0 !important;
-  padding: 0 0.75rem !important;
-  line-height: 2.6rem !important;
-}
 
 @media (max-width: 720px) {
   .detail-grid,

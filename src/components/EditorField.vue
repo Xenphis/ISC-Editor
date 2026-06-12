@@ -28,19 +28,19 @@ defineProps<{
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--text-soft);
   margin-bottom: 0.5rem;
 }
 
 .field label i {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: help;
   transition: color 0.2s;
 }
 
 .field label i:hover {
-  color: #cbd5e1;
+  color: var(--text-soft);
 }
 
 .field.full-width {
@@ -52,7 +52,7 @@ defineProps<{
 }
 
 .field.field-modified label {
-  color: #22d3ee;
+  color: var(--accent);
 }
 
 .field.field-modified::before {
@@ -62,7 +62,7 @@ defineProps<{
   top: 0;
   bottom: 0;
   width: 3px;
-  background: #22d3ee;
+  background: var(--accent);
   border-radius: 2px;
 }
 
@@ -70,6 +70,6 @@ defineProps<{
 .field.field-modified :deep(.p-inputnumber-input),
 .field.field-modified :deep(.p-select) {
   border-color: rgba(6, 182, 212, 0.4) !important;
-  background: rgba(6, 182, 212, 0.05) !important;
+  background: var(--accent-soft) !important;
 }
 </style>

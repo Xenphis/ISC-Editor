@@ -221,42 +221,4 @@ const textSectionTabs = computed<SectionTabItem[]>(() => [
   margin-top: 1.5rem;
 }
 
-/* Dark-theme styling for Dialog fields (teleported outside parent scope) */
-.detail-grid :deep(.p-inputtext),
-.detail-grid :deep(.p-inputnumber-input) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  height: 2.6rem !important;
-}
-
-.detail-grid :deep(.p-inputtext:focus),
-.detail-grid :deep(.p-inputnumber-input:focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
-}
-
-.detail-grid :deep(.p-inputtext::placeholder),
-.detail-grid :deep(.p-inputnumber-input::placeholder) {
-  color: #475569 !important;
-}
-
-.detail-grid :deep(.p-select) {
-  background: rgba(15, 23, 42, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  height: 2.6rem !important;
-}
-
-.detail-grid :deep(.p-select .p-select-label) {
-  padding: 0 0.75rem !important;
-  line-height: 2.6rem !important;
-  color: #e2e8f0 !important;
-}
-
-.detail-grid :deep(.p-select:focus),
-.detail-grid :deep(.p-select.p-focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15) !important;
-}
 </style>

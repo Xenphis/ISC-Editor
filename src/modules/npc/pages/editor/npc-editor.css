@@ -1,33 +1,3 @@
-.field-group {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.field-group-header {
-  margin-bottom: 1rem;
-}
-
-.field-group-header h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  margin: 0 0 0.25rem 0;
-}
-
-.field-group-header p {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
 
 /* Locale/Spell/Equip Panel shared styles */
 .locale-panel-desc {
@@ -37,7 +7,7 @@
 }
 
 .locale-entry {
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 0.75rem;
   margin-bottom: 0.75rem;
@@ -46,7 +16,7 @@
 }
 
 .locale-entry-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
   background: rgba(6, 182, 212, 0.03);
 }
 
@@ -60,7 +30,7 @@
 .locale-tag {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #22d3ee;
+  color: var(--accent);
   background: rgba(6, 182, 212, 0.1);
   padding: 0.15rem 0.6rem;
   border-radius: 4px;
@@ -80,7 +50,7 @@
 
 .locale-entry-fields .field label {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -95,10 +65,7 @@
   flex: 1;
 }
 
-.locale-panel-modified .p-panel-header {
-  border-color: rgba(6, 182, 212, 0.4) !important;
-  background: rgba(6, 182, 212, 0.05) !important;
-}
+/* .locale-panel-modified .p-panel-header and disabled inputs: see src/styles/forms.css */
 
 /* Inline field in panels (non-EditorField) */
 .field {
@@ -109,16 +76,6 @@
 
 .field label {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
-}
-
-/* Disabled/readonly fields */
-:deep(.p-inputnumber-input:disabled),
-:deep(.p-inputtext:disabled) {
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  background: rgba(15, 23, 42, 0.7) !important;
-  color: #94a3b8 !important;
-  opacity: 0.8 !important;
-  cursor: not-allowed !important;
 }
