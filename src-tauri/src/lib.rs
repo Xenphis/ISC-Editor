@@ -30,6 +30,11 @@ use commands::locale::{get_npc_locales, save_npc_locales};
 use commands::movement::{get_npc_movement, save_npc_movement};
 use commands::resistance::{get_npc_resistances, save_npc_resistances};
 use commands::access_requirement::{get_access_requirements, get_access_requirement, save_access_requirement, delete_access_requirement};
+use commands::exploration_basexp::{get_exploration_basexps, get_exploration_basexp, save_exploration_basexp, delete_exploration_basexp};
+use commands::game_tele::{get_game_teles, get_game_tele, save_game_tele, delete_game_tele};
+use commands::instance_template::{get_instance_templates, get_instance_template, save_instance_template, delete_instance_template};
+use commands::instance_encounters::{get_instance_encounters, get_instance_encounters_by_map, get_instance_encounter, save_instance_encounter, delete_instance_encounter};
+use commands::instance_spawn_groups::{get_instance_spawn_groups, get_instance_spawn_groups_by_map, get_instance_spawn_group, save_instance_spawn_group, delete_instance_spawn_group};
 use commands::creature_classlevelstats::{get_creature_classlevelstats, get_creature_classlevelstat, save_creature_classlevelstat};
 use commands::quest::{get_quests, get_quest, save_quest, delete_quest};
 use commands::quest_template_addon::{get_quest_addon, save_quest_addon};
@@ -121,6 +126,28 @@ pub fn run() {
       get_access_requirement,
       save_access_requirement,
       delete_access_requirement,
+      get_exploration_basexps,
+      get_exploration_basexp,
+      save_exploration_basexp,
+      delete_exploration_basexp,
+      get_game_teles,
+      get_game_tele,
+      save_game_tele,
+      delete_game_tele,
+      get_instance_templates,
+      get_instance_template,
+      save_instance_template,
+      delete_instance_template,
+      get_instance_encounters,
+      get_instance_encounters_by_map,
+      get_instance_encounter,
+      save_instance_encounter,
+      delete_instance_encounter,
+      get_instance_spawn_groups,
+      get_instance_spawn_groups_by_map,
+      get_instance_spawn_group,
+      save_instance_spawn_group,
+      delete_instance_spawn_group,
       get_quests,
       get_quest,
       save_quest,

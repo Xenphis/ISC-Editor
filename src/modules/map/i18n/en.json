@@ -68,5 +68,119 @@
       "4": "10-player Heroic",
       "5": "25-player Heroic"
     }
+  },
+  "instance": {
+    "title": "Instances",
+    "description": "Dungeons & raids: template, boss encounters and conditional spawn groups per map",
+    "searchPlaceholder": "Search by map or script...",
+    "addNew": "New instance",
+    "editorTitle": "Instance",
+    "tabs": {
+      "template": "Template",
+      "spawnGroups": "Spawn Groups",
+      "encounters": "Encounters"
+    },
+    "groups": {
+      "spawnGroups": "Spawn Groups",
+      "spawnGroupsDesc": "Spawn groups toggled on/off depending on boss states in this instance",
+      "encounters": "Boss Encounters",
+      "encountersDesc": "Dungeon Encounter entries driving boss kill credit and LFG progress"
+    },
+    "addSpawnGroup": "Add spawn group",
+    "addEncounter": "Add encounter",
+    "encountersHint": "Encounters are linked to this instance through their boss (creditEntry → creature spawned on this map). Adding a row links it once its boss spawns here."
+  },
+  "game_tele": {
+    "title": "Teleportation",
+    "description": "Named teleport destinations used by the .tele command",
+    "searchPlaceholder": "Search by name or id...",
+    "addNew": "New teleport",
+    "editorTitle": "Teleport",
+    "fields": {
+      "id": "ID",
+      "name": "Name",
+      "map": "Map",
+      "position": "Position (X, Y, Z)",
+      "position_x": "Position X",
+      "position_y": "Position Y",
+      "position_z": "Position Z",
+      "orientation": "Orientation"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Unique id and display name of the teleport",
+      "position": "Position",
+      "positionDesc": "Map, coordinates and orientation of the destination"
+    }
+  },
+  "exploration_basexp": {
+    "title": "Exploration XP",
+    "description": "Base experience granted when discovering an area, indexed by level",
+    "searchPlaceholder": "Search by level...",
+    "addNew": "New entry",
+    "editorTitle": "Exploration XP",
+    "fields": {
+      "level": "Level",
+      "basexp": "Base XP"
+    },
+    "groups": {
+      "main": "Experience",
+      "mainDesc": "Player level and the base experience granted on discovery"
+    }
+  },
+  "instance_template": {
+    "title": "Instance Templates",
+    "description": "Per-map instance configuration: parent map, script and mount permission",
+    "searchPlaceholder": "Search by map or script...",
+    "addNew": "New template",
+    "editorTitle": "Instance Template",
+    "fields": {
+      "map": "Map",
+      "parent": "Parent map",
+      "script": "Script name",
+      "allowMount": "Allow mount"
+    },
+    "groups": {
+      "main": "Configuration",
+      "mainDesc": "Map identifier, parent map, instance script and mount permission"
+    }
+  },
+  "instance_encounters": {
+    "title": "Boss Encounters",
+    "description": "Dungeon Encounter entries driving boss kill credit and LFG progress",
+    "searchPlaceholder": "Search by entry or comment...",
+    "addNew": "New encounter",
+    "editorTitle": "Instance Encounter",
+    "fields": {
+      "entry": "Encounter entry",
+      "creditType": "Credit type",
+      "creditEntry": "Credit entry",
+      "lastEncounterDungeon": "Last encounter dungeon",
+      "comment": "Comment"
+    },
+    "groups": {
+      "main": "Encounter",
+      "mainDesc": "DungeonEncounter id, kill-credit source and LFG dungeon"
+    }
+  },
+  "instance_spawn_groups": {
+    "title": "Spawn Groups",
+    "description": "Spawn groups toggled on/off depending on boss states in an instance",
+    "searchPlaceholder": "Search by instance map or spawn group...",
+    "addNew": "New spawn group",
+    "editorTitle": "Instance Spawn Group",
+    "fields": {
+      "instanceMapId": "Instance map",
+      "bossStateId": "Boss state id",
+      "bossStates": "Boss states",
+      "spawnGroupId": "Spawn group",
+      "flags": "Flags"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Instance map, boss state and spawn group this rule binds together",
+      "settings": "Settings",
+      "settingsDesc": "Behaviour flags controlling the spawn group toggling"
+    }
   }
 }

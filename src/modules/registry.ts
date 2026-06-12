@@ -3,6 +3,9 @@ import type { ModuleStore } from '@/stores/moduleStore'
 import { useNpcModuleStore } from '@/modules/npc/store'
 import { useGameObjectModuleStore } from '@/modules/game_objects/store'
 import { useQuestModuleStore } from '@/modules/quests/store'
+import { useGameTeleStore } from '@/modules/map/stores/game_tele'
+import { useExplorationBasexpStore } from '@/modules/map/stores/exploration_basexp'
+import { useInstanceStore } from '@/modules/map/stores/instance'
 import { npcRoutes } from '@/modules/npc/routes'
 import { gameObjectRoutes } from '@/modules/game_objects/routes'
 import { itemRoutes } from '@/modules/item/routes'
@@ -47,6 +50,7 @@ export interface AppModuleDefinition {
   navigation?: ModuleNavigationDefinition
   i18n?: ModuleI18nDefinition
   sessionStore?: () => ModuleStore
+  sessionStores?: (() => ModuleStore)[]
 }
 
 export interface ModuleI18nMessages {
@@ -96,6 +100,11 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/maps',
     navigation: { id: 'maps', icon: 'pi pi-map' },
     i18n: { en: mapEn, fr: mapFr },
+    sessionStores: [
+      useGameTeleStore,
+      useExplorationBasexpStore,
+      useInstanceStore,
+    ],
     routes: mapRoutes,
   },
   {
@@ -140,6 +149,7 @@ export const moduleI18nMessages = appModules.flatMap<ModuleI18nMessages>(module 
   ]
 })
 
-export const sessionModuleStores = appModules.flatMap(module => (
-  module.sessionStore ? [module.sessionStore] : []
-))
+export const sessionModuleStores = appModules.flatMap(module => [
+  ...(module.sessionStore ? [module.sessionStore] : []),
+  ...(module.sessionStores ?? []),
+])

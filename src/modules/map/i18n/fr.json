@@ -68,5 +68,119 @@
       "4": "10 héroïque",
       "5": "25 héroïque"
     }
+  },
+  "instance": {
+    "title": "Instances",
+    "description": "Donjons et raids : template, rencontres de boss et groupes de spawn conditionnels par carte",
+    "searchPlaceholder": "Rechercher par carte ou script...",
+    "addNew": "Nouvelle instance",
+    "editorTitle": "Instance",
+    "tabs": {
+      "template": "Template",
+      "spawnGroups": "Groupes de spawn",
+      "encounters": "Rencontres"
+    },
+    "groups": {
+      "spawnGroups": "Groupes de spawn",
+      "spawnGroupsDesc": "Groupes de spawn activés/désactivés selon l'état des boss de cette instance",
+      "encounters": "Rencontres de boss",
+      "encountersDesc": "Entrées DungeonEncounter pilotant le crédit de kill et la progression LFG"
+    },
+    "addSpawnGroup": "Ajouter un groupe de spawn",
+    "addEncounter": "Ajouter une rencontre",
+    "encountersHint": "Les rencontres sont reliées à cette instance via leur boss (creditEntry → créature spawnée sur cette carte). Une ligne ajoutée sera reliée dès que son boss y est spawné."
+  },
+  "game_tele": {
+    "title": "Téléportation",
+    "description": "Destinations de téléportation nommées utilisées par la commande .tele",
+    "searchPlaceholder": "Rechercher par nom ou id...",
+    "addNew": "Nouvelle téléportation",
+    "editorTitle": "Téléportation",
+    "fields": {
+      "id": "ID",
+      "name": "Nom",
+      "map": "Carte",
+      "position": "Position (X, Y, Z)",
+      "position_x": "Position X",
+      "position_y": "Position Y",
+      "position_z": "Position Z",
+      "orientation": "Orientation"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Identifiant unique et nom d'affichage de la téléportation",
+      "position": "Position",
+      "positionDesc": "Carte, coordonnées et orientation de la destination"
+    }
+  },
+  "exploration_basexp": {
+    "title": "XP d'exploration",
+    "description": "Expérience de base attribuée à la découverte d'une zone, indexée par niveau",
+    "searchPlaceholder": "Rechercher par niveau...",
+    "addNew": "Nouvelle entrée",
+    "editorTitle": "XP d'exploration",
+    "fields": {
+      "level": "Niveau",
+      "basexp": "XP de base"
+    },
+    "groups": {
+      "main": "Expérience",
+      "mainDesc": "Niveau du joueur et expérience de base attribuée à la découverte"
+    }
+  },
+  "instance_template": {
+    "title": "Templates d'instance",
+    "description": "Configuration d'instance par carte : carte parente, script et autorisation de monture",
+    "searchPlaceholder": "Rechercher par carte ou script...",
+    "addNew": "Nouveau template",
+    "editorTitle": "Template d'instance",
+    "fields": {
+      "map": "Carte",
+      "parent": "Carte parente",
+      "script": "Nom du script",
+      "allowMount": "Monture autorisée"
+    },
+    "groups": {
+      "main": "Configuration",
+      "mainDesc": "Identifiant de carte, carte parente, script d'instance et autorisation de monture"
+    }
+  },
+  "instance_encounters": {
+    "title": "Rencontres de boss",
+    "description": "Entrées DungeonEncounter pilotant le crédit de kill et la progression LFG",
+    "searchPlaceholder": "Rechercher par entry ou commentaire...",
+    "addNew": "Nouvelle rencontre",
+    "editorTitle": "Rencontre d'instance",
+    "fields": {
+      "entry": "Entry de rencontre",
+      "creditType": "Type de crédit",
+      "creditEntry": "Entry de crédit",
+      "lastEncounterDungeon": "Donjon dernière rencontre",
+      "comment": "Commentaire"
+    },
+    "groups": {
+      "main": "Rencontre",
+      "mainDesc": "Id DungeonEncounter, source du crédit de kill et donjon LFG"
+    }
+  },
+  "instance_spawn_groups": {
+    "title": "Groupes de spawn",
+    "description": "Groupes de spawn activés/désactivés selon l'état des boss d'une instance",
+    "searchPlaceholder": "Rechercher par carte d'instance ou groupe de spawn...",
+    "addNew": "Nouveau groupe de spawn",
+    "editorTitle": "Groupe de spawn d'instance",
+    "fields": {
+      "instanceMapId": "Carte d'instance",
+      "bossStateId": "Id état boss",
+      "bossStates": "États boss",
+      "spawnGroupId": "Groupe de spawn",
+      "flags": "Flags"
+    },
+    "groups": {
+      "identification": "Identification",
+      "identificationDesc": "Carte d'instance, état de boss et groupe de spawn liés par cette règle",
+      "settings": "Paramètres",
+      "settingsDesc": "Flags de comportement contrôlant l'activation du groupe de spawn"
+    }
   }
 }

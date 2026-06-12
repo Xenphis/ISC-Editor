@@ -12,7 +12,8 @@ const submodules = [
     color: '#06b6d4',
     gradient: 'linear-gradient(135deg, #0e7490, #06b6d4)',
     shadow: 'rgba(6, 182, 212, 0.25)',
-    available: false,
+    available: true,
+    route: '/maps/teleport',
   },
   {
     key: 'explorationXP',
@@ -20,7 +21,8 @@ const submodules = [
     color: '#f59e0b',
     gradient: 'linear-gradient(135deg, #b45309, #f59e0b)',
     shadow: 'rgba(245, 158, 11, 0.25)',
-    available: false,
+    available: true,
+    route: '/maps/exploration',
   },
   {
     key: 'instances',
@@ -28,7 +30,8 @@ const submodules = [
     color: '#8b5cf6',
     gradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6)',
     shadow: 'rgba(139, 92, 246, 0.25)',
-    available: false,
+    available: true,
+    route: '/maps/instances',
   },
   {
     key: 'areaTrigger',

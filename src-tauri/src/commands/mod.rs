@@ -1,5 +1,10 @@
 pub mod access_requirement;
 pub mod addon;
+pub mod exploration_basexp;
+pub mod game_tele;
+pub mod instance_template;
+pub mod instance_encounters;
+pub mod instance_spawn_groups;
 pub mod creature_classlevelstats;
 pub mod connection;
 pub mod creature;
