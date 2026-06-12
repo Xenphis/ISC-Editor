@@ -8,6 +8,9 @@
   --surface-input-soft: rgba(15, 23, 42, 0.6);
   --surface-disabled: rgba(15, 23, 42, 0.7);
   --surface-hover: rgba(30, 41, 59, 0.3);
+  /* Slightly elevated panel — uses a different base hue so it stays visible
+     even on the far-right edge of the body gradient where --surface-1 blends in. */
+  --surface-elevated: rgba(30, 41, 59, 0.5);
 
   /* Borders */
   --border-default: rgba(51, 65, 85, 0.4);

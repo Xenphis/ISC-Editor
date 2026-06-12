@@ -40,6 +40,14 @@
     "back": "Back",
     "discard": "Discard",
     "execute": "Execute",
+    "modelPanel": {
+      "title": "NPC Preview",
+      "placeholder": "Model preview — coming soon",
+      "displayId": "Display / Model ID",
+      "scale": "Scale",
+      "icon": "Icon",
+      "none": "—"
+    },
     "tabs": {
       "general": "General",
       "combat": "Combat",

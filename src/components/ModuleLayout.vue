@@ -73,7 +73,7 @@ function onSearchInput(val: string) {
 
 <style scoped>
 .module-layout {
-  max-width: 80rem;
+  max-width: 100%;
 }
 
 .module-header {

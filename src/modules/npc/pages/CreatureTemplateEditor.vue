@@ -21,6 +21,7 @@ import NpcTabLoot from './editor/creature_template/LootTab.vue'
 import NpcTabAdvanced from './editor/creature_template/AdvancedTab.vue'
 import NpcTabSpawn from './editor/creature_template/SpawnTab.vue'
 import NpcTabText from './editor/creature_template/TextTab.vue'
+import NpcModelPanel from './editor/creature_template/NpcModelPanel.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -137,7 +138,7 @@ onMounted(async () => {
   />
 
   <div v-else class="npc-editor">
-    <!-- Header -->
+    <!-- Header (full width, above the split) -->
     <EditorHeader
       :title="t('creature_template.editorTitle')"
       :subtitle="form.name || undefined"
@@ -151,40 +152,52 @@ onMounted(async () => {
       @execute="onSave"
     />
 
-    <!-- SQL Query Panel -->
-    <SqlQueryPanel
-      :diffQuery="store.combinedDiffQuery"
-      :fullQuery="store.combinedFullQuery"
-      :hasChanges="store.combinedHasChanges"
-      :changedFields="store.combinedChangedFields"
-    />
+    <div class="editor-split">
+      <div class="editor-main">
+        <!-- SQL Query Panel -->
+        <SqlQueryPanel
+          :diffQuery="store.combinedDiffQuery"
+          :fullQuery="store.combinedFullQuery"
+          :hasChanges="store.combinedHasChanges"
+          :changedFields="store.combinedChangedFields"
+        />
 
-    <!-- Tabs -->
-    <Tabs value="general">
-      <TabList>
-        <Tab value="general">{{ t('creature_template.tabs.general') }}</Tab>
-        <Tab value="combat">{{ t('creature_template.tabs.combat') }}</Tab>
-        <Tab value="appearance">{{ t('creature_template.tabs.appearance') }}</Tab>
-        <Tab value="behavior">{{ t('creature_template.tabs.behavior') }}</Tab>
-        <Tab value="loot">{{ t('creature_template.tabs.loot') }}</Tab>
-        <Tab value="text">{{ t('creature_template.tabs.text') }}</Tab>
-        <Tab value="advanced">{{ t('creature_template.tabs.advanced') }}</Tab>
-        <Tab value="spawn">{{ t('creature_template.tabs.spawn') }} ({{ spawns.length }})</Tab>
-      </TabList>
+        <!-- Tabs -->
+        <Tabs value="general">
+          <TabList>
+            <Tab value="general">{{ t('creature_template.tabs.general') }}</Tab>
+            <Tab value="combat">{{ t('creature_template.tabs.combat') }}</Tab>
+            <Tab value="appearance">{{ t('creature_template.tabs.appearance') }}</Tab>
+            <Tab value="behavior">{{ t('creature_template.tabs.behavior') }}</Tab>
+            <Tab value="loot">{{ t('creature_template.tabs.loot') }}</Tab>
+            <Tab value="text">{{ t('creature_template.tabs.text') }}</Tab>
+            <Tab value="advanced">{{ t('creature_template.tabs.advanced') }}</Tab>
+            <Tab value="spawn">{{ t('creature_template.tabs.spawn') }} ({{ spawns.length }})</Tab>
+          </TabList>
 
-      <TabPanels>
-        <TabPanel value="general"><NpcTabGeneral /></TabPanel>
-        <TabPanel value="combat"><NpcTabCombat /></TabPanel>
-        <TabPanel value="appearance"><NpcTabAppearance /></TabPanel>
-        <TabPanel value="behavior"><NpcTabBehavior /></TabPanel>
-        <TabPanel value="loot"><NpcTabLoot /></TabPanel>
-        <TabPanel value="text"><NpcTabText /></TabPanel>
-        <TabPanel value="advanced"><NpcTabAdvanced /></TabPanel>
-        <TabPanel value="spawn">
-          <NpcTabSpawn :spawns="spawns" @edit="onEditSpawn" @delete="onDeleteSpawn" />
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+          <TabPanels>
+            <TabPanel value="general"><NpcTabGeneral /></TabPanel>
+            <TabPanel value="combat"><NpcTabCombat /></TabPanel>
+            <TabPanel value="appearance"><NpcTabAppearance /></TabPanel>
+            <TabPanel value="behavior"><NpcTabBehavior /></TabPanel>
+            <TabPanel value="loot"><NpcTabLoot /></TabPanel>
+            <TabPanel value="text"><NpcTabText /></TabPanel>
+            <TabPanel value="advanced"><NpcTabAdvanced /></TabPanel>
+            <TabPanel value="spawn">
+              <NpcTabSpawn :spawns="spawns" @edit="onEditSpawn" @delete="onDeleteSpawn" />
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
+      </div>
+
+      <!-- Right info panel (collapsible) -->
+      <NpcModelPanel
+        :modelId="form.modelid1"
+        :scale="form.scale"
+        :name="form.name"
+        :iconName="form.IconName"
+      />
+    </div>
   </div>
 </template>
 

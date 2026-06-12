@@ -95,13 +95,14 @@ function isActive(path: string): boolean {
 
 <style scoped>
 .sidebar {
-  width: 16rem;
+  width: 13rem;
+  flex-shrink: 0;
   height: 100vh;
   overflow-y: auto;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(16px);
   border-right: 1px solid rgba(51, 65, 85, 0.5);
-  padding: 1.5rem;
+  padding: 1rem;
   display: flex;
   flex-direction: column;
 }

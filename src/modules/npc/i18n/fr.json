@@ -40,6 +40,14 @@
     "back": "Retour",
     "discard": "Annuler",
     "execute": "Exécuter",
+    "modelPanel": {
+      "title": "Aperçu du PNJ",
+      "placeholder": "Aperçu du modèle — à venir",
+      "displayId": "Display / Model ID",
+      "scale": "Échelle",
+      "icon": "Icône",
+      "none": "—"
+    },
     "tabs": {
       "general": "Informations générales",
       "combat": "Combat",

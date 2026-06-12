@@ -154,6 +154,22 @@
   background: var(--accent) !important;
 }
 
+/* Tab overflow navigation buttons (appear when tabs don't fit) */
+.p-tablist-prev-button,
+.p-tablist-next-button {
+  background: var(--surface-1) !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border-input-soft) !important;
+  color: var(--text-muted) !important;
+  box-shadow: none !important;
+}
+
+.p-tablist-prev-button:hover,
+.p-tablist-next-button:hover {
+  color: var(--accent) !important;
+  background: var(--surface-hover) !important;
+}
+
 .p-tabpanels {
   padding: 1.5rem 0 0 0 !important;
 }

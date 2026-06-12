@@ -50,7 +50,8 @@ async function handleDisconnect() {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  min-width: 0;
+  padding: 1.5rem;
   overflow-y: auto;
   height: 100vh;
 }
