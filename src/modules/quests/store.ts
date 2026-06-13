@@ -364,7 +364,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
             EmoteDelay1: e.EmoteDelay1, EmoteDelay2: e.EmoteDelay2,
             EmoteDelay3: e.EmoteDelay3, EmoteDelay4: e.EmoteDelay4,
             RewardText: e.RewardText || null,
-            VerifiedBuild: null,
+            VerifiedBuild: undefined,
           })
         },
       },

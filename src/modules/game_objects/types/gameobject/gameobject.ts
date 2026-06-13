@@ -17,7 +17,7 @@ export interface GameObject {
   spawntimesecs: number;
   animprogress: number;
   state: number;
-  ScriptName: string;
+  ScriptName: string | null;
   StringId: string | null;
-  VerifiedBuild: number;
+  VerifiedBuild: number | null;
 }

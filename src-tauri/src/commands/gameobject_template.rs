@@ -74,7 +74,7 @@ pub struct GameObjectTemplate {
     #[sqlx(rename = "StringId")]
     pub StringId: Option<String>,
     #[sqlx(rename = "VerifiedBuild")]
-    pub VerifiedBuild: i32,
+    pub VerifiedBuild: Option<i32>,
 }
 
 #[derive(Debug, Serialize)]

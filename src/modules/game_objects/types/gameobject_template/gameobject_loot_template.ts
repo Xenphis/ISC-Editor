@@ -8,5 +8,5 @@ export interface GameObjectLootTemplate {
   GroupId: number;
   MinCount: number;
   MaxCount: number;
-  Comment: string;
+  Comment: string | null;
 }

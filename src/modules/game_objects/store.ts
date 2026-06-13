@@ -44,7 +44,18 @@ export interface LootEntry {
   GroupId: number
   MinCount: number
   MaxCount: number
-  Comment: string
+  Comment: string | null
+}
+
+export interface QuestItemEntry {
+  Idx: number
+  ItemId: number
+}
+
+export interface GoLocaleEntry {
+  locale: string
+  name: string | null
+  castBarCaption: string | null
 }
 
 // ─── Default factories ──────────────────────────────────────────────
@@ -68,7 +79,7 @@ function createDefaultForm(): GameObjectTemplate {
     Data0: 0, Data1: 0, Data2: 0, Data3: 0, Data4: 0, Data5: 0, Data6: 0, Data7: 0,
     Data8: 0, Data9: 0, Data10: 0, Data11: 0, Data12: 0, Data13: 0, Data14: 0, Data15: 0,
     Data16: 0, Data17: 0, Data18: 0, Data19: 0, Data20: 0, Data21: 0, Data22: 0, Data23: 0,
-    AIName: '', ScriptName: '', StringId: null, VerifiedBuild: 0,
+    AIName: '', ScriptName: '', StringId: null, VerifiedBuild: null,
   }
 }
 
@@ -85,7 +96,29 @@ const lootConfig: Omit<CompositeKeyConfig<LootEntry>, 'parentId'> = {
     a.MaxCount === b.MaxCount && a.Comment === b.Comment,
   toSqlValues: (e) => [
     e.Reference, e.Chance, e.QuestRequired ? 1 : 0, e.LootMode,
-    e.GroupId, e.MinCount, e.MaxCount, `'${escapeSQL(e.Comment)}'`,
+    e.GroupId, e.MinCount, e.MaxCount, e.Comment != null ? `'${escapeSQL(e.Comment)}'` : null,
+  ],
+}
+
+const questItemConfig: Omit<CompositeKeyConfig<QuestItemEntry>, 'parentId'> = {
+  table: 'gameobject_questitem',
+  parentKey: 'GameObjectEntry',
+  childKey: 'Idx',
+  columns: ['ItemId', 'VerifiedBuild'],
+  isEqual: (a, b) => a.ItemId === b.ItemId,
+  toSqlValues: (e) => [e.ItemId, 0],
+}
+
+const goLocaleConfig: Omit<CompositeKeyConfig<GoLocaleEntry>, 'parentId'> = {
+  table: 'gameobject_template_locale',
+  parentKey: 'entry',
+  childKey: 'locale',
+  columns: ['name', 'castBarCaption', 'VerifiedBuild'],
+  isEqual: (a, b) => a.name === b.name && a.castBarCaption === b.castBarCaption,
+  toSqlValues: (e) => [
+    e.name != null ? `'${escapeSQL(e.name)}'` : null,
+    e.castBarCaption != null ? `'${escapeSQL(e.castBarCaption)}'` : null,
+    0,
   ],
 }
 
@@ -166,6 +199,20 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
     summarize: (e) => `quest ${e.quest}`,
   })
 
+  const questItems = new ArraySubTable<QuestItemEntry>({
+    tableName: 'gameobject_questitem',
+    compositeConfig: questItemConfig,
+    fieldPrefix: 'quest_item',
+    summarize: (e) => String(e.ItemId),
+  })
+
+  const locales = new ArraySubTable<GoLocaleEntry>({
+    tableName: 'gameobject_template_locale',
+    compositeConfig: goLocaleConfig,
+    fieldPrefix: 'locale',
+    summarize: (e) => `[${e.locale}] ${e.name || '(empty)'}`,
+  })
+
   const editor = createEntityEditorStore<GameObjectTemplate>({
     tableName: 'gameobject_template',
     primaryKey: 'entry',
@@ -215,6 +262,24 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
           return (rel?.enders ?? []).map(q => ({ id: entry, quest: q })) satisfies GameobjectQuestRelEntry[]
         },
       },
+      {
+        manager: questItems,
+        load: async (entry) => {
+          const rows = await gameObjectService.getGameObjectQuestItems(entry).catch(() => [])
+          return rows.map(row => ({ Idx: row.Idx, ItemId: row.ItemId })) satisfies QuestItemEntry[]
+        },
+      },
+      {
+        manager: locales,
+        load: async (entry) => {
+          const rows = await gameObjectService.getGameObjectLocales(entry).catch(() => [])
+          return rows.map(row => ({
+            locale: row.locale,
+            name: row.name ?? null,
+            castBarCaption: row.castBarCaption ?? null,
+          })) satisfies GoLocaleEntry[]
+        },
+      },
     ],
   })
 
@@ -228,7 +293,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
 
   return {
     gameObjects, loading, currentSearch, listLoaded,
-    addon, loot, spawnAddon, spawnOverrides, questStarters, questEnders,
+    addon, loot, spawnAddon, spawnOverrides, questStarters, questEnders, questItems, locales,
     ...editor,
     editingEntry: editor.editingId,
     markListLoaded, setGameObjects,

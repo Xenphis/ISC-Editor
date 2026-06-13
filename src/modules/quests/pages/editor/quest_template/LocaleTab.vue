@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
@@ -19,7 +19,7 @@ const store = useQuestModuleStore()
 // All translatable locales are shown as fixed tabs. Within each tab, every
 // sub-table (template / offer reward / request items) either shows its fields
 // (when a row exists for that locale) or a prompt to create the row.
-const allLocales = locale_options.map(o => o.value)
+const allLocales = locale_options.map(o => String(o.value))
 
 const activeLocale = ref<string>(allLocales[0] ?? '')
 

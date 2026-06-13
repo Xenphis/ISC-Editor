@@ -18,6 +18,8 @@ pub mod gameobject_overrides;
 pub mod gameobject_spawn;
 pub mod gameobject_template;
 pub mod gameobject_template_addon;
+pub mod gameobject_questitem;
+pub mod gameobject_template_locale;
 pub mod gossip_menu;
 pub mod gossip_menu_option;
 pub mod gossip_menu_option_locale;

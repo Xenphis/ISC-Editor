@@ -27,6 +27,9 @@ pub struct GameObjectSpawn {
     pub spawntimesecs: i32,
     pub animprogress: u8,
     pub state: u8,
+    pub ScriptName: Option<String>,
+    pub StringId: Option<String>,
+    pub VerifiedBuild: Option<i32>,
 }
 
 #[tauri::command]
@@ -63,8 +66,9 @@ pub async fn save_gameobject_spawn(
             guid, id, map, zoneId, areaId, spawnMask, phaseMask,
             position_x, position_y, position_z, orientation,
             rotation0, rotation1, rotation2, rotation3,
-            spawntimesecs, animprogress, state
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            spawntimesecs, animprogress, state,
+            ScriptName, StringId, VerifiedBuild
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(spawn.guid)
@@ -85,12 +89,16 @@ pub async fn save_gameobject_spawn(
         .bind(spawn.spawntimesecs)
         .bind(spawn.animprogress)
         .bind(spawn.state)
+        .bind(&spawn.ScriptName)
+        .bind(&spawn.StringId)
+        .bind(spawn.VerifiedBuild)
         .execute(pool)
         .await,
         spawn.guid, spawn.id, spawn.map, spawn.zoneId, spawn.areaId, spawn.spawnMask, spawn.phaseMask,
         spawn.position_x, spawn.position_y, spawn.position_z, spawn.orientation,
         spawn.rotation0, spawn.rotation1, spawn.rotation2, spawn.rotation3,
-        spawn.spawntimesecs, spawn.animprogress, spawn.state
+        spawn.spawntimesecs, spawn.animprogress, spawn.state,
+        &spawn.ScriptName, &spawn.StringId, spawn.VerifiedBuild
     ).map_err(|e| format!("Save failed: {}", e))?;
 
     log::info!("Saved gameobject spawn guid {}", spawn.guid);

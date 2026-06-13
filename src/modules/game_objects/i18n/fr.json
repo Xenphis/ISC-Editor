@@ -30,6 +30,7 @@
       "general": "Informations générales",
       "data": "Données",
       "loot": "Butin & Quêtes",
+      "locale": "Traductions",
       "spawn": "Spawns"
     },
     "groups": {
@@ -46,7 +47,11 @@
       "loot": "Table de butin",
       "lootDesc": "Objets pouvant être récupérés (table gameobject_loot_template)",
       "spawns": "Spawns",
-      "spawnsDesc": "Emplacements de l'objet dans le monde (table gameobject)"
+      "spawnsDesc": "Emplacements de l'objet dans le monde (table gameobject)",
+      "questItems": "Objets de quête",
+      "questItemsDesc": "Objets accordés pour les quêtes par cet objet (table gameobject_questitem)",
+      "locales": "Traductions",
+      "localesDesc": "Nom et texte de barre de cast traduits (table gameobject_template_locale)"
     },
     "fields": {
       "entry": "Entry",
@@ -77,7 +82,13 @@
       "loot_group_id": "Groupe",
       "loot_min_count": "Quantité min",
       "loot_max_count": "Quantité max",
-      "loot_comment": "Commentaire"
+      "loot_comment": "Commentaire",
+      "questItem_idx": "Index",
+      "questItem_itemId": "Item ID",
+      "locale_name": "Nom",
+      "locale_castBarCaption": "Texte barre de cast",
+      "locale_missing": "Aucune traduction pour cette langue.",
+      "locale_create": "Créer"
     }
   },
   "gameobjectSpawnEditor": {

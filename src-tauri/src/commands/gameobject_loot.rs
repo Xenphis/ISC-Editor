@@ -28,7 +28,7 @@ pub struct GameObjectLootTemplate {
     #[sqlx(rename = "MaxCount")]
     pub MaxCount: u8,
     #[sqlx(rename = "Comment")]
-    pub Comment: String,
+    pub Comment: Option<String>,
 }
 
 #[tauri::command]

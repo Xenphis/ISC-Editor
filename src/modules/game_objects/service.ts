@@ -5,6 +5,8 @@ import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobj
 import type { GameObjectAddon } from '@/modules/game_objects/types/gameobject/gameobject_addon'
 import type { GameObjectOverrides } from '@/modules/game_objects/types/gameobject/gameobject_overrides'
 import type { GameObjectLootTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_loot_template'
+import type { GameObjectQuestItem } from '@/modules/game_objects/types/gameobject_template/gameobject_questitem'
+import type { GameObjectTemplateLocale } from '@/modules/game_objects/types/gameobject_template/gameobject_template_locale'
 
 export interface GameObjectListResult {
   data: GameObjectTemplate[]
@@ -85,4 +87,14 @@ export async function saveGameObjectLoot(entry: number, loot: GameObjectLootTemp
 
 export async function getGameObjectQuestRelations(id: number): Promise<EntityQuestRelations> {
   return invoke('get_gameobject_quest_relations', { id })
+}
+
+// ─── quest items / locales (gameobject_questitem / gameobject_template_locale) ───
+
+export async function getGameObjectQuestItems(entry: number): Promise<GameObjectQuestItem[]> {
+  return invoke('get_gameobject_questitem', { entry })
+}
+
+export async function getGameObjectLocales(entry: number): Promise<GameObjectTemplateLocale[]> {
+  return invoke('get_gameobject_locales', { entry })
 }

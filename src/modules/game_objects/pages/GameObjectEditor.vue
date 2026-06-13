@@ -16,6 +16,7 @@ import { game_object_type_options } from '@/modules/game_objects/types/defines'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
 import { getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
 import GameObjectSpawnEditor from './GameObjectSpawnEditor.vue'
+import GameObjectLocaleTab from './GameObjectLocaleTab.vue'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
 import EditorField from '@/components/EditorField.vue'
 import StyledDataTable from '@/components/StyledDataTable.vue'
@@ -95,6 +96,29 @@ function addQuestEnder() {
 }
 function removeQuestEnder(index: number) {
   store.questEnders.removeNewEntry(index)
+}
+
+// --- Quest items (gameobject_questitem) ---
+const MAX_QUEST_ITEMS = 6
+const questItemEntries = computed(() => store.questItems.getNewEntries())
+const questItemHasChanges = computed(() => store.questItems.getSqlDiff(form.entry).length > 0)
+
+const questItemColumns: ColumnDef[] = [
+  { field: 'Idx', header: t('gameobjectEditor.fields.questItem_idx'), type: 'readonly', width: '5rem' },
+  { field: 'ItemId', header: t('gameobjectEditor.fields.questItem_itemId'), type: 'number' },
+]
+
+function addQuestItem() {
+  if (questItemEntries.value.length >= MAX_QUEST_ITEMS) return
+  const usedIdx = new Set(questItemEntries.value.map(e => e.Idx))
+  let nextIdx = 0
+  while (usedIdx.has(nextIdx) && nextIdx < MAX_QUEST_ITEMS) nextIdx++
+  if (nextIdx >= MAX_QUEST_ITEMS) return
+  store.questItems.pushNewEntry({ Idx: nextIdx, ItemId: 0 })
+}
+
+function removeQuestItem(index: number) {
+  store.questItems.removeNewEntry(index)
 }
 
 // --- Spawn state ---
@@ -239,6 +263,7 @@ onMounted(async () => {
         <Tab value="general">{{ t('gameobjectEditor.tabs.general') }}</Tab>
         <Tab value="data">{{ t('gameobjectEditor.tabs.data') }}</Tab>
         <Tab value="loot">{{ t('gameobjectEditor.tabs.loot') }}</Tab>
+        <Tab value="locale">{{ t('gameobjectEditor.tabs.locale') }}</Tab>
         <Tab value="spawn">{{ t('gameobjectEditor.tabs.spawn') }} ({{ spawns.length }})</Tab>
       </TabList>
 
@@ -365,6 +390,18 @@ onMounted(async () => {
             @remove="removeLoot"
           />
 
+          <EditableDataTable
+            :entries="questItemEntries"
+            :columns="questItemColumns"
+            :hasChanges="questItemHasChanges"
+            :title="t('gameobjectEditor.groups.questItems')"
+            :description="t('gameobjectEditor.groups.questItemsDesc')"
+            dataKey="Idx"
+            showHeaderAdd
+            @add="addQuestItem"
+            @remove="removeQuestItem"
+          />
+
           <div class="field-group" :class="{ 'field-group-modified': questStartersHasChanges || questEndersHasChanges }">
             <div class="field-group-header">
               <h4>{{ t('gameobject_quests.sectionTitle') }}</h4>
@@ -398,6 +435,11 @@ onMounted(async () => {
               </div>
             </div>
           </div>
+        </TabPanel>
+
+        <!-- ==================== LOCALE ==================== -->
+        <TabPanel value="locale">
+          <GameObjectLocaleTab />
         </TabPanel>
 
         <!-- ==================== SPAWN ==================== -->

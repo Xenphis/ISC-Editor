@@ -17,6 +17,8 @@ use commands::gameobject_addon::{get_gameobject_spawn_addon, save_gameobject_spa
 use commands::gameobject_overrides::{get_gameobject_overrides, save_gameobject_overrides};
 use commands::gameobject_spawn::{get_gameobject_spawns, save_gameobject_spawn, delete_gameobject_spawn};
 use commands::gameobject_loot::{get_gameobject_loot, save_gameobject_loot};
+use commands::gameobject_questitem::get_gameobject_questitem;
+use commands::gameobject_template_locale::get_gameobject_locales;
 use commands::gossip_menu::{get_gossip_menu_ids, get_next_custom_gossip_menu_id, get_gossip_menu, save_gossip_menu};
 use commands::gossip_menu_option::{get_gossip_menu_options, save_gossip_menu_options};
 use commands::gossip_menu_option_locale::{get_gossip_menu_option_locales, save_gossip_menu_option_locales};
@@ -110,6 +112,8 @@ pub fn run() {
       delete_gameobject_spawn,
       get_gameobject_loot,
       save_gameobject_loot,
+      get_gameobject_questitem,
+      get_gameobject_locales,
       get_gossip_menu_ids,
       get_next_custom_gossip_menu_id,
       get_gossip_menu,

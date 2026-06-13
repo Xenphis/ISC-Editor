@@ -30,6 +30,7 @@
       "general": "General Information",
       "data": "Data",
       "loot": "Loot & Quests",
+      "locale": "Locale",
       "spawn": "Spawns"
     },
     "groups": {
@@ -46,7 +47,11 @@
       "loot": "Loot Table",
       "lootDesc": "Items that can be looted (gameobject_loot_template table)",
       "spawns": "Spawns",
-      "spawnsDesc": "Object locations in the world (gameobject table)"
+      "spawnsDesc": "Object locations in the world (gameobject table)",
+      "questItems": "Quest Items",
+      "questItemsDesc": "Items granted for quests by this object (gameobject_questitem table)",
+      "locales": "Localization",
+      "localesDesc": "Translated name and cast bar caption (gameobject_template_locale table)"
     },
     "fields": {
       "entry": "Entry",
@@ -77,7 +82,13 @@
       "loot_group_id": "Group",
       "loot_min_count": "Min Count",
       "loot_max_count": "Max Count",
-      "loot_comment": "Comment"
+      "loot_comment": "Comment",
+      "questItem_idx": "Index",
+      "questItem_itemId": "Item ID",
+      "locale_name": "Name",
+      "locale_castBarCaption": "Cast Bar Caption",
+      "locale_missing": "No translation for this locale yet.",
+      "locale_create": "Create"
     }
   },
   "gameobjectSpawnEditor": {
