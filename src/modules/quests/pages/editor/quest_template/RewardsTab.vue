@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
+import Textarea from 'primevue/textarea'
 import EditorField from '@/components/EditorField.vue'
 import { useQuestModuleStore } from '@/modules/quests/store'
 
@@ -10,9 +11,17 @@ const store = useQuestModuleStore()
 const form = store.formData
 const orig = computed(() => store.originalValue)
 
+const offerForm = store.offerReward.newEntry
+const origOffer = computed(() => store.offerReward.getOriginalEntry())
+
 function isModified(field: keyof typeof form): boolean {
   if (!orig.value) return false
   return (orig.value as any)[field] !== (form as any)[field]
+}
+
+function isOfferModified(field: keyof typeof offerForm): boolean {
+  if (!origOffer.value) return false
+  return (origOffer.value as any)[field] !== (offerForm as any)[field]
 }
 </script>
 
@@ -152,6 +161,11 @@ function isModified(field: keyof typeof form): boolean {
           </EditorField>
         </div>
       </div>
+      <div class="field-grid" style="margin-top: 0.75rem;">
+        <EditorField :label="t('quest_template.fields.RewardFactionFlags')" :modified="isModified('RewardFactionFlags')">
+          <InputNumber v-model="form.RewardFactionFlags" :useGrouping="false" fluid />
+        </EditorField>
+      </div>
     </div>
 
     <!-- POI -->
@@ -197,6 +211,27 @@ function isModified(field: keyof typeof form): boolean {
             <InputNumber v-model="(form as any)[`ItemDropQuantity${i}`]" :useGrouping="false" :min="0" fluid />
           </EditorField>
         </div>
+      </div>
+    </div>
+
+    <!-- Turn-in Text & Emotes (quest_offer_reward) -->
+    <div class="field-group">
+      <div class="field-group-header">
+        <h4>{{ t('quest_template.groups.offer_reward') }}</h4>
+        <p>{{ t('quest_template.groups.offer_rewardDesc') }}</p>
+      </div>
+      <div class="field-grid">
+        <EditorField :label="t('quest_template.fields.RewardText')" :modified="isOfferModified('RewardText')" :fullWidth="true">
+          <Textarea v-model="offerForm.RewardText" rows="3" fluid />
+        </EditorField>
+        <template v-for="i in 4" :key="i">
+          <EditorField :label="`${t('quest_template.fields.emote')} ${i}`" :modified="isOfferModified((`Emote${i}`) as any)">
+            <InputNumber v-model="(offerForm as any)[`Emote${i}`]" :useGrouping="false" fluid />
+          </EditorField>
+          <EditorField :label="`${t('quest_template.fields.emoteDelay')} ${i}`" :modified="isOfferModified((`EmoteDelay${i}`) as any)">
+            <InputNumber v-model="(offerForm as any)[`EmoteDelay${i}`]" :useGrouping="false" fluid />
+          </EditorField>
+        </template>
       </div>
     </div>
   </div>

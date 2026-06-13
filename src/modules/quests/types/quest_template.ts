@@ -96,6 +96,7 @@ export interface QuestTemplate {
   RewardFactionID5: number;
   RewardFactionValue5: number;
   RewardFactionOverride5: number;
+  RewardFactionFlags: number;
   TimeAllowed: number;
   AllowableRaces: number;
   LogTitle?: string;
@@ -123,7 +124,6 @@ export interface QuestTemplate {
   RequiredItemCount4: number;
   RequiredItemCount5: number;
   RequiredItemCount6: number;
-  Unknown0: number;
   ObjectiveText1?: string;
   ObjectiveText2?: string;
   ObjectiveText3?: string;

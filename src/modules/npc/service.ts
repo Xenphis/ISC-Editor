@@ -28,6 +28,12 @@ export interface NpcListResult {
   total: number
 }
 
+/** Quêtes démarrées / terminées par cette créature (creature_queststarter / creature_questender). */
+export interface EntityQuestRelations {
+  starters: number[]
+  enders: number[]
+}
+
 export async function getNpcs(
   search?: string,
   limit?: number,
@@ -255,4 +261,10 @@ export async function getCreatureDefaultTrainers(trainerId: number): Promise<Cre
 
 export async function saveCreatureDefaultTrainers(trainerId: number, entries: CreatureDefaultTrainer[]): Promise<void> {
   return invoke('save_creature_default_trainers', { trainerId, entries })
+}
+
+// ─── quest relations (quests this creature starts / ends) ────────────────────
+
+export async function getCreatureQuestRelations(id: number): Promise<EntityQuestRelations> {
+  return invoke('get_creature_quest_relations', { id })
 }

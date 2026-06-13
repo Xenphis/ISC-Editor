@@ -1,192 +1,219 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
-import Select from 'primevue/select'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
+import EditorField from '@/components/EditorField.vue'
 import { locale_options } from '@/types/common'
 import { useQuestModuleStore } from '@/modules/quests/store'
 
 const { t } = useI18n()
 const store = useQuestModuleStore()
-const form = store.formData
 
-const localeEntries = computed(() => store.locales.getNewEntries())
-const localeHasChanges = computed(() => store.locales.getSqlDiff(form.ID).length > 0)
+// All translatable locales are shown as fixed tabs. Within each tab, every
+// sub-table (template / offer reward / request items) either shows its fields
+// (when a row exists for that locale) or a prompt to create the row.
+const allLocales = locale_options.map(o => o.value)
 
-const localeSelectOptions = locale_options.map(o => ({ value: o.value, label: `${o.value} — ${o.comment}` }))
+const activeLocale = ref<string>(allLocales[0] ?? '')
 
-function addLocale() {
-  store.locales.pushNewEntry({
-    locale: '',
-    Title: null,
-    Details: null,
-    Objectives: null,
-    EndText: null,
-    CompletedText: null,
-    ObjectiveText1: null,
-    ObjectiveText2: null,
-    ObjectiveText3: null,
-    ObjectiveText4: null,
-  })
+// ─── Generic locale-manager helpers ─────────────────────────────────────────
+
+interface LocaleManager {
+  getNewEntries(): any[]
+  getOriginalEntries(): any[] | null
+  pushNewEntry(entry: any): void
 }
 
-function removeLocale(index: number) {
-  store.locales.removeNewEntry(index)
+function hasEntry(mgr: LocaleManager, locale: string): boolean {
+  return mgr.getNewEntries().some(e => e.locale === locale)
 }
+
+function createEntry(mgr: LocaleManager, locale: string, makeDefault: (l: string) => any): void {
+  if (!hasEntry(mgr, locale)) mgr.pushNewEntry(makeDefault(locale))
+}
+
+function mGet(mgr: LocaleManager, locale: string, key: string): any {
+  const e = mgr.getNewEntries().find(x => x.locale === locale)
+  return e ? e[key] ?? null : null
+}
+
+function mSet(mgr: LocaleManager, locale: string, key: string, value: any): void {
+  const e = mgr.getNewEntries().find(x => x.locale === locale)
+  if (e) e[key] = value
+}
+
+function mModified(mgr: LocaleManager, locale: string, key: string): boolean {
+  const orig = mgr.getOriginalEntries()?.find(x => x.locale === locale)
+  const ov = orig ? orig[key] ?? null : null
+  return ov !== mGet(mgr, locale, key)
+}
+
+function localeCardModified(mgr: LocaleManager, locale: string, keys: string[]): boolean {
+  const origHas = mgr.getOriginalEntries()?.some(e => e.locale === locale) ?? false
+  const curHas = hasEntry(mgr, locale)
+  if (origHas !== curHas) return true
+  return keys.some(k => mModified(mgr, locale, k))
+}
+
+const makeTpl = (locale: string) => ({
+  locale, Title: null, Details: null, Objectives: null,
+  EndText: null, CompletedText: null,
+  ObjectiveText1: null, ObjectiveText2: null, ObjectiveText3: null, ObjectiveText4: null,
+})
+const makeOffer = (locale: string) => ({ locale, RewardText: null })
+const makeReq = (locale: string) => ({ locale, CompletionText: null })
+
+// ─── Template-locale field config (drives the first card) ───────────────────
+
+const tplFields: { key: string; labelKey: string }[] = [
+  { key: 'Title', labelKey: 'quest_template.fields.locale_title' },
+  { key: 'Details', labelKey: 'quest_template.fields.locale_details' },
+  { key: 'Objectives', labelKey: 'quest_template.fields.locale_objectives' },
+  { key: 'EndText', labelKey: 'quest_template.fields.locale_endtext' },
+  { key: 'CompletedText', labelKey: 'quest_template.fields.locale_completedtext' },
+  { key: 'ObjectiveText1', labelKey: 'quest_template.fields.locale_objectivetext1' },
+  { key: 'ObjectiveText2', labelKey: 'quest_template.fields.locale_objectivetext2' },
+  { key: 'ObjectiveText3', labelKey: 'quest_template.fields.locale_objectivetext3' },
+  { key: 'ObjectiveText4', labelKey: 'quest_template.fields.locale_objectivetext4' },
+]
+const tplKeys = tplFields.map(f => f.key)
+
+function tplCardModified(locale: string) { return localeCardModified(store.locales, locale, tplKeys) }
+function offerCardModified(locale: string) { return localeCardModified(store.offerRewardLocales, locale, ['RewardText']) }
+function reqCardModified(locale: string) { return localeCardModified(store.requestItemsLocales, locale, ['CompletionText']) }
 </script>
 
 <template>
   <div class="tab-content">
-    <div class="field-group" :class="{ 'field-group-modified': localeHasChanges }">
-      <div class="field-group-header">
-        <h4>{{ t('quest_template.groups.locales') }}</h4>
-        <p>{{ t('quest_template.groups.localesDesc') }}</p>
-      </div>
+    <Tabs :value="activeLocale" @update:value="(v) => activeLocale = String(v)">
+      <TabList>
+        <Tab v-for="locale in allLocales" :key="locale" :value="locale">{{ locale }}</Tab>
+      </TabList>
 
-      <div v-if="localeEntries.length === 0" class="locale-empty">
-        <span>{{ t('quest_template.fields.locale') }}</span>
-      </div>
-
-      <div v-for="(entry, idx) in localeEntries" :key="idx" class="locale-entry">
-        <div class="locale-entry-header">
-          <span class="locale-tag">{{ entry.locale || '?' }}</span>
-          <Button
-            icon="pi pi-trash"
-            severity="danger"
-            text
-            size="small"
-            @click="removeLocale(idx)"
-          />
-        </div>
-        <div class="locale-fields">
-          <div class="locale-row">
-            <div class="locale-select-field">
-              <label>{{ t('quest_template.fields.locale') }}</label>
-              <Select
-                v-model="entry.locale"
-                :options="localeSelectOptions"
-                optionValue="value"
-                optionLabel="label"
-                fluid
+      <TabPanels>
+        <TabPanel v-for="locale in allLocales" :key="locale" :value="locale">
+          <!-- quest_template_locale -->
+          <div class="field-group" :class="{ 'field-group-modified': tplCardModified(locale) }">
+            <div class="field-group-header">
+              <h4>{{ t('quest_template.groups.locales') }}</h4>
+              <p>{{ t('quest_template.groups.localesDesc') }}</p>
+            </div>
+            <div v-if="hasEntry(store.locales, locale)" class="field-grid-2">
+              <EditorField
+                v-for="f in tplFields"
+                :key="f.key"
+                :label="t(f.labelKey)"
+                :modified="mModified(store.locales, locale, f.key)"
+              >
+                <InputText
+                  :modelValue="mGet(store.locales, locale, f.key)"
+                  @update:modelValue="(v) => mSet(store.locales, locale, f.key, v)"
+                  fluid
+                />
+              </EditorField>
+            </div>
+            <div v-else class="locale-create-prompt">
+              <span>{{ t('quest_template.fields.locale_missing') }}</span>
+              <Button
+                icon="pi pi-plus"
+                :label="t('quest_template.fields.locale_create')"
+                severity="secondary"
+                size="small"
+                @click="createEntry(store.locales, locale, makeTpl)"
               />
             </div>
-            <div class="locale-field">
-              <label>{{ t('quest_template.fields.locale_title') }}</label>
-              <InputText v-model="entry.Title" fluid />
-            </div>
           </div>
-          <div class="locale-row">
-            <div class="locale-field">
-              <label>{{ t('quest_template.fields.locale_details') }}</label>
-              <InputText v-model="entry.Details" fluid />
-            </div>
-            <div class="locale-field">
-              <label>{{ t('quest_template.fields.locale_objectives') }}</label>
-              <InputText v-model="entry.Objectives" fluid />
-            </div>
-          </div>
-          <div class="locale-row">
-            <div class="locale-field">
-              <label>{{ t('quest_template.fields.locale_endtext') }}</label>
-              <InputText v-model="entry.EndText" fluid />
-            </div>
-            <div class="locale-field">
-              <label>{{ t('quest_template.fields.locale_completedtext') }}</label>
-              <InputText v-model="entry.CompletedText" fluid />
-            </div>
-          </div>
-          <div class="locale-row locale-row-4">
-            <div v-for="i in 4" :key="i" class="locale-field">
-              <label>{{ t(`quest_template.fields.locale_objectivetext${i}`) }}</label>
-              <InputText v-model="(entry as any)[`ObjectiveText${i}`]" fluid />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="locale-add-row">
-        <Button
-          icon="pi pi-plus"
-          :label="t('quest_template.fields.locale')"
-          severity="secondary"
-          size="small"
-          @click="addLocale"
-        />
-      </div>
-    </div>
+          <!-- quest_offer_reward_locale -->
+          <div class="field-group" :class="{ 'field-group-modified': offerCardModified(locale) }">
+            <div class="field-group-header">
+              <h4>{{ t('quest_template.groups.offer_reward_locale') }}</h4>
+              <p>{{ t('quest_template.groups.offer_reward_localeDesc') }}</p>
+            </div>
+            <div v-if="hasEntry(store.offerRewardLocales, locale)" class="field-grid">
+              <EditorField
+                :label="t('quest_template.fields.RewardText')"
+                :modified="mModified(store.offerRewardLocales, locale, 'RewardText')"
+                :fullWidth="true"
+              >
+                <Textarea
+                  :modelValue="mGet(store.offerRewardLocales, locale, 'RewardText')"
+                  @update:modelValue="(v) => mSet(store.offerRewardLocales, locale, 'RewardText', v)"
+                  rows="3"
+                  fluid
+                />
+              </EditorField>
+            </div>
+            <div v-else class="locale-create-prompt">
+              <span>{{ t('quest_template.fields.locale_missing') }}</span>
+              <Button
+                icon="pi pi-plus"
+                :label="t('quest_template.fields.locale_create')"
+                severity="secondary"
+                size="small"
+                @click="createEntry(store.offerRewardLocales, locale, makeOffer)"
+              />
+            </div>
+          </div>
+
+          <!-- quest_request_items_locale -->
+          <div class="field-group" :class="{ 'field-group-modified': reqCardModified(locale) }">
+            <div class="field-group-header">
+              <h4>{{ t('quest_template.groups.request_items_locale') }}</h4>
+              <p>{{ t('quest_template.groups.request_items_localeDesc') }}</p>
+            </div>
+            <div v-if="hasEntry(store.requestItemsLocales, locale)" class="field-grid">
+              <EditorField
+                :label="t('quest_template.fields.CompletionText')"
+                :modified="mModified(store.requestItemsLocales, locale, 'CompletionText')"
+                :fullWidth="true"
+              >
+                <Textarea
+                  :modelValue="mGet(store.requestItemsLocales, locale, 'CompletionText')"
+                  @update:modelValue="(v) => mSet(store.requestItemsLocales, locale, 'CompletionText', v)"
+                  rows="3"
+                  fluid
+                />
+              </EditorField>
+            </div>
+            <div v-else class="locale-create-prompt">
+              <span>{{ t('quest_template.fields.locale_missing') }}</span>
+              <Button
+                icon="pi pi-plus"
+                :label="t('quest_template.fields.locale_create')"
+                severity="secondary"
+                size="small"
+                @click="createEntry(store.requestItemsLocales, locale, makeReq)"
+              />
+            </div>
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </div>
 </template>
 
 <style scoped>
 @import './quest-editor.css';
 
-.locale-empty {
-  color: #64748b;
-  font-size: 0.875rem;
-  padding: 1rem 0;
-  text-align: center;
-}
-
-.locale-entry {
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  background: rgba(15, 23, 42, 0.4);
-}
-
-.locale-entry-header {
+.locale-create-prompt {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-}
-
-.locale-tag {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #22d3ee;
-  background: rgba(6, 182, 212, 0.1);
-  padding: 0.15rem 0.6rem;
-  border-radius: 4px;
-}
-
-.locale-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.locale-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.locale-row-4 {
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-}
-
-.locale-select-field,
-.locale-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.locale-select-field label,
-.locale-field label {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.locale-add-row {
-  margin-top: 0.75rem;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }
 
 .field-group-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus) !important;
 }
 </style>

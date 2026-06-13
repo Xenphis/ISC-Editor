@@ -29,7 +29,7 @@
     "tabs": {
       "general": "Informations générales",
       "data": "Données",
-      "loot": "Butin",
+      "loot": "Butin & Quêtes",
       "spawn": "Spawns"
     },
     "groups": {
@@ -143,5 +143,16 @@
       "open": "Ouvert (0)",
       "closed": "Fermé (1)"
     }
+  },
+  "gameobject_quests": {
+    "sectionTitle": "Quêtes",
+    "starters": "Quêtes démarrées par cet objet",
+    "startersDesc": "Quêtes que cet objet propose (gameobject_queststarter)",
+    "enders": "Quêtes terminées par cet objet",
+    "endersDesc": "Quêtes que l'on rend à cet objet (gameobject_questender)",
+    "quest": "Quête",
+    "add": "Ajouter",
+    "empty": "Aucune quête",
+    "questPlaceholder": "Quest ID"
   }
 }

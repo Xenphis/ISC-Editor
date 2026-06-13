@@ -55,6 +55,7 @@
       "behavior": "Comportement",
       "loot": "Butin & Quêtes",
       "text": "Texte & Gossip",
+      "quests": "Quêtes",
       "gossip": "Gossip",
       "advanced": "Avancé",
       "spawn": "Spawns"
@@ -572,5 +573,16 @@
       "reqAbility2": "Capacité req. 2",
       "reqAbility3": "Capacité req. 3"
     }
+  },
+  "creature_quests": {
+    "sectionTitle": "Quêtes",
+    "starters": "Quêtes démarrées par cette créature",
+    "startersDesc": "Quêtes que ce PNJ propose (creature_queststarter)",
+    "enders": "Quêtes terminées par cette créature",
+    "endersDesc": "Quêtes que l'on rend à ce PNJ (creature_questender)",
+    "quest": "Quête",
+    "add": "Ajouter",
+    "empty": "Aucune quête",
+    "questPlaceholder": "Quest ID"
   }
 }

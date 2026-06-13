@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
+import Textarea from 'primevue/textarea'
 import EditorField from '@/components/EditorField.vue'
 import { useQuestModuleStore } from '@/modules/quests/store'
 
@@ -11,9 +12,17 @@ const store = useQuestModuleStore()
 const form = store.formData
 const orig = computed(() => store.originalValue)
 
+const reqForm = store.requestItems.newEntry
+const origReq = computed(() => store.requestItems.getOriginalEntry())
+
 function isModified(field: keyof typeof form): boolean {
   if (!orig.value) return false
   return (orig.value as any)[field] !== (form as any)[field]
+}
+
+function isReqModified(field: keyof typeof reqForm): boolean {
+  if (!origReq.value) return false
+  return (origReq.value as any)[field] !== (reqForm as any)[field]
 }
 </script>
 
@@ -77,9 +86,6 @@ function isModified(field: keyof typeof form): boolean {
         <EditorField :label="t('quest_template.fields.RequiredPlayerKills')" :modified="isModified('RequiredPlayerKills')">
           <InputNumber v-model="form.RequiredPlayerKills" :useGrouping="false" fluid />
         </EditorField>
-        <EditorField :label="t('quest_template.fields.Unknown0')" :modified="isModified('Unknown0')">
-          <InputNumber v-model="form.Unknown0" :useGrouping="false" fluid />
-        </EditorField>
         <EditorField :label="t('quest_template.fields.RequiredFactionId1')" :modified="isModified('RequiredFactionId1')">
           <InputNumber v-model="form.RequiredFactionId1" :useGrouping="false" fluid />
         </EditorField>
@@ -109,6 +115,25 @@ function isModified(field: keyof typeof form): boolean {
           :fullWidth="true"
         >
           <InputText v-model="(form as any)[`ObjectiveText${i}`]" fluid />
+        </EditorField>
+      </div>
+    </div>
+
+    <!-- Completion Text & Emotes (quest_request_items) -->
+    <div class="field-group">
+      <div class="field-group-header">
+        <h4>{{ t('quest_template.groups.request_items') }}</h4>
+        <p>{{ t('quest_template.groups.request_itemsDesc') }}</p>
+      </div>
+      <div class="field-grid">
+        <EditorField :label="t('quest_template.fields.CompletionText')" :modified="isReqModified('CompletionText')" :fullWidth="true">
+          <Textarea v-model="reqForm.CompletionText" rows="3" fluid />
+        </EditorField>
+        <EditorField :label="t('quest_template.fields.EmoteOnComplete')" :modified="isReqModified('EmoteOnComplete')">
+          <InputNumber v-model="reqForm.EmoteOnComplete" :useGrouping="false" fluid />
+        </EditorField>
+        <EditorField :label="t('quest_template.fields.EmoteOnIncomplete')" :modified="isReqModified('EmoteOnIncomplete')">
+          <InputNumber v-model="reqForm.EmoteOnIncomplete" :useGrouping="false" fluid />
         </EditorField>
       </div>
     </div>

@@ -1,6 +1,3 @@
-// Structure de données pour quest_template_locale (TrinityCore 3.3.5)
-// Types adaptés pour TypeScript
-
 export interface QuestTemplateLocale {
   ID: number;
   locale: string;

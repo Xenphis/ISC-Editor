@@ -29,7 +29,7 @@
     "tabs": {
       "general": "General Information",
       "data": "Data",
-      "loot": "Loot",
+      "loot": "Loot & Quests",
       "spawn": "Spawns"
     },
     "groups": {
@@ -143,5 +143,16 @@
       "open": "Open (0)",
       "closed": "Closed (1)"
     }
+  },
+  "gameobject_quests": {
+    "sectionTitle": "Quests",
+    "starters": "Quests started by this game object",
+    "startersDesc": "Quests this object offers (gameobject_queststarter)",
+    "enders": "Quests ended by this game object",
+    "endersDesc": "Quests turned in to this object (gameobject_questender)",
+    "quest": "Quest",
+    "add": "Add",
+    "empty": "No quests",
+    "questPlaceholder": "Quest ID"
   }
 }

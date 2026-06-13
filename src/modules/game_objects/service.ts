@@ -11,6 +11,12 @@ export interface GameObjectListResult {
   total: number
 }
 
+/** Quêtes démarrées / terminées par ce GO (gameobject_queststarter / gameobject_questender). */
+export interface EntityQuestRelations {
+  starters: number[]
+  enders: number[]
+}
+
 export async function getGameObjects(
   search?: string,
   limit?: number,
@@ -73,4 +79,10 @@ export async function getGameObjectLoot(entry: number): Promise<GameObjectLootTe
 
 export async function saveGameObjectLoot(entry: number, loot: GameObjectLootTemplate[]): Promise<void> {
   return invoke('save_gameobject_loot', { entry, loot })
+}
+
+// ─── quest relations (quests this game object starts / ends) ─────────────────
+
+export async function getGameObjectQuestRelations(id: number): Promise<EntityQuestRelations> {
+  return invoke('get_gameobject_quest_relations', { id })
 }

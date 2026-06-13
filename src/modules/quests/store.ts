@@ -6,6 +6,7 @@ import { ReactiveSubTable, ArraySubTable } from '@/stores/SubTableManager'
 import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
 import * as questService from '@/modules/quests/service'
+import type { QuestRelations } from '@/modules/quests/service'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -29,6 +30,35 @@ export interface AddonForm {
   SpecialFlags: number
 }
 
+export interface OfferRewardForm {
+  Emote1: number
+  Emote2: number
+  Emote3: number
+  Emote4: number
+  EmoteDelay1: number
+  EmoteDelay2: number
+  EmoteDelay3: number
+  EmoteDelay4: number
+  RewardText: string
+}
+
+export interface RequestItemsForm {
+  EmoteOnComplete: number
+  EmoteOnIncomplete: number
+  CompletionText: string
+}
+
+export interface DetailsForm {
+  Emote1: number
+  Emote2: number
+  Emote3: number
+  Emote4: number
+  EmoteDelay1: number
+  EmoteDelay2: number
+  EmoteDelay3: number
+  EmoteDelay4: number
+}
+
 export interface LocaleEntry {
   locale: string
   Title: string | null
@@ -40,6 +70,16 @@ export interface LocaleEntry {
   ObjectiveText2: string | null
   ObjectiveText3: string | null
   ObjectiveText4: string | null
+}
+
+export interface OfferRewardLocaleEntry {
+  locale: string
+  RewardText: string | null
+}
+
+export interface RequestItemsLocaleEntry {
+  locale: string
+  CompletionText: string | null
 }
 
 // ─── Default factories ──────────────────────────────────────────────
@@ -54,6 +94,18 @@ export function createDefaultAddonForm(): AddonForm {
     RequiredMinRepValue: 0, RequiredMaxRepValue: 0,
     ProvidedItemCount: 0, SpecialFlags: 0,
   }
+}
+
+export function createDefaultOfferReward(): OfferRewardForm {
+  return { Emote1: 0, Emote2: 0, Emote3: 0, Emote4: 0, EmoteDelay1: 0, EmoteDelay2: 0, EmoteDelay3: 0, EmoteDelay4: 0, RewardText: '' }
+}
+
+export function createDefaultRequestItems(): RequestItemsForm {
+  return { EmoteOnComplete: 0, EmoteOnIncomplete: 0, CompletionText: '' }
+}
+
+export function createDefaultDetails(): DetailsForm {
+  return { Emote1: 0, Emote2: 0, Emote3: 0, Emote4: 0, EmoteDelay1: 0, EmoteDelay2: 0, EmoteDelay3: 0, EmoteDelay4: 0 }
 }
 
 function createDefaultForm(): QuestTemplate {
@@ -88,6 +140,7 @@ function createDefaultForm(): QuestTemplate {
     RewardFactionID3: 0, RewardFactionValue3: 0, RewardFactionOverride3: 0,
     RewardFactionID4: 0, RewardFactionValue4: 0, RewardFactionOverride4: 0,
     RewardFactionID5: 0, RewardFactionValue5: 0, RewardFactionOverride5: 0,
+    RewardFactionFlags: 0,
     TimeAllowed: 0, AllowableRaces: 0,
     LogTitle: undefined, LogDescription: undefined, QuestDescription: undefined,
     AreaDescription: undefined, QuestCompletionLog: undefined,
@@ -97,13 +150,36 @@ function createDefaultForm(): QuestTemplate {
     RequiredItemId4: 0, RequiredItemId5: 0, RequiredItemId6: 0,
     RequiredItemCount1: 0, RequiredItemCount2: 0, RequiredItemCount3: 0,
     RequiredItemCount4: 0, RequiredItemCount5: 0, RequiredItemCount6: 0,
-    Unknown0: 0,
     ObjectiveText1: undefined, ObjectiveText2: undefined, ObjectiveText3: undefined, ObjectiveText4: undefined,
     VerifiedBuild: undefined,
   }
 }
 
-// ─── Composite key config for locales ───────────────────────────────
+// ─── Composite key configs ───────────────────────────────────────────
+
+const offerRewardLocaleConfig: Omit<CompositeKeyConfig<OfferRewardLocaleEntry>, 'parentId'> = {
+  table: 'quest_offer_reward_locale',
+  parentKey: 'ID',
+  childKey: 'locale',
+  columns: ['RewardText', 'VerifiedBuild'],
+  isEqual: (a, b) => a.RewardText === b.RewardText,
+  toSqlValues: (e) => [
+    e.RewardText != null ? `'${escapeSQL(e.RewardText)}'` : null,
+    0,
+  ],
+}
+
+const requestItemsLocaleConfig: Omit<CompositeKeyConfig<RequestItemsLocaleEntry>, 'parentId'> = {
+  table: 'quest_request_items_locale',
+  parentKey: 'ID',
+  childKey: 'locale',
+  columns: ['CompletionText', 'VerifiedBuild'],
+  isEqual: (a, b) => a.CompletionText === b.CompletionText,
+  toSqlValues: (e) => [
+    e.CompletionText != null ? `'${escapeSQL(e.CompletionText)}'` : null,
+    0,
+  ],
+}
 
 const localeConfig: Omit<CompositeKeyConfig<LocaleEntry>, 'parentId'> = {
   table: 'quest_template_locale',
@@ -135,6 +211,36 @@ const localeConfig: Omit<CompositeKeyConfig<LocaleEntry>, 'parentId'> = {
   ],
 }
 
+// ─── Quest givers / enders (jonction id ↔ quest, sans colonne de valeur) ─────
+
+export interface RelationEntry {
+  id: number
+  quest: number
+}
+
+function relationConfig(table: string): Omit<CompositeKeyConfig<RelationEntry>, 'parentId'> {
+  return {
+    table,
+    parentKey: 'quest',
+    childKey: 'id',
+    columns: [],
+    isEqual: () => true,
+    toSqlValues: () => [],
+  }
+}
+
+// Cache court (un cycle de chargement) pour éviter 4 appels identiques quand
+// les 4 sous-tables de relations se chargent en parallèle pour la même quête.
+let questRelCache: { id: number; promise: Promise<QuestRelations | null> } | null = null
+function loadQuestRelations(id: number): Promise<QuestRelations | null> {
+  if (!questRelCache || questRelCache.id !== id) {
+    const entry = { id, promise: questService.getQuestRelations(id).catch(() => null) }
+    questRelCache = entry
+    entry.promise.finally(() => { if (questRelCache === entry) questRelCache = null })
+  }
+  return questRelCache.promise
+}
+
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useQuestModuleStore = defineStore('questModule', () => {
@@ -151,11 +257,71 @@ export const useQuestModuleStore = defineStore('questModule', () => {
     createDefault: createDefaultAddonForm,
   })
 
+  const offerReward = new ReactiveSubTable<OfferRewardForm>({
+    tableName: 'quest_offer_reward',
+    primaryKey: 'ID',
+    createDefault: createDefaultOfferReward,
+  })
+
+  const requestItems = new ReactiveSubTable<RequestItemsForm>({
+    tableName: 'quest_request_items',
+    primaryKey: 'ID',
+    createDefault: createDefaultRequestItems,
+  })
+
+  const details = new ReactiveSubTable<DetailsForm>({
+    tableName: 'quest_details',
+    primaryKey: 'ID',
+    createDefault: createDefaultDetails,
+  })
+
+  const creatureStarters = new ArraySubTable<RelationEntry>({
+    tableName: 'creature_queststarter',
+    compositeConfig: relationConfig('creature_queststarter'),
+    fieldPrefix: 'creature_starter',
+    summarize: (e) => `creature ${e.id}`,
+  })
+
+  const creatureEnders = new ArraySubTable<RelationEntry>({
+    tableName: 'creature_questender',
+    compositeConfig: relationConfig('creature_questender'),
+    fieldPrefix: 'creature_ender',
+    summarize: (e) => `creature ${e.id}`,
+  })
+
+  const gameobjectStarters = new ArraySubTable<RelationEntry>({
+    tableName: 'gameobject_queststarter',
+    compositeConfig: relationConfig('gameobject_queststarter'),
+    fieldPrefix: 'go_starter',
+    summarize: (e) => `gameobject ${e.id}`,
+  })
+
+  const gameobjectEnders = new ArraySubTable<RelationEntry>({
+    tableName: 'gameobject_questender',
+    compositeConfig: relationConfig('gameobject_questender'),
+    fieldPrefix: 'go_ender',
+    summarize: (e) => `gameobject ${e.id}`,
+  })
+
   const locales = new ArraySubTable<LocaleEntry>({
     tableName: 'quest_template_locale',
     compositeConfig: localeConfig,
     fieldPrefix: 'locale',
     summarize: (e) => `${e.Title ?? ''} / ${e.Details ?? ''}`,
+  })
+
+  const offerRewardLocales = new ArraySubTable<OfferRewardLocaleEntry>({
+    tableName: 'quest_offer_reward_locale',
+    compositeConfig: offerRewardLocaleConfig,
+    fieldPrefix: 'offer_locale',
+    summarize: (e) => e.RewardText ?? '',
+  })
+
+  const requestItemsLocales = new ArraySubTable<RequestItemsLocaleEntry>({
+    tableName: 'quest_request_items_locale',
+    compositeConfig: requestItemsLocaleConfig,
+    fieldPrefix: 'req_locale',
+    summarize: (e) => e.CompletionText ?? '',
   })
 
   const editor = createEntityEditorStore<QuestTemplate>({
@@ -177,6 +343,58 @@ export const useQuestModuleStore = defineStore('questModule', () => {
         commitWhenMissing: true,
       },
       {
+        manager: offerReward,
+        load: async (id) => {
+          const data = await questService.getQuestOfferReward(id).catch(() => null)
+          if (!data) return null
+          return {
+            Emote1: data.Emote1, Emote2: data.Emote2, Emote3: data.Emote3, Emote4: data.Emote4,
+            EmoteDelay1: data.EmoteDelay1, EmoteDelay2: data.EmoteDelay2,
+            EmoteDelay3: data.EmoteDelay3, EmoteDelay4: data.EmoteDelay4,
+            RewardText: data.RewardText ?? '',
+          } satisfies OfferRewardForm
+        },
+        commitWhenMissing: true,
+        save: async (id, manager) => {
+          const m = manager as typeof offerReward
+          const e = m.newEntry
+          await questService.saveQuestOfferReward(id, {
+            ID: id,
+            Emote1: e.Emote1, Emote2: e.Emote2, Emote3: e.Emote3, Emote4: e.Emote4,
+            EmoteDelay1: e.EmoteDelay1, EmoteDelay2: e.EmoteDelay2,
+            EmoteDelay3: e.EmoteDelay3, EmoteDelay4: e.EmoteDelay4,
+            RewardText: e.RewardText || null,
+            VerifiedBuild: null,
+          })
+        },
+      },
+      {
+        manager: requestItems,
+        load: async (id) => {
+          const data = await questService.getQuestRequestItems(id).catch(() => null)
+          if (!data) return null
+          return {
+            EmoteOnComplete: data.EmoteOnComplete,
+            EmoteOnIncomplete: data.EmoteOnIncomplete,
+            CompletionText: data.CompletionText ?? '',
+          } satisfies RequestItemsForm
+        },
+        commitWhenMissing: true,
+      },
+      {
+        manager: details,
+        load: async (id) => {
+          const data = await questService.getQuestDetails(id).catch(() => null)
+          if (!data) return null
+          return {
+            Emote1: data.Emote1, Emote2: data.Emote2, Emote3: data.Emote3, Emote4: data.Emote4,
+            EmoteDelay1: data.EmoteDelay1, EmoteDelay2: data.EmoteDelay2,
+            EmoteDelay3: data.EmoteDelay3, EmoteDelay4: data.EmoteDelay4,
+          } satisfies DetailsForm
+        },
+        commitWhenMissing: true,
+      },
+      {
         manager: locales,
         load: async (id) => {
           const rows = await questService.getQuestLocales(id).catch(() => [])
@@ -194,6 +412,60 @@ export const useQuestModuleStore = defineStore('questModule', () => {
           })) satisfies LocaleEntry[]
         },
       },
+      {
+        manager: offerRewardLocales,
+        load: async (id) => {
+          const rows = await questService.getQuestOfferRewardLocales(id).catch(() => [])
+          return rows.map(r => ({ locale: r.locale, RewardText: r.RewardText ?? null })) satisfies OfferRewardLocaleEntry[]
+        },
+        save: async (id, manager) => {
+          const m = manager as typeof offerRewardLocales
+          await questService.saveQuestOfferRewardLocales(id,
+            m.getNewEntries().map(e => ({ ID: id, locale: e.locale, RewardText: e.RewardText, VerifiedBuild: null }))
+          )
+        },
+      },
+      {
+        manager: requestItemsLocales,
+        load: async (id) => {
+          const rows = await questService.getQuestRequestItemsLocales(id).catch(() => [])
+          return rows.map(r => ({ locale: r.locale, CompletionText: r.CompletionText ?? null })) satisfies RequestItemsLocaleEntry[]
+        },
+        save: async (id, manager) => {
+          const m = manager as typeof requestItemsLocales
+          await questService.saveQuestRequestItemsLocales(id,
+            m.getNewEntries().map(e => ({ ID: id, locale: e.locale, CompletionText: e.CompletionText, VerifiedBuild: null }))
+          )
+        },
+      },
+      {
+        manager: creatureStarters,
+        load: async (id) => {
+          const rel = await loadQuestRelations(id)
+          return (rel?.creature_starters ?? []).map(cid => ({ id: cid, quest: id })) satisfies RelationEntry[]
+        },
+      },
+      {
+        manager: creatureEnders,
+        load: async (id) => {
+          const rel = await loadQuestRelations(id)
+          return (rel?.creature_enders ?? []).map(cid => ({ id: cid, quest: id })) satisfies RelationEntry[]
+        },
+      },
+      {
+        manager: gameobjectStarters,
+        load: async (id) => {
+          const rel = await loadQuestRelations(id)
+          return (rel?.gameobject_starters ?? []).map(gid => ({ id: gid, quest: id })) satisfies RelationEntry[]
+        },
+      },
+      {
+        manager: gameobjectEnders,
+        load: async (id) => {
+          const rel = await loadQuestRelations(id)
+          return (rel?.gameobject_enders ?? []).map(gid => ({ id: gid, quest: id })) satisfies RelationEntry[]
+        },
+      },
     ],
   })
 
@@ -207,7 +479,9 @@ export const useQuestModuleStore = defineStore('questModule', () => {
 
   return {
     quests, loading, currentSearch, listLoaded,
-    addon, locales,
+    addon, offerReward, requestItems, details, locales,
+    offerRewardLocales, requestItemsLocales,
+    creatureStarters, creatureEnders, gameobjectStarters, gameobjectEnders,
     ...editor,
     markListLoaded, setQuests,
   }

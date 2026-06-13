@@ -55,6 +55,7 @@
       "behavior": "Behavior",
       "loot": "Loot & Quests",
       "text": "Text & Gossip",
+      "quests": "Quests",
       "gossip": "Gossip",
       "advanced": "Advanced",
       "spawn": "Spawns"
@@ -575,5 +576,16 @@
       "reqAbility2": "Req. Ability 2",
       "reqAbility3": "Req. Ability 3"
     }
+  },
+  "creature_quests": {
+    "sectionTitle": "Quests",
+    "starters": "Quests started by this creature",
+    "startersDesc": "Quests this NPC offers (creature_queststarter)",
+    "enders": "Quests ended by this creature",
+    "endersDesc": "Quests turned in to this NPC (creature_questender)",
+    "quest": "Quest",
+    "add": "Add",
+    "empty": "No quests",
+    "questPlaceholder": "Quest ID"
   }
 }

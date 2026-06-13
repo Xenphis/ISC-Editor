@@ -6,6 +6,7 @@ import { ReactiveSubTable, ArraySubTable, DetachedArraySubTable } from '@/stores
 import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
 import * as npcService from '@/modules/npc/service'
+import type { EntityQuestRelations } from '@/modules/npc/service'
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
 import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
 
@@ -420,6 +421,34 @@ function toNpcTextLocaleSqlValues(entry: NpcTextLocale): (string | number | null
 
 // ─── Store ──────────────────────────────────────────────────────────
 
+// ─── Quest relations (creature ↔ quest, jonction sans colonne de valeur) ─────
+
+export interface CreatureQuestRelEntry {
+  id: number
+  quest: number
+}
+
+function creatureQuestRelConfig(table: string): Omit<CompositeKeyConfig<CreatureQuestRelEntry>, 'parentId'> {
+  return {
+    table,
+    parentKey: 'id',
+    childKey: 'quest',
+    columns: [],
+    isEqual: () => true,
+    toSqlValues: () => [],
+  }
+}
+
+let creatureRelCache: { id: number; promise: Promise<EntityQuestRelations | null> } | null = null
+function loadCreatureQuestRelations(entry: number): Promise<EntityQuestRelations | null> {
+  if (!creatureRelCache || creatureRelCache.id !== entry) {
+    const e = { id: entry, promise: npcService.getCreatureQuestRelations(entry).catch(() => null) }
+    creatureRelCache = e
+    e.promise.finally(() => { if (creatureRelCache === e) creatureRelCache = null })
+  }
+  return creatureRelCache.promise
+}
+
 export const useNpcModuleStore = defineStore('npcModule', () => {
   // --- List state ---
   const npcs = ref<CreatureTemplate[]>([])
@@ -495,6 +524,20 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     compositeConfig: questItemConfig,
     fieldPrefix: 'quest_item',
     summarize: (e) => String(e.ItemId),
+  })
+
+  const questStarters = new ArraySubTable<CreatureQuestRelEntry>({
+    tableName: 'creature_queststarter',
+    compositeConfig: creatureQuestRelConfig('creature_queststarter'),
+    fieldPrefix: 'quest_starter',
+    summarize: (e) => `quest ${e.quest}`,
+  })
+
+  const questEnders = new ArraySubTable<CreatureQuestRelEntry>({
+    tableName: 'creature_questender',
+    compositeConfig: creatureQuestRelConfig('creature_questender'),
+    fieldPrefix: 'quest_ender',
+    summarize: (e) => `quest ${e.quest}`,
   })
 
   const gossipMenus = new ArraySubTable<GossipMenuEntry>({
@@ -733,6 +776,20 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
         },
       },
       {
+        manager: questStarters,
+        load: async (entry) => {
+          const rel = await loadCreatureQuestRelations(entry)
+          return (rel?.starters ?? []).map(q => ({ id: entry, quest: q })) satisfies CreatureQuestRelEntry[]
+        },
+      },
+      {
+        manager: questEnders,
+        load: async (entry) => {
+          const rel = await loadCreatureQuestRelations(entry)
+          return (rel?.enders ?? []).map(q => ({ id: entry, quest: q })) satisfies CreatureQuestRelEntry[]
+        },
+      },
+      {
         manager: onKillRep,
         load: async (entry) => {
           const data = await npcService.getCreatureOnKillRep(entry).catch(() => null)
@@ -869,7 +926,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     // List state
     npcs, loading, currentSearch, listLoaded, gossipMenuIds, gossipMenuIdsLoading,
     // Sub-table managers
-    resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, onKillRep,
+    resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, questStarters, questEnders, onKillRep,
     gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales,
     ...editor,
     editingEntry: editor.editingId,

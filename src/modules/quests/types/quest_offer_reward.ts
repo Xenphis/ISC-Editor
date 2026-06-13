@@ -8,6 +8,6 @@ export interface QuestOfferReward {
   EmoteDelay2: number;
   EmoteDelay3: number;
   EmoteDelay4: number;
-  RewardText: string;
+  RewardText: string | null;
   VerifiedBuild?: number;
 }

@@ -82,6 +82,7 @@ pub struct QuestTemplate {
     #[sqlx(rename = "RewardFactionID5")] pub RewardFactionID5: u32,
     #[sqlx(rename = "RewardFactionValue5")] pub RewardFactionValue5: i32,
     #[sqlx(rename = "RewardFactionOverride5")] pub RewardFactionOverride5: i32,
+    #[sqlx(rename = "RewardFactionFlags")] pub RewardFactionFlags: u32,
     #[sqlx(rename = "TimeAllowed")] pub TimeAllowed: u32,
     #[sqlx(rename = "AllowableRaces")] pub AllowableRaces: u32,
     #[sqlx(rename = "LogTitle")] pub LogTitle: Option<String>,
@@ -109,7 +110,6 @@ pub struct QuestTemplate {
     #[sqlx(rename = "RequiredItemCount4")] pub RequiredItemCount4: u16,
     #[sqlx(rename = "RequiredItemCount5")] pub RequiredItemCount5: u16,
     #[sqlx(rename = "RequiredItemCount6")] pub RequiredItemCount6: u16,
-    #[sqlx(rename = "Unknown0")] pub Unknown0: u32,
     #[sqlx(rename = "ObjectiveText1")] pub ObjectiveText1: Option<String>,
     #[sqlx(rename = "ObjectiveText2")] pub ObjectiveText2: Option<String>,
     #[sqlx(rename = "ObjectiveText3")] pub ObjectiveText3: Option<String>,
@@ -209,18 +209,18 @@ pub async fn save_quest(
         RewardFactionID3,RewardFactionValue3,RewardFactionOverride3,
         RewardFactionID4,RewardFactionValue4,RewardFactionOverride4,
         RewardFactionID5,RewardFactionValue5,RewardFactionOverride5,
-        TimeAllowed,AllowableRaces,
+        RewardFactionFlags,TimeAllowed,AllowableRaces,
         LogTitle,LogDescription,QuestDescription,AreaDescription,QuestCompletionLog,
         RequiredNpcOrGo1,RequiredNpcOrGo2,RequiredNpcOrGo3,RequiredNpcOrGo4,
         RequiredNpcOrGoCount1,RequiredNpcOrGoCount2,RequiredNpcOrGoCount3,RequiredNpcOrGoCount4,
         RequiredItemId1,RequiredItemId2,RequiredItemId3,RequiredItemId4,RequiredItemId5,RequiredItemId6,
         RequiredItemCount1,RequiredItemCount2,RequiredItemCount3,RequiredItemCount4,RequiredItemCount5,RequiredItemCount6,
-        Unknown0,ObjectiveText1,ObjectiveText2,ObjectiveText3,ObjectiveText4,VerifiedBuild
+        ObjectiveText1,ObjectiveText2,ObjectiveText3,ObjectiveText4,VerifiedBuild
     ) VALUES (
         ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
         ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
         ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,
-        ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
+        ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?
     )";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
@@ -249,6 +249,7 @@ pub async fn save_quest(
         .bind(data.RewardFactionID3).bind(data.RewardFactionValue3).bind(data.RewardFactionOverride3)
         .bind(data.RewardFactionID4).bind(data.RewardFactionValue4).bind(data.RewardFactionOverride4)
         .bind(data.RewardFactionID5).bind(data.RewardFactionValue5).bind(data.RewardFactionOverride5)
+        .bind(data.RewardFactionFlags)
         .bind(data.TimeAllowed).bind(data.AllowableRaces)
         .bind(&data.LogTitle).bind(&data.LogDescription).bind(&data.QuestDescription)
         .bind(&data.AreaDescription).bind(&data.QuestCompletionLog)
@@ -260,7 +261,6 @@ pub async fn save_quest(
         .bind(data.RequiredItemId4).bind(data.RequiredItemId5).bind(data.RequiredItemId6)
         .bind(data.RequiredItemCount1).bind(data.RequiredItemCount2).bind(data.RequiredItemCount3)
         .bind(data.RequiredItemCount4).bind(data.RequiredItemCount5).bind(data.RequiredItemCount6)
-        .bind(data.Unknown0)
         .bind(&data.ObjectiveText1).bind(&data.ObjectiveText2)
         .bind(&data.ObjectiveText3).bind(&data.ObjectiveText4)
         .bind(data.VerifiedBuild)

@@ -6,6 +6,7 @@ import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
 import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
 import * as gameObjectService from '@/modules/game_objects/service'
+import type { EntityQuestRelations } from '@/modules/game_objects/service'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -88,6 +89,34 @@ const lootConfig: Omit<CompositeKeyConfig<LootEntry>, 'parentId'> = {
   ],
 }
 
+// ─── Quest relations (gameobject ↔ quest, jonction sans colonne de valeur) ───
+
+export interface GameobjectQuestRelEntry {
+  id: number
+  quest: number
+}
+
+function gameobjectQuestRelConfig(table: string): Omit<CompositeKeyConfig<GameobjectQuestRelEntry>, 'parentId'> {
+  return {
+    table,
+    parentKey: 'id',
+    childKey: 'quest',
+    columns: [],
+    isEqual: () => true,
+    toSqlValues: () => [],
+  }
+}
+
+let gameobjectRelCache: { id: number; promise: Promise<EntityQuestRelations | null> } | null = null
+function loadGameobjectQuestRelations(entry: number): Promise<EntityQuestRelations | null> {
+  if (!gameobjectRelCache || gameobjectRelCache.id !== entry) {
+    const e = { id: entry, promise: gameObjectService.getGameObjectQuestRelations(entry).catch(() => null) }
+    gameobjectRelCache = e
+    e.promise.finally(() => { if (gameobjectRelCache === e) gameobjectRelCache = null })
+  }
+  return gameobjectRelCache.promise
+}
+
 // ─── Store ──────────────────────────────────────────────────────────
 
 export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
@@ -121,6 +150,20 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
     compositeConfig: lootConfig,
     fieldPrefix: 'loot_item',
     summarize: (e) => `Item ${e.Item} (${e.Chance}%)`,
+  })
+
+  const questStarters = new ArraySubTable<GameobjectQuestRelEntry>({
+    tableName: 'gameobject_queststarter',
+    compositeConfig: gameobjectQuestRelConfig('gameobject_queststarter'),
+    fieldPrefix: 'quest_starter',
+    summarize: (e) => `quest ${e.quest}`,
+  })
+
+  const questEnders = new ArraySubTable<GameobjectQuestRelEntry>({
+    tableName: 'gameobject_questender',
+    compositeConfig: gameobjectQuestRelConfig('gameobject_questender'),
+    fieldPrefix: 'quest_ender',
+    summarize: (e) => `quest ${e.quest}`,
   })
 
   const editor = createEntityEditorStore<GameObjectTemplate>({
@@ -158,6 +201,20 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
           })) satisfies LootEntry[]
         },
       },
+      {
+        manager: questStarters,
+        load: async (entry) => {
+          const rel = await loadGameobjectQuestRelations(entry)
+          return (rel?.starters ?? []).map(q => ({ id: entry, quest: q })) satisfies GameobjectQuestRelEntry[]
+        },
+      },
+      {
+        manager: questEnders,
+        load: async (entry) => {
+          const rel = await loadGameobjectQuestRelations(entry)
+          return (rel?.enders ?? []).map(q => ({ id: entry, quest: q })) satisfies GameobjectQuestRelEntry[]
+        },
+      },
     ],
   })
 
@@ -171,7 +228,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
 
   return {
     gameObjects, loading, currentSearch, listLoaded,
-    addon, loot, spawnAddon, spawnOverrides,
+    addon, loot, spawnAddon, spawnOverrides, questStarters, questEnders,
     ...editor,
     editingEntry: editor.editingId,
     markListLoaded, setGameObjects,

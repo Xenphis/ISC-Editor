@@ -28,6 +28,7 @@
       "objectives": "Objectives",
       "rewards": "Rewards",
       "chain": "Chain & Addon",
+      "givers": "Givers",
       "locale": "Translations"
     },
     "groups": {
@@ -76,7 +77,17 @@
       "addon_special": "Special Flags",
       "addon_specialDesc": "Additional special behaviors (quest_template_addon table)",
       "locales": "Translations",
-      "localesDesc": "Translated texts per language (quest_template_locale table)"
+      "localesDesc": "Translated texts per language (quest_template_locale table)",
+      "offer_reward": "Turn-in Text",
+      "offer_rewardDesc": "Text and emotes shown on quest turn-in (quest_offer_reward table)",
+      "request_items": "Completion Text",
+      "request_itemsDesc": "Text and emotes shown when the player returns without all items (quest_request_items table)",
+      "details_emotes": "Offer Emotes",
+      "details_emotesDesc": "Emotes played when the NPC offers the quest (quest_details table)",
+      "offer_reward_locale": "Turn-in Text Translations",
+      "offer_reward_localeDesc": "Localized RewardText per language (quest_offer_reward_locale table)",
+      "request_items_locale": "Completion Text Translations",
+      "request_items_localeDesc": "Localized CompletionText per language (quest_request_items_locale table)"
     },
     "fields": {
       "ID": "ID",
@@ -86,6 +97,7 @@
       "QuestSortID": "Category (Sort ID)",
       "QuestInfoID": "Info ID",
       "SuggestedGroupNum": "Suggested Group",
+      "RewardFactionFlags": "Faction Reward Flags",
       "TimeAllowed": "Time Allowed (s)",
       "AllowableRaces": "Allowable Races",
       "StartItem": "Start Item",
@@ -120,7 +132,6 @@
       "RequiredFactionId2": "Req. Faction 2",
       "RequiredFactionValue1": "Rep. Value 1",
       "RequiredFactionValue2": "Rep. Value 2",
-      "Unknown0": "Unknown0",
       "ObjectiveText1": "Objective Text 1",
       "ObjectiveText2": "Objective Text 2",
       "ObjectiveText3": "Objective Text 3",
@@ -157,7 +168,9 @@
       "RewardMailDelay": "Mail Delay (s)",
       "ProvidedItemCount": "Provided Item Count",
       "SpecialFlags": "Special Flags",
-      "locale": "Locale",
+      "locale": "No language added yet",
+      "locale_missing": "This translation does not exist yet.",
+      "locale_create": "Create translation",
       "locale_title": "Title",
       "locale_details": "Details",
       "locale_objectives": "Objectives",
@@ -166,7 +179,32 @@
       "locale_objectivetext1": "Obj. Text 1",
       "locale_objectivetext2": "Obj. Text 2",
       "locale_objectivetext3": "Obj. Text 3",
-      "locale_objectivetext4": "Obj. Text 4"
+      "locale_objectivetext4": "Obj. Text 4",
+      "RewardText": "Turn-in Text",
+      "CompletionText": "Completion Text",
+      "EmoteOnComplete": "Emote (complete)",
+      "EmoteOnIncomplete": "Emote (incomplete)",
+      "emote": "Emote",
+      "emoteDelay": "Delay (ms)"
     }
+  },
+  "quest_givers": {
+    "creature_starters": "Creatures that start the quest",
+    "creature_startersDesc": "NPCs giving this quest (creature_queststarter)",
+    "gameobject_starters": "Game objects that start the quest",
+    "gameobject_startersDesc": "Game objects giving this quest (gameobject_queststarter)",
+    "creature_enders": "Creatures that end the quest",
+    "creature_endersDesc": "NPCs to turn this quest in to (creature_questender)",
+    "gameobject_enders": "Game objects that end the quest",
+    "gameobject_endersDesc": "Game objects to turn this quest in to (gameobject_questender)",
+    "givers": "Quest Givers",
+    "giversDesc": "Creatures and game objects that start this quest (creature_queststarter, gameobject_queststarter)",
+    "enders": "Quest Enders",
+    "endersDesc": "Creatures and game objects where this quest is turned in (creature_questender, gameobject_questender)",
+    "creature": "Creature",
+    "gameobject": "Game object",
+    "add": "Add",
+    "empty": "No entries",
+    "entryPlaceholder": "Entry ID"
   }
 }
