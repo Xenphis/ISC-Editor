@@ -18,6 +18,12 @@
     "discard": "Discard",
     "execute": "Execute",
     "editorTitle": "Edit",
+    "modelPanel": {
+      "title": "Object Preview",
+      "displayId": "Display ID",
+      "size": "Size",
+      "none": "—"
+    },
     "tooltips": {
       "entry": "Unique identifier for the game object template",
       "name": "Name of the game object as seen by players",

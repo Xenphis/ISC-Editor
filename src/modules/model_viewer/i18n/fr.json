@@ -1,0 +1,23 @@
+{
+  "modelViewer": {
+    "states": {
+      "loading": "Chargement du modèle…",
+      "empty": "Aucun modèle assigné",
+      "error": "Modèle indisponible",
+      "errorHint": "Ce display ID est peut-être custom ou absent de la base de données en ligne.",
+      "localComingSoon": "Le rendu local arrive bientôt",
+      "localNoPath": "Définissez le dossier de données WoW extraites dans les Paramètres",
+      "localPathSet": "Dossier de données : {path}"
+    },
+    "settings": {
+      "title": "Aperçu des modèles",
+      "sourceLabel": "Source de l'aperçu",
+      "sourceOnline": "En ligne",
+      "sourceLocal": "Local",
+      "sourceDesc": "« En ligne » utilise la base de modèles Wowhead (Internet requis). « Local » effectue le rendu depuis vos fichiers client extraits.",
+      "localPathLabel": "Dossier de données extraites",
+      "localPathPlaceholder": "/chemin/vers/donnees/wow/extraites",
+      "localPathDesc": "Dossier contenant les fichiers .m2/.skin/.blp et DBC pré-extraits (utilisé par le rendu local, à venir)."
+    }
+  }
+}

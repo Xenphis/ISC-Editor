@@ -24,6 +24,8 @@ import mapFr from '@/modules/map/i18n/fr.json'
 import mapEn from '@/modules/map/i18n/en.json'
 import lootItemFr from '@/modules/loot_and_item/i18n/fr.json'
 import lootItemEn from '@/modules/loot_and_item/i18n/en.json'
+import modelViewerFr from '@/modules/model_viewer/i18n/fr.json'
+import modelViewerEn from '@/modules/model_viewer/i18n/en.json'
 
 export type AppLocale = 'en' | 'fr'
 
@@ -121,6 +123,14 @@ export const appModules: AppModuleDefinition[] = [
     routes: [
       { path: 'spells', name: 'spells', component: () => import('@/pages/PlaceholderModule.vue') },
     ],
+  },
+  {
+    // Shared capability module (no routes / sidebar entry): contributes the
+    // model-preview viewer, its settings store/service and i18n.
+    id: 'model-viewer',
+    basePath: '/model-viewer',
+    i18n: { en: modelViewerEn, fr: modelViewerFr },
+    routes: [],
   },
   {
     id: 'misc',

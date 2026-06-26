@@ -18,6 +18,12 @@
     "discard": "Annuler les modifications",
     "execute": "Exécuter les modifications",
     "editorTitle": "Éditer",
+    "modelPanel": {
+      "title": "Aperçu de l'objet",
+      "displayId": "Display ID",
+      "size": "Taille",
+      "none": "—"
+    },
     "tooltips": {
       "entry": "Identifiant unique pour le modèle d'objet de jeu",
       "name": "Nom de l'objet de jeu tel que vu par les joueurs",

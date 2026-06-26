@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import ViewInfoPanel from '@/components/ViewInfoPanel.vue'
+import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 
 const { t } = useI18n()
 
@@ -19,11 +20,7 @@ defineProps<{
     icon="pi pi-user"
     storageKey="npc.modelPanel"
   >
-    <!-- Render placeholder — a real model viewer will be mounted here later -->
-    <div class="npc-model-preview">
-      <i class="pi pi-user npc-model-preview-icon"></i>
-      <span class="npc-model-preview-label">{{ t('creature_template.modelPanel.placeholder') }}</span>
-    </div>
+    <ModelViewer kind="creature" :displayId="modelId" />
 
     <dl class="npc-model-meta">
       <div class="npc-model-meta-row">
@@ -43,33 +40,6 @@ defineProps<{
 </template>
 
 <style scoped>
-.npc-model-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  aspect-ratio: 3 / 4;
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgba(6, 182, 212, 0.08), transparent 70%),
-    var(--surface-input);
-  border: 1px dashed var(--border-input);
-  border-radius: 0.5rem;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 1rem;
-}
-
-.npc-model-preview-icon {
-  font-size: 3rem;
-  color: var(--text-placeholder);
-}
-
-.npc-model-preview-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
 .npc-model-meta {
   margin: 0;
   display: flex;

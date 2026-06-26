@@ -17,6 +17,7 @@ import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobj
 import { getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
 import GameObjectSpawnEditor from './GameObjectSpawnEditor.vue'
 import GameObjectLocaleTab from './GameObjectLocaleTab.vue'
+import GameObjectModelPanel from './GameObjectModelPanel.vue'
 import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
 import EditorField from '@/components/EditorField.vue'
 import StyledDataTable from '@/components/StyledDataTable.vue'
@@ -249,16 +250,18 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- SQL Query Panel -->
-    <SqlQueryPanel
-      :diffQuery="store.combinedDiffQuery"
-      :fullQuery="store.combinedFullQuery"
-      :hasChanges="store.combinedHasChanges"
-      :changedFields="store.combinedChangedFields"
-    />
+    <div class="editor-split">
+      <div class="editor-main">
+        <!-- SQL Query Panel -->
+        <SqlQueryPanel
+          :diffQuery="store.combinedDiffQuery"
+          :fullQuery="store.combinedFullQuery"
+          :hasChanges="store.combinedHasChanges"
+          :changedFields="store.combinedChangedFields"
+        />
 
-    <!-- Tabs -->
-    <Tabs value="general">
+        <!-- Tabs -->
+        <Tabs value="general">
       <TabList>
         <Tab value="general">{{ t('gameobjectEditor.tabs.general') }}</Tab>
         <Tab value="data">{{ t('gameobjectEditor.tabs.data') }}</Tab>
@@ -472,11 +475,37 @@ onMounted(async () => {
           </div>
         </TabPanel>
       </TabPanels>
-    </Tabs>
+        </Tabs>
+      </div>
+
+      <!-- Right info panel (collapsible) -->
+      <GameObjectModelPanel
+        :displayId="form.displayId"
+        :size="form.size"
+        :name="form.name"
+      />
+    </div>
   </div>
 </template>
 
 <style scoped>
+.editor-split {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.editor-main {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .editor-split {
+    flex-direction: column;
+  }
+}
+
 .editor-header {
   display: flex;
   justify-content: space-between;

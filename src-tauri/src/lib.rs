@@ -1,6 +1,7 @@
 mod db;
 mod debug;
 mod commands;
+mod model_proxy;
 
 use db::DbState;
 use debug::{DebugState, set_debug_mode, get_debug_mode};
@@ -66,6 +67,13 @@ pub fn run() {
         app.handle().plugin(tauri_plugin_mcp_bridge::init())?;
       }
       Ok(())
+    })
+    // `wowcdn://` proxies the Wowhead model-viewer CDN through the Rust side so
+    // the online model preview isn't blocked by the webview's CORS policy.
+    .register_asynchronous_uri_scheme_protocol("wowcdn", |_app, request, responder| {
+      tauri::async_runtime::spawn(async move {
+        responder.respond(model_proxy::proxy_request(request).await);
+      });
     })
     .invoke_handler(tauri::generate_handler![
       connect_db,

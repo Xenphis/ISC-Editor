@@ -1,0 +1,23 @@
+{
+  "modelViewer": {
+    "states": {
+      "loading": "Loading model…",
+      "empty": "No model assigned",
+      "error": "Model not available",
+      "errorHint": "This display ID may be custom or missing from the online database.",
+      "localComingSoon": "Local rendering is coming soon",
+      "localNoPath": "Set your extracted WoW data folder in Settings",
+      "localPathSet": "Data folder: {path}"
+    },
+    "settings": {
+      "title": "Model preview",
+      "sourceLabel": "Preview source",
+      "sourceOnline": "Online",
+      "sourceLocal": "Local",
+      "sourceDesc": "Online uses the Wowhead model database (internet required). Local renders from your extracted client files.",
+      "localPathLabel": "Extracted data folder",
+      "localPathPlaceholder": "/path/to/extracted/wow/data",
+      "localPathDesc": "Folder containing pre-extracted .m2/.skin/.blp and DBC files (used by local rendering, coming soon)."
+    }
+  }
+}
