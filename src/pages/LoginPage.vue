@@ -7,7 +7,6 @@ import InputNumber from 'primevue/inputnumber'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import Button from 'primevue/button'
-import { connectDb } from '@/services/database'
 import { useConnectionStore } from '@/stores/connectionStore'
 import SettingsDialog from '@/components/SettingsDialog.vue'
 
@@ -35,12 +34,12 @@ async function handleSubmit() {
   error.value = ''
 
   try {
-    await connectDb(host.value, port.value, username.value, password.value, database.value)
-    connection.connect({
+    await connection.connect({
       host: host.value,
       port: port.value,
       username: username.value,
-      database: database.value
+      password: password.value,
+      database: database.value,
     })
     router.push('/npc')
   } catch (e: any) {

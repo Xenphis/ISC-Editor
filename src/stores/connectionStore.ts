@@ -1,7 +1,21 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
-import { disconnectDb } from '@/services/database'
+import { invoke } from '@tauri-apps/api/core'
 import type { ConnectionInfo } from '@/types/connection'
+
+async function connectDb(
+  host: string,
+  port: number,
+  user: string,
+  password: string,
+  database: string
+): Promise<void> {
+  return invoke('connect_db', { host, port, user, password, database })
+}
+
+async function disconnectDb(): Promise<void> {
+  return invoke('disconnect_db')
+}
 
 export const useConnectionStore = defineStore('connection', () => {
   const isConnected = ref(false)
@@ -12,7 +26,8 @@ export const useConnectionStore = defineStore('connection', () => {
     database: '',
   })
 
-  function connect(credentials: { host: string; port: number; username: string; database: string }) {
+  async function connect(credentials: { host: string; port: number; username: string; password: string; database: string }) {
+    await connectDb(credentials.host, credentials.port, credentials.username, credentials.password, credentials.database)
     connectionInfo.host = credentials.host
     connectionInfo.port = credentials.port
     connectionInfo.username = credentials.username
