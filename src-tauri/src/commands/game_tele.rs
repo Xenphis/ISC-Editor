@@ -96,9 +96,7 @@ pub async fn save_game_tele(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO game_tele \
-        (id, position_x, position_y, position_z, orientation, map, name) \
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO game_tele (id, position_x, position_y, position_z, orientation, map, name) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id = VALUES(id), position_x = VALUES(position_x), position_y = VALUES(position_y), position_z = VALUES(position_z), orientation = VALUES(orientation), map = VALUES(map), name = VALUES(name)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.id)

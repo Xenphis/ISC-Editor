@@ -91,7 +91,7 @@ pub async fn save_exploration_basexp(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO exploration_basexp (level, basexp) VALUES (?, ?)";
+    const SQL: &str = "INSERT INTO exploration_basexp (level, basexp) VALUES (?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level), basexp = VALUES(basexp)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.level)

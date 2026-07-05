@@ -105,7 +105,18 @@ pub async fn save_npc_text_locales(
     }
 
     let placeholders = std::iter::repeat("?").take(18).collect::<Vec<_>>().join(", ");
-    let sql = format!("REPLACE INTO npc_text_locale ({}) VALUES ({})", NPC_TEXT_LOCALE_COLUMNS, placeholders);
+    let updates = NPC_TEXT_LOCALE_COLUMNS
+        .split(',')
+        .map(|c| {
+            let c = c.trim();
+            format!("{c} = VALUES({c})")
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    let sql = format!(
+        "INSERT INTO npc_text_locale ({}) VALUES ({}) ON DUPLICATE KEY UPDATE {}",
+        NPC_TEXT_LOCALE_COLUMNS, placeholders, updates
+    );
     for locale in &locales {
         debug_sql!(app, debug, &sql,
             sqlx::query(&sql)

@@ -45,7 +45,7 @@ pub async fn save_gameobject_overrides(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO gameobject_overrides (spawnId, faction, flags) VALUES (?, ?, ?)";
+    const SQL: &str = "INSERT INTO gameobject_overrides (spawnId, faction, flags) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE spawnId = VALUES(spawnId), faction = VALUES(faction), flags = VALUES(flags)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(spawn_id)

@@ -181,7 +181,7 @@ pub async fn save_gameobject(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO gameobject_template (
+    const SQL: &str = "INSERT INTO gameobject_template (
             entry, `type`, displayId, name, IconName, castBarCaption, unk1, size,
             Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7,
             Data8, Data9, Data10, Data11, Data12, Data13, Data14, Data15,
@@ -193,7 +193,7 @@ pub async fn save_gameobject(
             ?, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?, ?, ?, ?, ?,
             ?, ?, ?, ?
-        )";
+        ) ON DUPLICATE KEY UPDATE entry = VALUES(entry), `type` = VALUES(`type`), displayId = VALUES(displayId), name = VALUES(name), IconName = VALUES(IconName), castBarCaption = VALUES(castBarCaption), unk1 = VALUES(unk1), size = VALUES(size), Data0 = VALUES(Data0), Data1 = VALUES(Data1), Data2 = VALUES(Data2), Data3 = VALUES(Data3), Data4 = VALUES(Data4), Data5 = VALUES(Data5), Data6 = VALUES(Data6), Data7 = VALUES(Data7), Data8 = VALUES(Data8), Data9 = VALUES(Data9), Data10 = VALUES(Data10), Data11 = VALUES(Data11), Data12 = VALUES(Data12), Data13 = VALUES(Data13), Data14 = VALUES(Data14), Data15 = VALUES(Data15), Data16 = VALUES(Data16), Data17 = VALUES(Data17), Data18 = VALUES(Data18), Data19 = VALUES(Data19), Data20 = VALUES(Data20), Data21 = VALUES(Data21), Data22 = VALUES(Data22), Data23 = VALUES(Data23), AIName = VALUES(AIName), ScriptName = VALUES(ScriptName), StringId = VALUES(StringId), VerifiedBuild = VALUES(VerifiedBuild)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(data.entry)

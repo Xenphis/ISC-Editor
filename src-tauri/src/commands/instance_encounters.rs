@@ -120,9 +120,7 @@ pub async fn save_instance_encounter(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO instance_encounters \
-        (entry, creditType, creditEntry, lastEncounterDungeon, comment) \
-        VALUES (?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO instance_encounters (entry, creditType, creditEntry, lastEncounterDungeon, comment) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), creditType = VALUES(creditType), creditEntry = VALUES(creditEntry), lastEncounterDungeon = VALUES(lastEncounterDungeon), comment = VALUES(comment)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.entry)
