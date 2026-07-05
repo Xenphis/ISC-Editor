@@ -105,6 +105,8 @@
       "miscAdvancedDesc": "Other advanced settings",
       "spawns": "Instances (creature)",
       "spawnsDesc": "All spawn instances of this creature in the world (creature table)",
+      "viewOnMap": "View on map",
+      "spawnsMapTitle": "Spawn locations",
       "equipment": "Equipment",
       "equipmentDesc": "Creature equipment sets (creature_equip_template table)",
       "creatureSpells": "Spells",

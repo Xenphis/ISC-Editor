@@ -26,6 +26,10 @@
       "outdoorPvP": {
         "title": "PvP en extérieur",
         "description": "Zones de PvP en monde ouvert, objectifs et récompenses"
+      },
+      "mapCalibration": {
+        "title": "Calibration des cartes",
+        "description": "Calibrer les images de zones utilisées par le visualiseur de spawns"
       }
     },
     "comingSoon": "À venir"

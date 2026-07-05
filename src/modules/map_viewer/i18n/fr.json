@@ -1,0 +1,57 @@
+{
+  "mapViewer": {
+    "dialog": {
+      "title": "Visualiseur de carte",
+      "zoneLabel": "Zone",
+      "excludedUnsupported": "{count} spawn(s) sur des cartes non supportées (instances, champs de bataille…)",
+      "excludedUnresolved": "{count} spawn(s) n'ont pas pu être associés à une zone"
+    },
+    "states": {
+      "loading": "Chargement de la carte…",
+      "imageError": "Échec du chargement de l'image de la carte",
+      "noSpawns": "Aucun spawn à afficher",
+      "noneOnSupportedMaps": "Aucun spawn sur une carte supportée (Royaumes de l'Est / Kalimdor)",
+      "unavailable": "Carte indisponible",
+      "unavailableHint": "Cette zone n'est pas encore calibrée. Ouvrez #/map-viewer/calibrate pour la calibrer."
+    },
+    "pin": {
+      "offMap": "En dehors de l'image de la carte (ramené au bord)"
+    },
+    "map": {
+      "zoomIn": "Zoomer",
+      "zoomOut": "Dézoomer",
+      "zoomFit": "Ajuster à la vue"
+    },
+    "calibrate": {
+      "title": "Calibration des cartes de zones",
+      "intro": "Choisissez une zone, capturez deux points de référence en diagonale sur l'image, saisissez leurs coordonnées monde (ex. depuis la table game_tele ou .gps en jeu), puis calculez. Collez le snippet exporté dans data/zone-calibration.ts pour le committer.",
+      "zone": "Image de zone",
+      "status": {
+        "baked": "Calibrée (committée)",
+        "override": "Calibrée (override local)",
+        "none": "Non calibrée"
+      },
+      "point": "Point de référence {id}",
+      "capture": "Capturer sur la carte",
+      "captureActive": "Cliquez sur la carte…",
+      "notCaptured": "Pas encore capturé",
+      "worldX": "X monde",
+      "worldY": "Y monde",
+      "compute": "Calculer la calibration",
+      "testPoint": "Point de test (optionnel)",
+      "refPin": "Référence {id}",
+      "testPin": "Point de test",
+      "export": "Export",
+      "exportHint": "Collez cette ligne dans BAKED_CALIBRATIONS de src/modules/map_viewer/data/zone-calibration.ts",
+      "copy": "Copier",
+      "clearOverride": "Supprimer l'override",
+      "clearPoints": "Effacer les points",
+      "errors": {
+        "incomplete": "Les deux points de référence doivent avoir une position capturée et des coordonnées monde.",
+        "sameWorld": "Les deux points doivent différer sur les deux axes monde — choisissez deux repères en diagonale.",
+        "samePixel": "Les deux positions cliquées sont trop proches sur l'image — choisissez deux repères en diagonale.",
+        "signWarning": "Orientation inattendue : vérifiez que X et Y monde n'ont pas été inversés (.gps affiche X puis Y)."
+      }
+    }
+  }
+}

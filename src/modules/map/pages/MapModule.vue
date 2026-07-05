@@ -58,6 +58,15 @@ const submodules = [
     shadow: 'rgba(96, 165, 250, 0.25)',
     available: false,
   },
+  {
+    key: 'mapCalibration',
+    icon: 'pi pi-map-marker',
+    color: '#10b981',
+    gradient: 'linear-gradient(135deg, #047857, #10b981)',
+    shadow: 'rgba(16, 185, 129, 0.25)',
+    available: true,
+    route: '/map-viewer/calibrate',
+  },
 ]
 </script>
 

@@ -26,6 +26,10 @@
       "outdoorPvP": {
         "title": "Outdoor PvP",
         "description": "Open world PvP zones, objectives and rewards"
+      },
+      "mapCalibration": {
+        "title": "Map Calibration",
+        "description": "Calibrate zone map images used by the spawn map viewer"
       }
     },
     "comingSoon": "Coming soon"

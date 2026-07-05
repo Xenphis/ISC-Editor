@@ -105,6 +105,8 @@
       "miscAdvancedDesc": "Autres paramètres avancés",
       "spawns": "Instances (creature)",
       "spawnsDesc": "Toutes les instances de spawn de cette créature dans le monde (table creature)",
+      "viewOnMap": "Voir sur la carte",
+      "spawnsMapTitle": "Positions d'apparition",
       "equipment": "Équipement",
       "equipmentDesc": "Sets d'équipement de la créature (table creature_equip_template)",
       "creatureSpells": "Sorts",

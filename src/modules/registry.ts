@@ -12,6 +12,7 @@ import { itemRoutes } from '@/modules/item/routes'
 import { questRoutes } from '@/modules/quests/routes'
 import { mapRoutes } from '@/modules/map/routes'
 import { lootAndItemRoutes } from '@/modules/loot_and_item/routes'
+import { mapViewerRoutes } from '@/modules/map_viewer/routes'
 import npcFr from '@/modules/npc/i18n/fr.json'
 import npcEn from '@/modules/npc/i18n/en.json'
 import goFr from '@/modules/game_objects/i18n/fr.json'
@@ -26,6 +27,8 @@ import lootItemFr from '@/modules/loot_and_item/i18n/fr.json'
 import lootItemEn from '@/modules/loot_and_item/i18n/en.json'
 import modelViewerFr from '@/modules/model_viewer/i18n/fr.json'
 import modelViewerEn from '@/modules/model_viewer/i18n/en.json'
+import mapViewerFr from '@/modules/map_viewer/i18n/fr.json'
+import mapViewerEn from '@/modules/map_viewer/i18n/en.json'
 
 export type AppLocale = 'en' | 'fr'
 
@@ -131,6 +134,14 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/model-viewer',
     i18n: { en: modelViewerEn, fr: modelViewerFr },
     routes: [],
+  },
+  {
+    // Shared capability module: zone-map spawn viewer. Its only route is the
+    // calibration debug tool (#/map-viewer/calibrate), not in the sidebar.
+    id: 'map-viewer',
+    basePath: '/map-viewer',
+    i18n: { en: mapViewerEn, fr: mapViewerFr },
+    routes: mapViewerRoutes,
   },
   {
     id: 'misc',

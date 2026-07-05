@@ -1,0 +1,57 @@
+{
+  "mapViewer": {
+    "dialog": {
+      "title": "Map viewer",
+      "zoneLabel": "Zone",
+      "excludedUnsupported": "{count} spawn(s) on unsupported maps (instances, battlegrounds…)",
+      "excludedUnresolved": "{count} spawn(s) could not be matched to a zone"
+    },
+    "states": {
+      "loading": "Loading map…",
+      "imageError": "Failed to load the map image",
+      "noSpawns": "No spawn to display",
+      "noneOnSupportedMaps": "No spawn on a supported map (Eastern Kingdoms / Kalimdor)",
+      "unavailable": "Map unavailable",
+      "unavailableHint": "This zone is not calibrated yet. Open #/map-viewer/calibrate to calibrate it."
+    },
+    "pin": {
+      "offMap": "Outside the map image (clamped to the edge)"
+    },
+    "map": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomFit": "Fit to view"
+    },
+    "calibrate": {
+      "title": "Zone map calibration",
+      "intro": "Pick a zone, capture two diagonal reference points on the image, enter their world coordinates (e.g. from the game_tele table or .gps in game), then compute. Paste the exported snippet into data/zone-calibration.ts to commit it.",
+      "zone": "Zone image",
+      "status": {
+        "baked": "Calibrated (baked)",
+        "override": "Calibrated (local override)",
+        "none": "Not calibrated"
+      },
+      "point": "Reference point {id}",
+      "capture": "Capture on map",
+      "captureActive": "Click the map…",
+      "notCaptured": "Not captured yet",
+      "worldX": "World X",
+      "worldY": "World Y",
+      "compute": "Compute calibration",
+      "testPoint": "Test point (optional)",
+      "refPin": "Reference {id}",
+      "testPin": "Test point",
+      "export": "Export",
+      "exportHint": "Paste this line into BAKED_CALIBRATIONS in src/modules/map_viewer/data/zone-calibration.ts",
+      "copy": "Copy",
+      "clearOverride": "Clear override",
+      "clearPoints": "Clear points",
+      "errors": {
+        "incomplete": "Both reference points need a captured position and world coordinates.",
+        "sameWorld": "The two reference points must differ on both world axes — pick two diagonal landmarks.",
+        "samePixel": "The two clicked positions are too close on the image — pick two diagonal landmarks.",
+        "signWarning": "Unexpected orientation: check that World X and World Y were not swapped (.gps prints X then Y)."
+      }
+    }
+  }
+}
