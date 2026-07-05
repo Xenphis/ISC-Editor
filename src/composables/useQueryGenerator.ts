@@ -200,7 +200,9 @@ export function generateCompositeKeyDiffStatements<T>(
       lines.push(`DELETE FROM \`${table}\` WHERE ${getWhereClause(cur)};`)
       if (!skipInsert || !skipInsert(cur)) {
         const colNames = [`\`${parentKey}\``, `\`${childKey}\``, ...columns.map(c => `\`${c}\``)].join(', ')
-        const vals = [parentId, toSqlLiteral(cur[childKey]), ...toSqlValues(cur)].join(', ')
+        // toSqlValues callers return null for nullable columns; render it as
+        // NULL instead of letting join() turn it into an empty string.
+        const vals = [parentId, toSqlLiteral(cur[childKey]), ...toSqlValues(cur).map(v => v == null ? 'NULL' : v)].join(', ')
         lines.push(`INSERT INTO \`${table}\` (${colNames}) VALUES (${vals});`)
       }
     }
