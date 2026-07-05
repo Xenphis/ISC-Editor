@@ -30,7 +30,7 @@ pub async fn get_creature_classlevelstats(
     app: tauri::AppHandle,
     debug: State<'_, DebugState>,
 ) -> Result<Vec<CreatureClassLevelStats>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM creature_classlevelstats ORDER BY level, class";
     let rows: Vec<CreatureClassLevelStats> = debug_sql!(app, debug, SQL,
@@ -47,7 +47,7 @@ pub async fn get_creature_classlevelstat(
     level: u8,
     class_id: u8,
 ) -> Result<CreatureClassLevelStats, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM creature_classlevelstats WHERE level = ? AND class = ?";
     debug_sql!(app, debug, SQL,
@@ -68,7 +68,7 @@ pub async fn save_creature_classlevelstat(
     debug: State<'_, DebugState>,
     data: CreatureClassLevelStats,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO creature_classlevelstats (level, class, basehp0, basehp1, basehp2, basemana, basearmor, \
          attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level), class = VALUES(class), basehp0 = VALUES(basehp0), basehp1 = VALUES(basehp1), basehp2 = VALUES(basehp2), basemana = VALUES(basemana), basearmor = VALUES(basearmor), \

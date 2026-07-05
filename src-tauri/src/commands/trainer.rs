@@ -50,15 +50,23 @@ pub async fn get_trainers(
     state: State<'_, DbState>,
     app: tauri::AppHandle,
     debug: State<'_, DebugState>,
+    limit: Option<i64>,
+    offset: Option<i64>,
 ) -> Result<Vec<Trainer>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "SELECT * FROM trainer ORDER BY Id";
+    let limit = limit.unwrap_or(1000);
+    let offset = offset.unwrap_or(0);
+
+    const SQL: &str = "SELECT * FROM trainer ORDER BY Id LIMIT ? OFFSET ?";
     debug_sql!(app, debug, SQL,
         sqlx::query_as::<_, Trainer>(SQL)
+            .bind(limit)
+            .bind(offset)
             .fetch_all(pool)
-            .await
+            .await,
+        limit, offset
     ).map_err(|e| format!("Query failed: {}", e))
 }
 
@@ -69,7 +77,7 @@ pub async fn get_trainer(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Trainer, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM trainer WHERE Id = ?";
@@ -90,7 +98,7 @@ pub async fn save_trainer(
     debug: State<'_, DebugState>,
     data: Trainer,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO trainer (Id, Type, Requirement, Greeting, VerifiedBuild) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE Id = VALUES(Id), Type = VALUES(Type), Requirement = VALUES(Requirement), Greeting = VALUES(Greeting), VerifiedBuild = VALUES(VerifiedBuild)";
@@ -117,7 +125,7 @@ pub async fn delete_trainer(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM trainer WHERE Id = ?";
@@ -140,7 +148,7 @@ pub async fn get_trainer_spells(
     debug: State<'_, DebugState>,
     trainer_id: u32,
 ) -> Result<Vec<TrainerSpell>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM trainer_spell WHERE TrainerId = ? ORDER BY SpellId";
@@ -161,7 +169,7 @@ pub async fn save_trainer_spells(
     trainer_id: u32,
     spells: Vec<TrainerSpell>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM trainer_spell WHERE TrainerId = ?";
@@ -216,7 +224,7 @@ pub async fn get_creature_default_trainers(
     debug: State<'_, DebugState>,
     trainer_id: u32,
 ) -> Result<Vec<CreatureDefaultTrainer>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_default_trainer WHERE TrainerId = ? ORDER BY CreatureId";
@@ -237,7 +245,7 @@ pub async fn save_creature_default_trainers(
     trainer_id: u32,
     entries: Vec<CreatureDefaultTrainer>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM creature_default_trainer WHERE TrainerId = ?";

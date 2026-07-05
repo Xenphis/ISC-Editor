@@ -21,7 +21,7 @@ pub async fn get_gameobject_overrides(
     debug: State<'_, DebugState>,
     spawn_id: u32,
 ) -> Result<Option<GameObjectOverrides>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject_overrides WHERE spawnId = ?";
@@ -42,7 +42,7 @@ pub async fn save_gameobject_overrides(
     spawn_id: u32,
     overrides: GameObjectOverrides,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO gameobject_overrides (spawnId, faction, flags) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE spawnId = VALUES(spawnId), faction = VALUES(faction), flags = VALUES(flags)";

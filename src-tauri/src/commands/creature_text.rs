@@ -43,7 +43,7 @@ pub async fn get_creature_texts(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Vec<CreatureText>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_text WHERE CreatureID = ? ORDER BY GroupID, ID";
@@ -64,7 +64,7 @@ pub async fn save_creature_texts(
     entry: u32,
     texts: Vec<CreatureText>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM creature_text WHERE CreatureID = ?";

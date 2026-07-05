@@ -66,7 +66,7 @@ pub async fn get_npc_text_locales(
         return Ok(Vec::new());
     }
 
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let placeholders = ids.iter().map(|_| "?").collect::<Vec<_>>().join(", ");
     let sql = format!("SELECT * FROM npc_text_locale WHERE ID IN ({}) ORDER BY ID, Locale", placeholders);
@@ -89,7 +89,7 @@ pub async fn save_npc_text_locales(
     locales: Vec<NpcTextLocale>,
     deleted: Vec<NpcTextLocaleKey>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM npc_text_locale WHERE ID = ? AND Locale = ?";

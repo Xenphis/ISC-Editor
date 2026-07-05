@@ -180,7 +180,7 @@ pub async fn get_npc_texts(
         return Ok(Vec::new());
     }
 
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let placeholders = ids.iter().map(|_| "?").collect::<Vec<_>>().join(", ");
     let sql = format!("SELECT * FROM npc_text WHERE ID IN ({}) ORDER BY ID", placeholders);
@@ -202,7 +202,7 @@ pub async fn save_npc_texts(
     debug: State<'_, DebugState>,
     texts: Vec<NpcText>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let placeholders = std::iter::repeat("?").take(90).collect::<Vec<_>>().join(", ");
     let updates = NPC_TEXT_COLUMNS

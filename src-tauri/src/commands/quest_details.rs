@@ -29,7 +29,7 @@ pub async fn get_quest_details(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Option<QuestDetails>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_details WHERE ID = ?";
     debug_sql!(app, debug, SQL,

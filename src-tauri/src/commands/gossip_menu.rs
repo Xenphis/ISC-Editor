@@ -25,7 +25,7 @@ pub async fn get_gossip_menu_ids(
     search: Option<String>,
     limit: Option<i64>,
 ) -> Result<Vec<u32>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(100);
 
@@ -64,7 +64,7 @@ pub async fn get_gossip_menu(
     debug: State<'_, DebugState>,
     menu_id: u32,
 ) -> Result<Vec<GossipMenu>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gossip_menu WHERE MenuID = ? ORDER BY TextID";
@@ -85,7 +85,7 @@ pub async fn save_gossip_menu(
     menu_id: u32,
     rows: Vec<GossipMenu>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM gossip_menu WHERE MenuID = ?";

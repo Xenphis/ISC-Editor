@@ -28,7 +28,7 @@ pub async fn get_gossip_menu_option_locales(
     debug: State<'_, DebugState>,
     menu_id: u32,
 ) -> Result<Vec<GossipMenuOptionLocale>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gossip_menu_option_locale WHERE MenuID = ? ORDER BY OptionID, Locale";
@@ -49,7 +49,7 @@ pub async fn save_gossip_menu_option_locales(
     menu_id: u32,
     locales: Vec<GossipMenuOptionLocale>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM gossip_menu_option_locale WHERE MenuID = ?";

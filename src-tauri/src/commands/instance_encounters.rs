@@ -31,7 +31,7 @@ pub async fn get_instance_encounters(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<InstanceEncounterListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -81,7 +81,7 @@ pub async fn get_instance_encounters_by_map(
     debug: State<'_, DebugState>,
     map: u16,
 ) -> Result<Vec<InstanceEncounter>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT DISTINCT ie.entry, ie.creditType, ie.creditEntry, ie.lastEncounterDungeon, ie.comment \
         FROM instance_encounters ie \
@@ -101,7 +101,7 @@ pub async fn get_instance_encounter(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<InstanceEncounter, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM instance_encounters WHERE entry = ?";
     debug_sql!(app, debug, SQL,
@@ -118,7 +118,7 @@ pub async fn save_instance_encounter(
     debug: State<'_, DebugState>,
     data: InstanceEncounter,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO instance_encounters (entry, creditType, creditEntry, lastEncounterDungeon, comment) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), creditType = VALUES(creditType), creditEntry = VALUES(creditEntry), lastEncounterDungeon = VALUES(lastEncounterDungeon), comment = VALUES(comment)";
     debug_sql!(app, debug, SQL,
@@ -142,7 +142,7 @@ pub async fn delete_instance_encounter(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM instance_encounters WHERE entry = ?";
     debug_sql!(app, debug, SQL,

@@ -31,7 +31,7 @@ pub async fn connect_db(
         }
     }
 
-    let mut db = state.pool.lock().await;
+    let mut db = state.pool.write().await;
     *db = Some(pool);
 
     log::info!("Connected to MySQL {}@{}:{}/{}", user, host, port, database);
@@ -40,7 +40,7 @@ pub async fn connect_db(
 
 #[tauri::command]
 pub async fn disconnect_db(state: State<'_, DbState>) -> Result<(), String> {
-    let mut db = state.pool.lock().await;
+    let mut db = state.pool.write().await;
     if let Some(pool) = db.take() {
         pool.close().await;
         log::info!("Disconnected from MySQL");

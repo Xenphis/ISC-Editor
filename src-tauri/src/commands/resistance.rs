@@ -26,7 +26,7 @@ pub async fn get_npc_resistances(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Vec<CreatureTemplateResistance>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_template_resistance WHERE CreatureID = ? ORDER BY School";
@@ -47,7 +47,7 @@ pub async fn save_npc_resistances(
     entry: u32,
     resistances: Vec<CreatureTemplateResistance>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     // Delete all existing resistances for this creature

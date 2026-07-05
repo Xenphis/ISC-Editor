@@ -37,7 +37,7 @@ pub async fn get_quest_addon(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Option<QuestTemplateAddon>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_template_addon WHERE ID = ?";
     debug_sql!(app, debug, SQL,
@@ -54,7 +54,7 @@ pub async fn save_quest_addon(
     id: u32,
     addon: QuestTemplateAddon,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO quest_template_addon (
         ID, MaxLevel, AllowableClasses, SourceSpellID, PrevQuestID, NextQuestID,

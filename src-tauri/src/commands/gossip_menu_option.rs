@@ -46,7 +46,7 @@ pub async fn get_gossip_menu_options(
     debug: State<'_, DebugState>,
     menu_id: u32,
 ) -> Result<Vec<GossipMenuOption>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gossip_menu_option WHERE MenuID = ? ORDER BY OptionID";
@@ -67,7 +67,7 @@ pub async fn save_gossip_menu_options(
     menu_id: u32,
     options: Vec<GossipMenuOption>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM gossip_menu_option WHERE MenuID = ?";

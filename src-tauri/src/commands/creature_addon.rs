@@ -36,7 +36,7 @@ pub async fn get_creature_addon(
     debug: State<'_, DebugState>,
     guid: u32,
 ) -> Result<Option<CreatureAddon>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_addon WHERE guid = ?";
@@ -57,7 +57,7 @@ pub async fn save_creature_addon(
     guid: u32,
     addon: CreatureAddon,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature_addon (guid, path_id, mount, MountCreatureID, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, visibilityDistanceType, auras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guid = VALUES(guid), path_id = VALUES(path_id), mount = VALUES(mount), MountCreatureID = VALUES(MountCreatureID), StandState = VALUES(StandState), AnimTier = VALUES(AnimTier), VisFlags = VALUES(VisFlags), SheathState = VALUES(SheathState), PvPFlags = VALUES(PvPFlags), emote = VALUES(emote), visibilityDistanceType = VALUES(visibilityDistanceType), auras = VALUES(auras)";

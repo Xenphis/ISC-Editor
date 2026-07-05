@@ -206,7 +206,7 @@ pub async fn get_items(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<ItemListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     let limit = limit.unwrap_or(50);
@@ -271,7 +271,7 @@ pub async fn get_item(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<ItemTemplate, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM item_template WHERE entry = ?";
@@ -293,7 +293,7 @@ pub async fn save_item(
     debug: State<'_, DebugState>,
     item: ItemTemplate,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO item_template (
@@ -521,7 +521,7 @@ pub async fn delete_item(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM item_template WHERE entry = ?";

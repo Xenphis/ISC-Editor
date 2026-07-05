@@ -47,7 +47,7 @@ pub async fn get_creature_spawns(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Vec<Creature>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature WHERE id = ? ORDER BY guid";
@@ -112,7 +112,7 @@ pub async fn get_creature_spawns_in_bounds(
     max_y: f32,
     limit: i64,
 ) -> Result<Vec<CreatureSpawnMarker>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT c.guid, c.id, c.position_x, c.position_y, c.position_z, c.orientation, \
@@ -158,7 +158,7 @@ pub async fn save_creature_spawn(
     debug: State<'_, DebugState>,
     creature: Creature,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature (guid, id, map, zoneId, areaId, spawnMask, phaseMask, modelid, equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, wander_distance, currentwaypoint, curhealth, curmana, MovementType, npcflag, unit_flags, dynamicflags, ScriptName, StringId, VerifiedBuild) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guid = VALUES(guid), id = VALUES(id), map = VALUES(map), zoneId = VALUES(zoneId), areaId = VALUES(areaId), spawnMask = VALUES(spawnMask), phaseMask = VALUES(phaseMask), modelid = VALUES(modelid), equipment_id = VALUES(equipment_id), position_x = VALUES(position_x), position_y = VALUES(position_y), position_z = VALUES(position_z), orientation = VALUES(orientation), spawntimesecs = VALUES(spawntimesecs), wander_distance = VALUES(wander_distance), currentwaypoint = VALUES(currentwaypoint), curhealth = VALUES(curhealth), curmana = VALUES(curmana), MovementType = VALUES(MovementType), npcflag = VALUES(npcflag), unit_flags = VALUES(unit_flags), dynamicflags = VALUES(dynamicflags), ScriptName = VALUES(ScriptName), StringId = VALUES(StringId), VerifiedBuild = VALUES(VerifiedBuild)";
@@ -211,7 +211,7 @@ pub async fn delete_creature_spawn(
     debug: State<'_, DebugState>,
     guid: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM creature WHERE guid = ?";

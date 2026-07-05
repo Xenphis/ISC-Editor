@@ -23,7 +23,7 @@ pub async fn get_quest_offer_reward_locales(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Vec<QuestOfferRewardLocale>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_offer_reward_locale WHERE ID = ? ORDER BY locale";
     debug_sql!(app, debug, SQL,
@@ -40,7 +40,7 @@ pub async fn save_quest_offer_reward_locales(
     id: u32,
     locales: Vec<QuestOfferRewardLocale>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM quest_offer_reward_locale WHERE ID = ?";

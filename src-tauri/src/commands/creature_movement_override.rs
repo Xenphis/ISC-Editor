@@ -34,7 +34,7 @@ pub async fn get_creature_movement_override(
     debug: State<'_, DebugState>,
     spawn_id: u32,
 ) -> Result<Option<CreatureMovementOverride>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_movement_override WHERE SpawnId = ?";
@@ -55,7 +55,7 @@ pub async fn save_creature_movement_override(
     spawn_id: u32,
     movement: CreatureMovementOverride,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature_movement_override (SpawnId, Ground, Swim, Flight, Rooted, Chase, `Random`, InteractionPauseTimer) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE SpawnId = VALUES(SpawnId), Ground = VALUES(Ground), Swim = VALUES(Swim), Flight = VALUES(Flight), Rooted = VALUES(Rooted), Chase = VALUES(Chase), `Random` = VALUES(`Random`), InteractionPauseTimer = VALUES(InteractionPauseTimer)";

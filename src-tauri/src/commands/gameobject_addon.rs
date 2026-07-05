@@ -25,7 +25,7 @@ pub async fn get_gameobject_spawn_addon(
     debug: State<'_, DebugState>,
     guid: u32,
 ) -> Result<Option<GameObjectAddon>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject_addon WHERE guid = ?";
@@ -46,7 +46,7 @@ pub async fn save_gameobject_spawn_addon(
     guid: u32,
     addon: GameObjectAddon,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO gameobject_addon (guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guid = VALUES(guid), parent_rotation0 = VALUES(parent_rotation0), parent_rotation1 = VALUES(parent_rotation1), parent_rotation2 = VALUES(parent_rotation2), parent_rotation3 = VALUES(parent_rotation3), invisibilityType = VALUES(invisibilityType), invisibilityValue = VALUES(invisibilityValue)";

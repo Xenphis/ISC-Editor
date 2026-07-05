@@ -132,7 +132,7 @@ pub async fn get_quests(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<QuestListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -174,7 +174,7 @@ pub async fn get_quest(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<QuestTemplate, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_template WHERE ID = ?";
     debug_sql!(app, debug, SQL,
@@ -191,7 +191,7 @@ pub async fn save_quest(
     debug: State<'_, DebugState>,
     data: QuestTemplate,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO quest_template (
         ID,QuestType,QuestLevel,MinLevel,QuestSortID,QuestInfoID,SuggestedGroupNum,
@@ -278,7 +278,7 @@ pub async fn delete_quest(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM quest_template WHERE ID = ?";
     let result = debug_sql!(app, debug, SQL,

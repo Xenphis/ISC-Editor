@@ -28,7 +28,7 @@ pub async fn search_creature_model_tags(
     search: String,
     limit: Option<i64>,
 ) -> Result<Vec<CreatureModelTag>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     let limit = limit.unwrap_or(50);
