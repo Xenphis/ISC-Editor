@@ -331,7 +331,6 @@ export const useQuestModuleStore = defineStore('questModule', () => {
     primaryKey: 'ID',
     createDefault: createDefaultForm,
     load: questService.getQuest,
-    save: questService.saveQuest,
     delete: questService.deleteQuest,
     subTables: [
       {
@@ -357,18 +356,6 @@ export const useQuestModuleStore = defineStore('questModule', () => {
           } satisfies OfferRewardForm
         },
         commitWhenMissing: true,
-        save: async (id, manager) => {
-          const m = manager as typeof offerReward
-          const e = m.newEntry
-          await questService.saveQuestOfferReward(id, {
-            ID: id,
-            Emote1: e.Emote1, Emote2: e.Emote2, Emote3: e.Emote3, Emote4: e.Emote4,
-            EmoteDelay1: e.EmoteDelay1, EmoteDelay2: e.EmoteDelay2,
-            EmoteDelay3: e.EmoteDelay3, EmoteDelay4: e.EmoteDelay4,
-            RewardText: e.RewardText || null,
-            VerifiedBuild: undefined,
-          })
-        },
       },
       {
         manager: requestItems,
@@ -422,24 +409,12 @@ export const useQuestModuleStore = defineStore('questModule', () => {
           const rows = await questService.getQuestOfferRewardLocales(id).catch(() => [])
           return rows.map(r => ({ locale: r.locale, RewardText: r.RewardText ?? null })) satisfies OfferRewardLocaleEntry[]
         },
-        save: async (id, manager) => {
-          const m = manager as typeof offerRewardLocales
-          await questService.saveQuestOfferRewardLocales(id,
-            m.getNewEntries().map(e => ({ ID: id, locale: e.locale, RewardText: e.RewardText, VerifiedBuild: null }))
-          )
-        },
       },
       {
         manager: requestItemsLocales,
         load: async (id) => {
           const rows = await questService.getQuestRequestItemsLocales(id).catch(() => [])
           return rows.map(r => ({ locale: r.locale, CompletionText: r.CompletionText ?? null })) satisfies RequestItemsLocaleEntry[]
-        },
-        save: async (id, manager) => {
-          const m = manager as typeof requestItemsLocales
-          await questService.saveQuestRequestItemsLocales(id,
-            m.getNewEntries().map(e => ({ ID: id, locale: e.locale, CompletionText: e.CompletionText, VerifiedBuild: null }))
-          )
         },
       },
       {

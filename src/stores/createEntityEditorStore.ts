@@ -2,9 +2,11 @@ import { computed, reactive, ref, type Ref } from 'vue'
 import {
   generateDiffQuery,
   generateFullQuery,
+  generateFullQueryStatements,
   getChangedFields,
   type FieldChange,
 } from '@/composables/useQueryGenerator'
+import { executeBatch } from '@/services/sql'
 import type { SessionQuery } from '@/stores/moduleStore'
 import type { SubTableManager, SubTableSnapshot } from '@/stores/SubTableManager'
 
@@ -20,7 +22,6 @@ export interface EntitySubTableBinding<T extends object, TLoaded = unknown> {
   load?: (id: number, formData: T) => Promise<TLoaded>
   mapLoaded?: (data: TLoaded, id: number, formData: T) => unknown
   commitWhenMissing?: boolean
-  save?: (id: number, manager: SubTableManager, formData: T) => Promise<void>
 }
 
 export interface CreateEntityEditorStoreOptions<T extends object> {
@@ -28,7 +29,6 @@ export interface CreateEntityEditorStoreOptions<T extends object> {
   primaryKey: keyof T & string
   createDefault: () => T
   load?: (id: number) => Promise<T>
-  save?: (data: T) => Promise<void>
   delete?: (id: number) => Promise<void>
   subTables?: EntitySubTableBinding<T>[]
   getParentId?: (formData: T, editingId: number | null) => number
@@ -294,12 +294,47 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
     }
   }
 
+  /**
+   * Collect all pending statements (main table + sub-tables) for the current
+   * editor. Existing entities are updated field-by-field; new entities
+   * (editingId == null) are written as a full DELETE + INSERT.
+   */
+  function collectSaveStatements(): string[] {
+    const statements: string[] = []
+
+    if (editingId.value != null && originalValue.value) {
+      const diff = generateDiffQuery(
+        options.tableName,
+        options.primaryKey,
+        originalValue.value as unknown as Record<string, unknown>,
+        formData as unknown as Record<string, unknown>,
+      )
+      if (diff) {
+        statements.push(diff)
+      }
+    } else {
+      statements.push(...generateFullQueryStatements(
+        options.tableName,
+        options.primaryKey,
+        formData as unknown as Record<string, unknown>,
+      ))
+    }
+
+    for (const binding of subTableBindings) {
+      statements.push(...binding.manager.getSqlDiffStatements(getBindingParentId(binding)))
+    }
+
+    return statements
+  }
+
+  // All statements run in a single backend transaction: a failure in any
+  // sub-table save rolls back the whole entity instead of leaving the
+  // database half-updated.
   async function saveCurrent() {
-    if (!options.save) return
-    await options.save(cloneEntity(formData))
-    await Promise.all(subTableBindings.map(binding => (
-      binding.save?.(getBindingParentId(binding), binding.manager, formData)
-    )))
+    const statements = collectSaveStatements()
+    if (statements.length > 0) {
+      await executeBatch(statements)
+    }
     commitEditor()
   }
 

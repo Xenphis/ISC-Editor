@@ -11,6 +11,7 @@ use debug::{DebugState, set_debug_mode, get_debug_mode};
 use minimap::{MinimapState, minimap_load_client, minimap_adt_liquids};
 use minimap::{minimap_adt_wmo_placements, minimap_global_wmo_placements, minimap_wmo_model, minimap_creature_models};
 use commands::addon::{get_npc_addon, save_npc_addon};
+use commands::batch::execute_batch;
 use commands::connection::{connect_db, disconnect_db};
 use commands::creature::{get_creature_spawns, get_creature_spawns_in_bounds, save_creature_spawn, delete_creature_spawn};
 use commands::creature_addon::{get_creature_addon, save_creature_addon};
@@ -104,6 +105,7 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       connect_db,
       disconnect_db,
+      execute_batch,
       get_npcs,
       get_npc,
       save_npc,
