@@ -57,8 +57,57 @@
       "text": "Texte & Gossip",
       "quests": "Quêtes",
       "gossip": "Gossip",
+      "smartAi": "Smart AI",
       "advanced": "Avancé",
       "spawn": "Spawns"
+    },
+    "smart_ai": {
+      "editRow": "Éditer la règle SmartAI",
+      "sections": {
+        "event": "Événement — quand",
+        "action": "Action — faire",
+        "target": "Cible — sur",
+        "conditions": "Conditions — seulement si",
+        "comment": "Commentaire"
+      },
+      "conditions": {
+        "hint": "Les conditions restreignent cet événement. Les groupes sont des alternatives (OU) ; les conditions d'un groupe doivent toutes être vraies (ET).",
+        "empty": "Aucune condition : l'événement se déclenche toujours.",
+        "or": "— ou —",
+        "groupLabel": "Groupe {n} (toutes requises)",
+        "addAnd": "Condition ET",
+        "addOr": "Ajouter un groupe OU",
+        "addFirst": "Ajouter une condition",
+        "type": "Type de condition",
+        "target": "S'applique à",
+        "negate": "NON"
+      },
+      "fields": {
+        "eventType": "Type d'événement",
+        "actionType": "Type d'action",
+        "targetType": "Type de cible",
+        "chance": "Chance",
+        "phaseMask": "Phases",
+        "eventFlags": "Flags d'événement",
+        "comment": "Commentaire"
+      },
+      "autoComment": "Commentaire auto-généré",
+      "actionlistWaitHint": "Étape d'actionlist : attend le délai indiqué après l'étape précédente, puis exécute son action.",
+      "groupEntry": "Script principal (entry {entry})",
+      "groupGuid": "Script de spawn (GUID {guid})",
+      "groupActionlist": "Actionlist temporisée {id}",
+      "linkCycle": "Cycle de liens détecté — imbrication désactivée pour les lignes concernées",
+      "addRow": "Ajouter une règle",
+      "emptyGroup": "Aucune règle",
+      "viewCards": "Cartes",
+      "viewTable": "Tableau",
+      "filterPhases": "Filtrer par phase",
+      "addActionlist": "Nouvelle actionlist",
+      "emptyScript": "Cette créature n'a pas encore de script SmartAI.",
+      "createFirst": "Créer la première règle",
+      "aiNameConflict": "Cette créature utilise l'AIName « {aiName} ». Sauvegarder un script SmartAI le remplacera par SmartAI.",
+      "scriptNameConflict": "Cette créature a le ScriptName « {scriptName} » (script C++). SmartAI peut entrer en conflit avec lui.",
+      "aiNameWillBeSet": "L'AIName sera défini sur « SmartAI » à la sauvegarde."
     },
     "groups": {
       "identification": "Identification",

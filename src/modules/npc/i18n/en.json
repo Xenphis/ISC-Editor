@@ -57,8 +57,57 @@
       "text": "Text & Gossip",
       "quests": "Quests",
       "gossip": "Gossip",
+      "smartAi": "Smart AI",
       "advanced": "Advanced",
       "spawn": "Spawns"
+    },
+    "smart_ai": {
+      "editRow": "Edit SmartAI rule",
+      "sections": {
+        "event": "Event — when",
+        "action": "Action — do",
+        "target": "Target — on",
+        "conditions": "Conditions — only if",
+        "comment": "Comment"
+      },
+      "conditions": {
+        "hint": "Conditions gate this event. Groups are alternatives (OR); conditions inside a group must all match (AND).",
+        "empty": "No conditions: the event always fires.",
+        "or": "— or —",
+        "groupLabel": "Group {n} (all must match)",
+        "addAnd": "AND condition",
+        "addOr": "Add OR group",
+        "addFirst": "Add a condition",
+        "type": "Condition type",
+        "target": "Applies to",
+        "negate": "NOT"
+      },
+      "fields": {
+        "eventType": "Event type",
+        "actionType": "Action type",
+        "targetType": "Target type",
+        "chance": "Chance",
+        "phaseMask": "Phases",
+        "eventFlags": "Event flags",
+        "comment": "Comment"
+      },
+      "autoComment": "Auto-generate comment",
+      "actionlistWaitHint": "Actionlist step: waits for the given delay after the previous step, then runs its action.",
+      "groupEntry": "Main script (entry {entry})",
+      "groupGuid": "Spawn script (GUID {guid})",
+      "groupActionlist": "Timed actionlist {id}",
+      "linkCycle": "Link cycle detected — nesting disabled for the affected rows",
+      "addRow": "Add rule",
+      "emptyGroup": "No rules",
+      "viewCards": "Cards",
+      "viewTable": "Table",
+      "filterPhases": "Filter by phase",
+      "addActionlist": "New actionlist",
+      "emptyScript": "This creature has no SmartAI script yet.",
+      "createFirst": "Create the first rule",
+      "aiNameConflict": "This creature uses AIName \"{aiName}\". Saving a SmartAI script will replace it with SmartAI.",
+      "scriptNameConflict": "This creature has ScriptName \"{scriptName}\" (C++ script). SmartAI may conflict with it.",
+      "aiNameWillBeSet": "AIName will be set to \"SmartAI\" when saving."
     },
     "groups": {
       "identification": "Identification",

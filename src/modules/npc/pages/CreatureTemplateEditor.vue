@@ -22,6 +22,7 @@ import NpcTabAdvanced from './editor/creature_template/AdvancedTab.vue'
 import NpcTabSpawn from './editor/creature_template/SpawnTab.vue'
 import NpcTabText from './editor/creature_template/TextTab.vue'
 import NpcModelPanel from './editor/creature_template/NpcModelPanel.vue'
+import NpcTabSmartAi from './editor/creature_template/SmartAiTab.vue'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -171,6 +172,7 @@ onMounted(async () => {
             <Tab value="behavior">{{ t('creature_template.tabs.behavior') }}</Tab>
             <Tab value="loot">{{ t('creature_template.tabs.loot') }}</Tab>
             <Tab value="text">{{ t('creature_template.tabs.text') }}</Tab>
+            <Tab value="smartai">{{ t('creature_template.tabs.smartAi') }}</Tab>
             <Tab value="advanced">{{ t('creature_template.tabs.advanced') }}</Tab>
             <Tab value="spawn">{{ t('creature_template.tabs.spawn') }} ({{ spawns.length }})</Tab>
           </TabList>
@@ -182,6 +184,7 @@ onMounted(async () => {
             <TabPanel value="behavior"><NpcTabBehavior /></TabPanel>
             <TabPanel value="loot"><NpcTabLoot /></TabPanel>
             <TabPanel value="text"><NpcTabText /></TabPanel>
+            <TabPanel value="smartai"><NpcTabSmartAi /></TabPanel>
             <TabPanel value="advanced"><NpcTabAdvanced /></TabPanel>
             <TabPanel value="spawn">
               <NpcTabSpawn :spawns="spawns" @edit="onEditSpawn" @delete="onDeleteSpawn" />

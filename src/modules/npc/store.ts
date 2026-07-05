@@ -7,6 +7,8 @@ import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
 import { escapeSQL } from '@/utils/sql'
 import * as npcService from '@/modules/npc/service'
 import type { EntityQuestRelations } from '@/modules/npc/service'
+import * as saiService from '@/modules/smart_scripts/service'
+import { SaiConditionsManager, SmartScriptsManager } from '@/modules/smart_scripts/SaiSubTables'
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
 import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
 
@@ -573,6 +575,9 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     deleteMissing: false,
   })
 
+  const smartScripts = new SmartScriptsManager()
+  const saiConditions = new SaiConditionsManager(smartScripts)
+
   const npcTextLocales = new DetachedArraySubTable<NpcTextLocale>({
     tableName: 'npc_text_locale',
     columns: [...npcTextLocaleColumns],
@@ -871,6 +876,30 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
         },
       },
       {
+        manager: smartScripts,
+        load: async (entry) => {
+          const spawns = await npcService.getCreatureSpawns(entry).catch(() => [])
+          const payload = await saiService.loadSmartAiPayload(entry, spawns.map(s => s.guid))
+          // Conditions share the SAI keys, so they are loaded here rather
+          // than in their own binding (bindings load in parallel).
+          const sourceEntries = [...new Set(payload.ownedKeys.map(k => k.entryorguid))]
+          const conditionRows = await saiService.getSmartConditions(sourceEntries).catch(() => [])
+          saiConditions.load(conditionRows)
+          return payload
+        },
+        save: async (entry) => {
+          if (!smartScripts.getSqlDiff(entry)) return
+          await saiService.saveSmartScripts(smartScripts.getDeleteKeys(), smartScripts.newEntries.value)
+        },
+      },
+      {
+        manager: saiConditions,
+        save: async (entry) => {
+          if (!saiConditions.getSqlDiff(entry)) return
+          await saiService.saveSmartConditions(smartScripts.getDeleteKeys(), saiConditions.getNewEntries())
+        },
+      },
+      {
         manager: npcTexts,
         getParentId: () => 0,
         load: async (_entry, formData) => fetchNpcTextsForMenu(getGossipMenuParentId(formData)),
@@ -927,7 +956,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     npcs, loading, currentSearch, listLoaded, gossipMenuIds, gossipMenuIdsLoading,
     // Sub-table managers
     resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, questStarters, questEnders, onKillRep,
-    gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales,
+    gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales, smartScripts, saiConditions,
     ...editor,
     editingEntry: editor.editingId,
     markListLoaded, setNpcs, loadGossipMenuIds, loadGossipMenu, setGossipMenuId, createNextCustomGossipMenu,
