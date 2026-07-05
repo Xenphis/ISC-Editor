@@ -4,7 +4,7 @@ import type { CreatureTemplate } from '@/modules/npc/types/creature_template/cre
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
 import { ReactiveSubTable, ArraySubTable, DetachedArraySubTable } from '@/stores/SubTableManager'
 import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
-import { escapeSQL } from '@/utils/sql'
+import { escapeSQL, sqlText, sqlNumber } from '@/utils/sql'
 import * as npcService from '@/modules/npc/service'
 import type { EntityQuestRelations } from '@/modules/npc/service'
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
@@ -186,14 +186,6 @@ export function createDefaultNpcTextLocale(id: number, locale = ''): NpcTextLoca
     Text7_0: null,
     Text7_1: null,
   }
-}
-
-function sqlText(value: string | null | undefined): string {
-  return value != null && value !== '' ? `'${escapeSQL(value)}'` : 'NULL'
-}
-
-function sqlNumber(value: number | null | undefined): string | number {
-  return value == null ? 'NULL' : value
 }
 
 function createDefaultForm(): CreatureTemplate {
