@@ -164,7 +164,6 @@ export const useItemModuleStore = defineStore('itemModule', () => {
     primaryKey: 'entry',
     createDefault: createDefaultItem,
     load: itemService.getItem,
-    save: itemService.saveItem,
     delete: itemService.deleteItem,
   });
 

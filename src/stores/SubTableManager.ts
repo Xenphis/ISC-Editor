@@ -1,6 +1,6 @@
 import { reactive, ref, markRaw, type Ref, type UnwrapRef } from 'vue'
-import { generateDiffQuery, getChangedFields, type FieldChange } from '@/composables/useQueryGenerator'
-import { generateCompositeKeyDiffSql, type CompositeKeyConfig } from '@/composables/useQueryGenerator'
+import { generateUpsertQuery, getChangedFields, type FieldChange } from '@/composables/useQueryGenerator'
+import { generateCompositeKeyDiffStatements, type CompositeKeyConfig } from '@/composables/useQueryGenerator'
 
 // ─── Common interface ────────────────────────────────────────────────
 
@@ -26,6 +26,8 @@ export interface SubTableManager {
   revert(): void
   /** Generate diff SQL for a given parent entry */
   getSqlDiff(parentId: number): string
+  /** Generate diff SQL as individual statements (for transactional execution) */
+  getSqlDiffStatements(parentId: number): string[]
   /** Get list of changed fields for display */
   getChangedFields(parentId: number): FieldChange[]
 }
@@ -111,25 +113,30 @@ export class ReactiveSubTable<T extends object> implements SubTableManager {
   }
 
   getSqlDiff(parentId: number): string {
+    return this.getSqlDiffStatements(parentId).join('\n')
+  }
+
+  getSqlDiffStatements(parentId: number): string[] {
     if (!this.originalEntry.value) {
-      return ''
+      return []
     }
     if (this.compositeConfig && this.toRows) {
-      return generateCompositeKeyDiffSql(
+      return generateCompositeKeyDiffStatements(
         { ...this.compositeConfig, parentId },
         this.toRows(this.originalEntry.value),
         this.toRows(this.newEntry as unknown as T),
       )
     }
-    // Inject the parent ID as the primary key value for the WHERE clause
+    // Inject the parent ID as the primary key value
     const originalWithKey = { ...this.originalEntry.value, [this.primaryKey]: parentId } as Record<string, unknown>
     const currentWithKey = { ...(this.newEntry as object), [this.primaryKey]: parentId } as Record<string, unknown>
-    return generateDiffQuery(
-      this.tableName,
-      this.primaryKey,
-      originalWithKey,
-      currentWithKey,
-    )
+    const changed = getChangedFields(originalWithKey, currentWithKey, this.primaryKey)
+    if (changed.length === 0) {
+      return []
+    }
+    // Upsert instead of UPDATE: the row may not exist in the database yet
+    // (commitWhenMissing bindings), in which case an UPDATE would no-op.
+    return [generateUpsertQuery(this.tableName, currentWithKey, changed.map(c => c.field))]
   }
 
   getChangedFields(_parentId: number): FieldChange[] {
@@ -255,10 +262,14 @@ export class ArraySubTable<T extends Record<string, any>> implements SubTableMan
   }
 
   getSqlDiff(parentId: number): string {
+    return this.getSqlDiffStatements(parentId).join('\n')
+  }
+
+  getSqlDiffStatements(parentId: number): string[] {
     if (!this.originalEntries.value) {
-      return ''
+      return []
     }
-    return generateCompositeKeyDiffSql(
+    return generateCompositeKeyDiffStatements(
       { ...this.compositeConfig, parentId },
       this.originalEntries.value,
       this.newEntries.value,
@@ -404,9 +415,13 @@ export class DetachedArraySubTable<T extends Record<string, any>> implements Sub
     return this.originalEntries.value.filter(entry => !currentKeys.has(this.getUniqueKey(entry)))
   }
 
-  getSqlDiff(_parentId: number): string {
+  getSqlDiff(parentId: number): string {
+    return this.getSqlDiffStatements(parentId).join('\n')
+  }
+
+  getSqlDiffStatements(_parentId: number): string[] {
     if (!this.originalEntries.value) {
-      return ''
+      return []
     }
 
     const lines: string[] = []
@@ -431,7 +446,7 @@ export class DetachedArraySubTable<T extends Record<string, any>> implements Sub
       }
     }
 
-    return lines.join('\n')
+    return lines
   }
 
   getChangedFields(_parentId: number): FieldChange[] {

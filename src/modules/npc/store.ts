@@ -8,7 +8,7 @@ import { escapeSQL, sqlText, sqlNumber } from '@/utils/sql'
 import * as npcService from '@/modules/npc/service'
 import type { EntityQuestRelations } from '@/modules/npc/service'
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
-import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
+import type { NpcTextLocale } from '@/modules/npc/types/gossip/npc_text_locale'
 
 // ─── Interfaces ──────────────────────────────────────────────────────
 
@@ -677,7 +677,6 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     primaryKey: 'entry',
     createDefault: createDefaultForm,
     load: npcService.getNpc,
-    save: npcService.saveNpc,
     delete: npcService.deleteNpc,
     subTables: [
       {
@@ -790,24 +789,11 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
           return repFields as OnKillRepForm
         },
         commitWhenMissing: true,
-        save: async (entry) => {
-          await npcService.saveCreatureOnKillRep(entry, {
-            creature_id: entry,
-            ...onKillRep.newEntry,
-          })
-        },
       },
       {
         manager: gossipMenus,
         getParentId: getGossipMenuParentId,
         load: async (_entry, formData) => fetchGossipMenuRows(getGossipMenuParentId(formData)),
-        save: async (menuId) => {
-          if (menuId <= 0 || !gossipMenus.getSqlDiff(menuId)) return
-          await npcService.saveGossipMenu(menuId, gossipMenus.getNewEntries().map(row => ({
-            MenuID: menuId,
-            ...row,
-          })))
-        },
       },
       {
         manager: gossipOptions,
@@ -832,13 +818,6 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
             VerifiedBuild: row.VerifiedBuild,
           })) satisfies GossipOptionEntry[]
         },
-        save: async (menuId) => {
-          if (menuId <= 0 || !gossipOptions.getSqlDiff(menuId)) return
-          await npcService.saveGossipMenuOptions(menuId, gossipOptions.getNewEntries().map(row => ({
-            MenuID: menuId,
-            ...row,
-          })))
-        },
       },
       {
         manager: gossipOptionLocales,
@@ -854,32 +833,16 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
             BoxText: row.BoxText,
           })) satisfies GossipOptionLocaleEntry[]
         },
-        save: async (menuId) => {
-          if (menuId <= 0 || !gossipOptionLocales.getSqlDiff(menuId)) return
-          await npcService.saveGossipMenuOptionLocales(menuId, gossipOptionLocales.getNewEntries().map(row => ({
-            MenuID: menuId,
-            ...row,
-          })))
-        },
       },
       {
         manager: npcTexts,
         getParentId: () => 0,
         load: async (_entry, formData) => fetchNpcTextsForMenu(getGossipMenuParentId(formData)),
-        save: async () => {
-          if (!npcTexts.getSqlDiff(0)) return
-          await npcService.saveNpcTexts(npcTexts.getNewEntries())
-        },
       },
       {
         manager: npcTextLocales,
         getParentId: () => 0,
         load: async (_entry, formData) => fetchNpcTextLocalesForMenu(getGossipMenuParentId(formData)),
-        save: async () => {
-          if (!npcTextLocales.getSqlDiff(0)) return
-          const deleted = npcTextLocales.getDeletedEntries().map(row => ({ ID: row.ID, Locale: row.Locale })) satisfies NpcTextLocaleKey[]
-          await npcService.saveNpcTextLocales(npcTextLocales.getNewEntries(), deleted)
-        },
       },
     ],
   })

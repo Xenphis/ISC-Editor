@@ -6,6 +6,7 @@ mod model_proxy;
 use db::DbState;
 use debug::{DebugState, set_debug_mode, get_debug_mode};
 use commands::addon::{get_npc_addon, save_npc_addon};
+use commands::batch::execute_batch;
 use commands::connection::{connect_db, disconnect_db};
 use commands::creature::{get_creature_spawns, save_creature_spawn, delete_creature_spawn};
 use commands::creature_addon::{get_creature_addon, save_creature_addon};
@@ -78,6 +79,7 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       connect_db,
       disconnect_db,
+      execute_batch,
       get_npcs,
       get_npc,
       save_npc,

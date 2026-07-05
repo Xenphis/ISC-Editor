@@ -65,11 +65,11 @@ export function generateDiffQuery(
   return query.toString() + ';'
 }
 
-export function generateFullQuery(
+export function generateFullQueryStatements(
   table: string,
   primaryKey: string,
   row: AnyRow,
-): string {
+): string[] {
   const delQuery = delete_(SQUEL_CONFIG)
     .from(table)
     .where(`\`${primaryKey}\` = ${toSqlLiteral(row[primaryKey])}`)
@@ -83,7 +83,15 @@ export function generateFullQuery(
     .setFieldsRows([literalRow])
     .toString()
 
-  return delQuery + ';\n' + insQuery + ';'
+  return [delQuery + ';', insQuery + ';']
+}
+
+export function generateFullQuery(
+  table: string,
+  primaryKey: string,
+  row: AnyRow,
+): string {
+  return generateFullQueryStatements(table, primaryKey, row).join('\n')
 }
 
 export function generateDeleteQuery(
@@ -95,6 +103,23 @@ export function generateDeleteQuery(
     .from(table)
     .where(`\`${primaryKey}\` = ${toSqlLiteral(id)}`)
     .toString() + ';'
+}
+
+/**
+ * Insert-or-update a full row: inserts it when missing, otherwise only
+ * overwrites the changed columns. Used for single-row sub-tables whose row
+ * may not exist yet (a plain UPDATE would silently no-op).
+ */
+export function generateUpsertQuery(
+  table: string,
+  row: AnyRow,
+  changedColumns: string[],
+): string {
+  const keys = Object.keys(row)
+  const cols = keys.map(k => `\`${k}\``).join(', ')
+  const vals = keys.map(k => toSqlLiteral(row[k])).join(', ')
+  const updates = changedColumns.map(k => `\`${k}\` = VALUES(\`${k}\`)`).join(', ')
+  return `INSERT INTO \`${table}\` (${cols}) VALUES (${vals}) ON DUPLICATE KEY UPDATE ${updates};`
 }
 
 export function getChangedFields(
@@ -141,11 +166,11 @@ export interface CompositeKeyConfig<T> {
   buildWhereClause?: (entry: T, parentId: number) => string
 }
 
-export function generateCompositeKeyDiffSql<T>(
+export function generateCompositeKeyDiffStatements<T>(
   config: CompositeKeyConfig<T>,
   original: T[],
   current: T[],
-): string {
+): string[] {
   const { table, parentKey, parentId, childKey, columns, isEqual, toSqlValues, skipInsert, getUniqueKey, buildWhereClause } = config
   const lines: string[] = []
   const keyFn = getUniqueKey || ((entry: T) => String(entry[childKey]))
@@ -181,7 +206,15 @@ export function generateCompositeKeyDiffSql<T>(
     }
   }
 
-  return lines.join('\n')
+  return lines
+}
+
+export function generateCompositeKeyDiffSql<T>(
+  config: CompositeKeyConfig<T>,
+  original: T[],
+  current: T[],
+): string {
+  return generateCompositeKeyDiffStatements(config, original, current).join('\n')
 }
 
 // --- Vue composable ---

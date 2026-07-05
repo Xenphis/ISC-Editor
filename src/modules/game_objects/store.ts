@@ -218,7 +218,6 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
     primaryKey: 'entry',
     createDefault: createDefaultForm,
     load: gameObjectService.getGameObject,
-    save: gameObjectService.saveGameObject,
     delete: gameObjectService.deleteGameObject,
     subTables: [
       {

@@ -89,7 +89,6 @@ export const useTrainerStore = defineStore('trainer', () => {
     primaryKey: 'Id',
     createDefault: createDefaultForm,
     load: npcService.getTrainer,
-    save: npcService.saveTrainer,
     delete: npcService.deleteTrainer,
     subTables: [
       {
@@ -107,34 +106,12 @@ export const useTrainerStore = defineStore('trainer', () => {
             ReqLevel: row.ReqLevel,
           })) satisfies TrainerSpellEntry[]
         },
-        save: async (id) => {
-          const rows = spells.getNewEntries().map(entry => ({
-            TrainerId: id,
-            SpellId: entry.SpellId,
-            MoneyCost: entry.MoneyCost,
-            ReqSkillLine: entry.ReqSkillLine,
-            ReqSkillRank: entry.ReqSkillRank,
-            ReqAbility1: entry.ReqAbility1,
-            ReqAbility2: entry.ReqAbility2,
-            ReqAbility3: entry.ReqAbility3,
-            ReqLevel: entry.ReqLevel,
-            VerifiedBuild: null,
-          }))
-          await npcService.saveTrainerSpells(id, rows)
-        },
       },
       {
         manager: creatureLinks,
         load: async (id) => {
           const rows = await npcService.getCreatureDefaultTrainers(id).catch(() => [])
           return rows.map(row => ({ CreatureId: row.CreatureId })) satisfies CreatureDefaultTrainerEntry[]
-        },
-        save: async (id) => {
-          const rows = creatureLinks.getNewEntries().map(entry => ({
-            CreatureId: entry.CreatureId,
-            TrainerId: id,
-          }))
-          await npcService.saveCreatureDefaultTrainers(id, rows)
         },
       },
     ],
