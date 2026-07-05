@@ -101,10 +101,10 @@ pub async fn save_access_requirement(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO access_requirement \
-        (mapId, difficulty, level_min, level_max, item, item2, \
-         quest_done_A, quest_done_H, completed_achievement, quest_failed_text, comment) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO access_requirement (mapId, difficulty, level_min, level_max, item, item2, \
+         quest_done_A, quest_done_H, completed_achievement, quest_failed_text, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE mapId = VALUES(mapId), difficulty = VALUES(difficulty), level_min = VALUES(level_min), level_max = VALUES(level_max), item = VALUES(item), item2 = VALUES(item2), \
+         quest_done_A = VALUES(\
+         quest_done_A), quest_done_H = VALUES(quest_done_H), completed_achievement = VALUES(completed_achievement), quest_failed_text = VALUES(quest_failed_text), comment = VALUES(comment)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.mapId)

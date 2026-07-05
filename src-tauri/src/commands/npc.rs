@@ -199,7 +199,7 @@ pub async fn save_npc(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO creature_template (
+    const SQL: &str = "INSERT INTO creature_template (
             entry, difficulty_entry_1, difficulty_entry_2, difficulty_entry_3,
             KillCredit1, KillCredit2, modelid1, modelid2, modelid3, modelid4,
             name, subname, IconName, gossip_menu_id, minlevel, maxlevel,
@@ -223,7 +223,7 @@ pub async fn save_npc(
             ?, ?, ?, ?,
             ?, ?, ?,
             ?, ?, ?
-        )";
+        ) ON DUPLICATE KEY UPDATE entry = VALUES(entry), difficulty_entry_1 = VALUES(difficulty_entry_1), difficulty_entry_2 = VALUES(difficulty_entry_2), difficulty_entry_3 = VALUES(difficulty_entry_3), KillCredit1 = VALUES(KillCredit1), KillCredit2 = VALUES(KillCredit2), modelid1 = VALUES(modelid1), modelid2 = VALUES(modelid2), modelid3 = VALUES(modelid3), modelid4 = VALUES(modelid4), name = VALUES(name), subname = VALUES(subname), IconName = VALUES(IconName), gossip_menu_id = VALUES(gossip_menu_id), minlevel = VALUES(minlevel), maxlevel = VALUES(maxlevel), exp = VALUES(exp), faction = VALUES(faction), npcflag = VALUES(npcflag), speed_walk = VALUES(speed_walk), speed_run = VALUES(speed_run), scale = VALUES(scale), `rank` = VALUES(`rank`), dmgschool = VALUES(dmgschool), BaseAttackTime = VALUES(BaseAttackTime), RangeAttackTime = VALUES(RangeAttackTime), BaseVariance = VALUES(BaseVariance), RangeVariance = VALUES(RangeVariance), unit_class = VALUES(unit_class), unit_flags = VALUES(unit_flags), unit_flags2 = VALUES(unit_flags2), dynamicflags = VALUES(dynamicflags), family = VALUES(family), `type` = VALUES(`type`), type_flags = VALUES(type_flags), lootid = VALUES(lootid), pickpocketloot = VALUES(pickpocketloot), skinloot = VALUES(skinloot), PetSpellDataId = VALUES(PetSpellDataId), VehicleId = VALUES(VehicleId), mingold = VALUES(mingold), maxgold = VALUES(maxgold), AIName = VALUES(AIName), MovementType = VALUES(MovementType), HoverHeight = VALUES(HoverHeight), HealthModifier = VALUES(HealthModifier), ManaModifier = VALUES(ManaModifier), ArmorModifier = VALUES(ArmorModifier), DamageModifier = VALUES(DamageModifier), ExperienceModifier = VALUES(ExperienceModifier), RacialLeader = VALUES(RacialLeader), movementId = VALUES(movementId), RegenHealth = VALUES(RegenHealth), mechanic_immune_mask = VALUES(mechanic_immune_mask), spell_school_immune_mask = VALUES(spell_school_immune_mask), flags_extra = VALUES(flags_extra), ScriptName = VALUES(ScriptName), StringId = VALUES(StringId), VerifiedBuild = VALUES(VerifiedBuild)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(data.entry)

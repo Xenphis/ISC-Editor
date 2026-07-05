@@ -62,13 +62,13 @@ pub async fn save_gameobject_spawn(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO gameobject (
+    const SQL: &str = "INSERT INTO gameobject (
             guid, id, map, zoneId, areaId, spawnMask, phaseMask,
             position_x, position_y, position_z, orientation,
             rotation0, rotation1, rotation2, rotation3,
             spawntimesecs, animprogress, state,
             ScriptName, StringId, VerifiedBuild
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guid = VALUES(guid), id = VALUES(id), map = VALUES(map), zoneId = VALUES(zoneId), areaId = VALUES(areaId), spawnMask = VALUES(spawnMask), phaseMask = VALUES(phaseMask), position_x = VALUES(position_x), position_y = VALUES(position_y), position_z = VALUES(position_z), orientation = VALUES(orientation), rotation0 = VALUES(rotation0), rotation1 = VALUES(rotation1), rotation2 = VALUES(rotation2), rotation3 = VALUES(rotation3), spawntimesecs = VALUES(spawntimesecs), animprogress = VALUES(animprogress), state = VALUES(state), ScriptName = VALUES(ScriptName), StringId = VALUES(StringId), VerifiedBuild = VALUES(VerifiedBuild)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(spawn.guid)

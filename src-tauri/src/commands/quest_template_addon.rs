@@ -56,12 +56,12 @@ pub async fn save_quest_addon(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO quest_template_addon (
+    const SQL: &str = "INSERT INTO quest_template_addon (
         ID, MaxLevel, AllowableClasses, SourceSpellID, PrevQuestID, NextQuestID,
         ExclusiveGroup, BreadcrumbForQuestId, RewardMailTemplateID, RewardMailDelay,
         RequiredSkillID, RequiredSkillPoints, RequiredMinRepFaction, RequiredMaxRepFaction,
         RequiredMinRepValue, RequiredMaxRepValue, ProvidedItemCount, SpecialFlags
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE ID = VALUES(ID), MaxLevel = VALUES(MaxLevel), AllowableClasses = VALUES(AllowableClasses), SourceSpellID = VALUES(SourceSpellID), PrevQuestID = VALUES(PrevQuestID), NextQuestID = VALUES(NextQuestID), ExclusiveGroup = VALUES(ExclusiveGroup), BreadcrumbForQuestId = VALUES(BreadcrumbForQuestId), RewardMailTemplateID = VALUES(RewardMailTemplateID), RewardMailDelay = VALUES(RewardMailDelay), RequiredSkillID = VALUES(RequiredSkillID), RequiredSkillPoints = VALUES(RequiredSkillPoints), RequiredMinRepFaction = VALUES(RequiredMinRepFaction), RequiredMaxRepFaction = VALUES(RequiredMaxRepFaction), RequiredMinRepValue = VALUES(RequiredMinRepValue), RequiredMaxRepValue = VALUES(RequiredMaxRepValue), ProvidedItemCount = VALUES(ProvidedItemCount), SpecialFlags = VALUES(SpecialFlags)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(id)

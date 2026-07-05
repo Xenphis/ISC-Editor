@@ -49,7 +49,7 @@ pub async fn save_gameobject_spawn_addon(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO gameobject_addon (guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO gameobject_addon (guid, parent_rotation0, parent_rotation1, parent_rotation2, parent_rotation3, invisibilityType, invisibilityValue) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE guid = VALUES(guid), parent_rotation0 = VALUES(parent_rotation0), parent_rotation1 = VALUES(parent_rotation1), parent_rotation2 = VALUES(parent_rotation2), parent_rotation3 = VALUES(parent_rotation3), invisibilityType = VALUES(invisibilityType), invisibilityValue = VALUES(invisibilityValue)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(guid)

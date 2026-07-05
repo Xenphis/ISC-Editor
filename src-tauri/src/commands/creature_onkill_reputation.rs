@@ -61,10 +61,10 @@ pub async fn save_creature_onkill_reputation(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO creature_onkill_reputation \
-        (creature_id, RewOnKillRepFaction1, RewOnKillRepFaction2, MaxStanding1, IsTeamAward1, \
-        RewOnKillRepValue1, MaxStanding2, IsTeamAward2, RewOnKillRepValue2, TeamDependent) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO creature_onkill_reputation (creature_id, RewOnKillRepFaction1, RewOnKillRepFaction2, MaxStanding1, IsTeamAward1, \
+        RewOnKillRepValue1, MaxStanding2, IsTeamAward2, RewOnKillRepValue2, TeamDependent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE creature_id = VALUES(creature_id), RewOnKillRepFaction1 = VALUES(RewOnKillRepFaction1), RewOnKillRepFaction2 = VALUES(RewOnKillRepFaction2), MaxStanding1 = VALUES(MaxStanding1), IsTeamAward1 = VALUES(IsTeamAward1), \
+        RewOnKillRepValue1 = VALUES(\
+        RewOnKillRepValue1), MaxStanding2 = VALUES(MaxStanding2), IsTeamAward2 = VALUES(IsTeamAward2), RewOnKillRepValue2 = VALUES(RewOnKillRepValue2), TeamDependent = VALUES(TeamDependent)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(entry)

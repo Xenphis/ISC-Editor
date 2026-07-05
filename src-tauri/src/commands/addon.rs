@@ -60,7 +60,7 @@ pub async fn save_npc_addon(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO creature_template_addon (entry, path_id, mount, MountCreatureID, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, visibilityDistanceType, auras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO creature_template_addon (entry, path_id, mount, MountCreatureID, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, visibilityDistanceType, auras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), path_id = VALUES(path_id), mount = VALUES(mount), MountCreatureID = VALUES(MountCreatureID), StandState = VALUES(StandState), AnimTier = VALUES(AnimTier), VisFlags = VALUES(VisFlags), SheathState = VALUES(SheathState), PvPFlags = VALUES(PvPFlags), emote = VALUES(emote), visibilityDistanceType = VALUES(visibilityDistanceType), auras = VALUES(auras)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(entry)

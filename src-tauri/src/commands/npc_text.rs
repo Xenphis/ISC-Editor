@@ -205,7 +205,18 @@ pub async fn save_npc_texts(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let placeholders = std::iter::repeat("?").take(90).collect::<Vec<_>>().join(", ");
-    let sql = format!("REPLACE INTO npc_text ({}) VALUES ({})", NPC_TEXT_COLUMNS, placeholders);
+    let updates = NPC_TEXT_COLUMNS
+        .split(',')
+        .map(|c| {
+            let c = c.trim();
+            format!("{c} = VALUES({c})")
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    let sql = format!(
+        "INSERT INTO npc_text ({}) VALUES ({}) ON DUPLICATE KEY UPDATE {}",
+        NPC_TEXT_COLUMNS, placeholders, updates
+    );
 
     for text in &texts {
         debug_sql!(app, debug, &sql,

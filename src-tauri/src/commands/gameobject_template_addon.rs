@@ -51,7 +51,7 @@ pub async fn save_gameobject_addon(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO gameobject_template_addon (entry, faction, flags, mingold, maxgold, artkit0, artkit1, artkit2, artkit3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO gameobject_template_addon (entry, faction, flags, mingold, maxgold, artkit0, artkit1, artkit2, artkit3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), faction = VALUES(faction), flags = VALUES(flags), mingold = VALUES(mingold), maxgold = VALUES(maxgold), artkit0 = VALUES(artkit0), artkit1 = VALUES(artkit1), artkit2 = VALUES(artkit2), artkit3 = VALUES(artkit3)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(entry)

@@ -70,10 +70,10 @@ pub async fn save_creature_classlevelstat(
 ) -> Result<(), String> {
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
-    const SQL: &str = "REPLACE INTO creature_classlevelstats \
-        (level, class, basehp0, basehp1, basehp2, basemana, basearmor, \
-         attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2, comment) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO creature_classlevelstats (level, class, basehp0, basehp1, basehp2, basemana, basearmor, \
+         attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level), class = VALUES(class), basehp0 = VALUES(basehp0), basehp1 = VALUES(basehp1), basehp2 = VALUES(basehp2), basemana = VALUES(basemana), basearmor = VALUES(basearmor), \
+         attackpower = VALUES(\
+         attackpower), rangedattackpower = VALUES(rangedattackpower), damage_base = VALUES(damage_base), damage_exp1 = VALUES(damage_exp1), damage_exp2 = VALUES(damage_exp2), comment = VALUES(comment)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.level)

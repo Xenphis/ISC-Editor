@@ -93,7 +93,7 @@ pub async fn save_trainer(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO trainer (Id, Type, Requirement, Greeting, VerifiedBuild) VALUES (?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO trainer (Id, Type, Requirement, Greeting, VerifiedBuild) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE Id = VALUES(Id), Type = VALUES(Type), Requirement = VALUES(Requirement), Greeting = VALUES(Greeting), VerifiedBuild = VALUES(VerifiedBuild)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.Id)

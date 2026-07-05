@@ -58,7 +58,7 @@ pub async fn save_npc_movement(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
-    const SQL: &str = "REPLACE INTO creature_template_movement (CreatureId, Ground, Swim, Flight, Rooted, Chase, `Random`, InteractionPauseTimer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    const SQL: &str = "INSERT INTO creature_template_movement (CreatureId, Ground, Swim, Flight, Rooted, Chase, `Random`, InteractionPauseTimer) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE CreatureId = VALUES(CreatureId), Ground = VALUES(Ground), Swim = VALUES(Swim), Flight = VALUES(Flight), Rooted = VALUES(Rooted), Chase = VALUES(Chase), `Random` = VALUES(`Random`), InteractionPauseTimer = VALUES(InteractionPauseTimer)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
         .bind(entry)
