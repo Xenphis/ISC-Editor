@@ -27,7 +27,7 @@ pub async fn get_gameobject_addon(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Option<GameObjectTemplateAddon>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject_template_addon WHERE entry = ?";
@@ -48,7 +48,7 @@ pub async fn save_gameobject_addon(
     entry: u32,
     addon: GameObjectTemplateAddon,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO gameobject_template_addon (entry, faction, flags, mingold, maxgold, artkit0, artkit1, artkit2, artkit3) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), faction = VALUES(faction), flags = VALUES(flags), mingold = VALUES(mingold), maxgold = VALUES(maxgold), artkit0 = VALUES(artkit0), artkit1 = VALUES(artkit1), artkit2 = VALUES(artkit2), artkit3 = VALUES(artkit3)";

@@ -31,7 +31,7 @@ pub async fn get_instance_spawn_groups(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<InstanceSpawnGroupListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -75,7 +75,7 @@ pub async fn get_instance_spawn_groups_by_map(
     debug: State<'_, DebugState>,
     map: u16,
 ) -> Result<Vec<InstanceSpawnGroup>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM instance_spawn_groups WHERE instanceMapId = ? ORDER BY bossStateId, bossStates, spawnGroupId";
     let rows: Vec<InstanceSpawnGroup> = debug_sql!(app, debug, SQL,
@@ -95,7 +95,7 @@ pub async fn get_instance_spawn_group(
     boss_states: u8,
     spawn_group_id: u32,
 ) -> Result<InstanceSpawnGroup, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM instance_spawn_groups WHERE instanceMapId = ? AND bossStateId = ? AND bossStates = ? AND spawnGroupId = ?";
     debug_sql!(app, debug, SQL,
@@ -117,7 +117,7 @@ pub async fn save_instance_spawn_group(
     debug: State<'_, DebugState>,
     data: InstanceSpawnGroup,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO instance_spawn_groups (instanceMapId, bossStateId, bossStates, spawnGroupId, flags) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE instanceMapId = VALUES(instanceMapId), bossStateId = VALUES(bossStateId), bossStates = VALUES(bossStates), spawnGroupId = VALUES(spawnGroupId), flags = VALUES(flags)";
     debug_sql!(app, debug, SQL,
@@ -144,7 +144,7 @@ pub async fn delete_instance_spawn_group(
     boss_states: u8,
     spawn_group_id: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM instance_spawn_groups WHERE instanceMapId = ? AND bossStateId = ? AND bossStates = ? AND spawnGroupId = ?";
     debug_sql!(app, debug, SQL,

@@ -37,7 +37,7 @@ pub async fn get_access_requirements(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<AccessRequirementListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -82,7 +82,7 @@ pub async fn get_access_requirement(
     map_id: u32,
     difficulty: u8,
 ) -> Result<AccessRequirement, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM access_requirement WHERE mapId = ? AND difficulty = ?";
     debug_sql!(app, debug, SQL,
@@ -99,7 +99,7 @@ pub async fn save_access_requirement(
     debug: State<'_, DebugState>,
     data: AccessRequirement,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO access_requirement (mapId, difficulty, level_min, level_max, item, item2, \
          quest_done_A, quest_done_H, completed_achievement, quest_failed_text, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE mapId = VALUES(mapId), difficulty = VALUES(difficulty), level_min = VALUES(level_min), level_max = VALUES(level_max), item = VALUES(item), item2 = VALUES(item2), \
@@ -135,7 +135,7 @@ pub async fn delete_access_requirement(
     map_id: u32,
     difficulty: u8,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM access_requirement WHERE mapId = ? AND difficulty = ?";
     debug_sql!(app, debug, SQL,

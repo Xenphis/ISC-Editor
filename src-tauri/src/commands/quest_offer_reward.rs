@@ -30,7 +30,7 @@ pub async fn get_quest_offer_reward(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Option<QuestOfferReward>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_offer_reward WHERE ID = ?";
     debug_sql!(app, debug, SQL,
@@ -47,7 +47,7 @@ pub async fn save_quest_offer_reward(
     id: u32,
     data: QuestOfferReward,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO quest_offer_reward (ID, Emote1, Emote2, Emote3, Emote4, EmoteDelay1, EmoteDelay2, EmoteDelay3, EmoteDelay4, RewardText, VerifiedBuild) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0) ON DUPLICATE KEY UPDATE ID = VALUES(ID), Emote1 = VALUES(Emote1), Emote2 = VALUES(Emote2), Emote3 = VALUES(Emote3), Emote4 = VALUES(Emote4), EmoteDelay1 = VALUES(EmoteDelay1), EmoteDelay2 = VALUES(EmoteDelay2), EmoteDelay3 = VALUES(EmoteDelay3), EmoteDelay4 = VALUES(EmoteDelay4), RewardText = VALUES(RewardText), VerifiedBuild = VALUES(VerifiedBuild)";
     debug_sql!(app, debug, SQL,

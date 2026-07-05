@@ -92,7 +92,7 @@ pub async fn get_gameobjects(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<GameObjectListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     let limit = limit.unwrap_or(50);
@@ -157,7 +157,7 @@ pub async fn get_gameobject(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<GameObjectTemplate, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject_template WHERE entry = ?";
@@ -178,7 +178,7 @@ pub async fn save_gameobject(
     debug: State<'_, DebugState>,
     data: GameObjectTemplate,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO gameobject_template (
@@ -234,7 +234,7 @@ pub async fn delete_gameobject(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM gameobject_template WHERE entry = ?";

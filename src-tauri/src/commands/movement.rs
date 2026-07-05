@@ -34,7 +34,7 @@ pub async fn get_npc_movement(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Option<CreatureTemplateMovement>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_template_movement WHERE CreatureId = ?";
@@ -55,7 +55,7 @@ pub async fn save_npc_movement(
     entry: u32,
     movement: CreatureTemplateMovement,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature_template_movement (CreatureId, Ground, Swim, Flight, Rooted, Chase, `Random`, InteractionPauseTimer) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE CreatureId = VALUES(CreatureId), Ground = VALUES(Ground), Swim = VALUES(Swim), Flight = VALUES(Flight), Rooted = VALUES(Rooted), Chase = VALUES(Chase), `Random` = VALUES(`Random`), InteractionPauseTimer = VALUES(InteractionPauseTimer)";

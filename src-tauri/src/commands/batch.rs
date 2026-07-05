@@ -16,7 +16,7 @@ pub async fn execute_batch(
         return Ok(());
     }
 
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     let mut tx = pool

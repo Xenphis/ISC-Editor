@@ -33,7 +33,7 @@ pub async fn get_game_teles(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<GameTeleListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -77,7 +77,7 @@ pub async fn get_game_tele(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<GameTele, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM game_tele WHERE id = ?";
     debug_sql!(app, debug, SQL,
@@ -94,7 +94,7 @@ pub async fn save_game_tele(
     debug: State<'_, DebugState>,
     data: GameTele,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO game_tele (id, position_x, position_y, position_z, orientation, map, name) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE id = VALUES(id), position_x = VALUES(position_x), position_y = VALUES(position_y), position_z = VALUES(position_z), orientation = VALUES(orientation), map = VALUES(map), name = VALUES(name)";
     debug_sql!(app, debug, SQL,
@@ -121,7 +121,7 @@ pub async fn delete_game_tele(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM game_tele WHERE id = ?";
     debug_sql!(app, debug, SQL,

@@ -26,7 +26,7 @@ pub async fn get_creature_questitem(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Vec<CreatureQuestItem>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_questitem WHERE CreatureEntry = ? ORDER BY Idx";
@@ -47,7 +47,7 @@ pub async fn save_creature_questitem(
     entry: u32,
     items: Vec<CreatureQuestItem>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM creature_questitem WHERE CreatureEntry = ?";

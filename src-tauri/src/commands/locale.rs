@@ -26,7 +26,7 @@ pub async fn get_npc_locales(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Vec<CreatureTemplateLocale>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_template_locale WHERE entry = ?";
@@ -47,7 +47,7 @@ pub async fn save_npc_locales(
     entry: u32,
     locales: Vec<CreatureTemplateLocale>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     // Delete all existing locale rows for this entry

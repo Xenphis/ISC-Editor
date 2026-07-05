@@ -27,7 +27,7 @@ pub async fn get_quest_relations(
     debug: State<'_, DebugState>,
     quest: u32,
 ) -> Result<QuestRelations, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_CS: &str = "SELECT id FROM creature_queststarter WHERE quest = ? ORDER BY id";
@@ -58,7 +58,7 @@ pub async fn get_creature_quest_relations(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<EntityQuestRelations, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL_S: &str = "SELECT quest FROM creature_queststarter WHERE id = ? ORDER BY quest";
     const SQL_E: &str = "SELECT quest FROM creature_questender WHERE id = ? ORDER BY quest";
@@ -78,7 +78,7 @@ pub async fn get_gameobject_quest_relations(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<EntityQuestRelations, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL_S: &str = "SELECT quest FROM gameobject_queststarter WHERE id = ? ORDER BY quest";
     const SQL_E: &str = "SELECT quest FROM gameobject_questender WHERE id = ? ORDER BY quest";

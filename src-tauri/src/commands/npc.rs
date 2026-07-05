@@ -110,7 +110,7 @@ pub async fn get_npcs(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<NpcListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     let limit = limit.unwrap_or(50);
@@ -175,7 +175,7 @@ pub async fn get_npc(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<CreatureTemplate, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_template WHERE entry = ?";
@@ -196,7 +196,7 @@ pub async fn save_npc(
     debug: State<'_, DebugState>,
     data: CreatureTemplate,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature_template (
@@ -312,7 +312,7 @@ pub async fn delete_npc(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM creature_template WHERE entry = ?";

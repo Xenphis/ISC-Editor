@@ -23,7 +23,7 @@ pub async fn get_quest_request_items_locales(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Vec<QuestRequestItemsLocale>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM quest_request_items_locale WHERE ID = ? ORDER BY locale";
     debug_sql!(app, debug, SQL,
@@ -40,7 +40,7 @@ pub async fn save_quest_request_items_locales(
     id: u32,
     locales: Vec<QuestRequestItemsLocale>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM quest_request_items_locale WHERE ID = ?";

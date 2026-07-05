@@ -231,8 +231,8 @@ export async function saveCreatureClassLevelStat(data: CreatureClassLevelStats):
 
 // ─── trainer ─────────────────────────────────────────────────────────────────
 
-export async function getTrainers(): Promise<Trainer[]> {
-  return invoke('get_trainers')
+export async function getTrainers(limit?: number, offset?: number): Promise<Trainer[]> {
+  return invoke('get_trainers', { limit, offset })
 }
 
 export async function getTrainer(id: number): Promise<Trainer> {

@@ -1,16 +1,19 @@
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 
+// RwLock instead of Mutex: every command only needs a shared read of the
+// pool (MySqlPool is itself thread-safe); the write lock is only taken on
+// connect/disconnect.
 pub struct DbState {
-    pub pool: Arc<Mutex<Option<MySqlPool>>>,
+    pub pool: Arc<RwLock<Option<MySqlPool>>>,
 }
 
 impl DbState {
     pub fn new() -> Self {
         Self {
-            pool: Arc::new(Mutex::new(None)),
+            pool: Arc::new(RwLock::new(None)),
         }
     }
 }
@@ -30,7 +33,7 @@ pub async fn connect(
     log::info!("Connecting to: mysql://{}:***@{}:{}/{}", user, host, port, database);
 
     MySqlPoolOptions::new()
-        .max_connections(5)
+        .max_connections(20)
         .acquire_timeout(std::time::Duration::from_secs(5))
         .connect(&url)
         .await

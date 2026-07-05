@@ -39,7 +39,7 @@ pub async fn get_gameobject_spawns(
     debug: State<'_, DebugState>,
     id: u32,
 ) -> Result<Vec<GameObjectSpawn>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject WHERE id = ? ORDER BY guid";
@@ -59,7 +59,7 @@ pub async fn save_gameobject_spawn(
     debug: State<'_, DebugState>,
     spawn: GameObjectSpawn,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO gameobject (
@@ -112,7 +112,7 @@ pub async fn delete_gameobject_spawn(
     debug: State<'_, DebugState>,
     guid: u32,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "DELETE FROM gameobject WHERE guid = ?";

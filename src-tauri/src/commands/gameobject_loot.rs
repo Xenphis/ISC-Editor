@@ -38,7 +38,7 @@ pub async fn get_gameobject_loot(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Vec<GameObjectLootTemplate>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM gameobject_loot_template WHERE Entry = ? ORDER BY Item";
@@ -59,7 +59,7 @@ pub async fn save_gameobject_loot(
     entry: u32,
     loot: Vec<GameObjectLootTemplate>,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL_DELETE: &str = "DELETE FROM gameobject_loot_template WHERE Entry = ?";

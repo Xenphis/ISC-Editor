@@ -36,7 +36,7 @@ pub async fn get_npc_addon(
     debug: State<'_, DebugState>,
     entry: u32,
 ) -> Result<Option<CreatureTemplateAddon>, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "SELECT * FROM creature_template_addon WHERE entry = ?";
@@ -57,7 +57,7 @@ pub async fn save_npc_addon(
     entry: u32,
     addon: CreatureTemplateAddon,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
 
     const SQL: &str = "INSERT INTO creature_template_addon (entry, path_id, mount, MountCreatureID, StandState, AnimTier, VisFlags, SheathState, PvPFlags, emote, visibilityDistanceType, auras) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE entry = VALUES(entry), path_id = VALUES(path_id), mount = VALUES(mount), MountCreatureID = VALUES(MountCreatureID), StandState = VALUES(StandState), AnimTier = VALUES(AnimTier), VisFlags = VALUES(VisFlags), SheathState = VALUES(SheathState), PvPFlags = VALUES(PvPFlags), emote = VALUES(emote), visibilityDistanceType = VALUES(visibilityDistanceType), auras = VALUES(auras)";

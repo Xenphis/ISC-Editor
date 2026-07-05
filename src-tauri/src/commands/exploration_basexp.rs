@@ -28,7 +28,7 @@ pub async fn get_exploration_basexps(
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<ExplorationBasexpListResult, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
@@ -72,7 +72,7 @@ pub async fn get_exploration_basexp(
     debug: State<'_, DebugState>,
     level: u8,
 ) -> Result<ExplorationBasexp, String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "SELECT * FROM exploration_basexp WHERE level = ?";
     debug_sql!(app, debug, SQL,
@@ -89,7 +89,7 @@ pub async fn save_exploration_basexp(
     debug: State<'_, DebugState>,
     data: ExplorationBasexp,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "INSERT INTO exploration_basexp (level, basexp) VALUES (?, ?) ON DUPLICATE KEY UPDATE level = VALUES(level), basexp = VALUES(basexp)";
     debug_sql!(app, debug, SQL,
@@ -110,7 +110,7 @@ pub async fn delete_exploration_basexp(
     debug: State<'_, DebugState>,
     level: u8,
 ) -> Result<(), String> {
-    let db = state.pool.lock().await;
+    let db = state.pool.read().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "DELETE FROM exploration_basexp WHERE level = ?";
     debug_sql!(app, debug, SQL,
