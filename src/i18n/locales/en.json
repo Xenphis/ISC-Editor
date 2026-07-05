@@ -111,7 +111,9 @@
     "filter": "Filter",
     "noEntries": "No entries",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loadError": "Failed to load {source}",
+    "saveError": "Failed to save changes"
   },
   "settings": {
     "title": "Settings",

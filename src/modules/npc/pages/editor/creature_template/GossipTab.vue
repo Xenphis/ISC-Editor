@@ -44,49 +44,22 @@ const detailDialogPt = {
   mask: { style: 'background: rgba(0,0,0,0.6);' },
 }
 
-const gossipIconOptions = [
-  { value: 0, label: 'Chat' },
-  { value: 1, label: 'Vendor' },
-  { value: 2, label: 'Taxi' },
-  { value: 3, label: 'Trainer' },
-  { value: 4, label: 'Interact 1' },
-  { value: 5, label: 'Interact 2' },
-  { value: 6, label: 'Money Bag' },
-  { value: 7, label: 'Talk' },
-  { value: 8, label: 'Tabard' },
-  { value: 9, label: 'Battle' },
-  { value: 10, label: 'Dot' },
-]
+const GOSSIP_ICON_COUNT = 11
+const GOSSIP_TYPE_COUNT = 21
 
-const gossipTypeOptions = [
-  { value: 0, label: 'None' },
-  { value: 1, label: 'Gossip' },
-  { value: 2, label: 'Questgiver' },
-  { value: 3, label: 'Vendor' },
-  { value: 4, label: 'Taxi' },
-  { value: 5, label: 'Trainer' },
-  { value: 6, label: 'Spirit Healer' },
-  { value: 7, label: 'Spirit Guide' },
-  { value: 8, label: 'Innkeeper' },
-  { value: 9, label: 'Banker' },
-  { value: 10, label: 'Petitioner' },
-  { value: 11, label: 'Tabard Designer' },
-  { value: 12, label: 'Battleground' },
-  { value: 13, label: 'Auctioneer' },
-  { value: 14, label: 'Stable Pet' },
-  { value: 15, label: 'Armorer' },
-  { value: 16, label: 'Unlearn Talents' },
-  { value: 17, label: 'Unlearn Pet Talents' },
-  { value: 18, label: 'Learn Dual Spec' },
-  { value: 19, label: 'Outdoor PvP' },
-  { value: 20, label: 'Dual Spec Info' },
-]
+const gossipIconOptions = computed(() =>
+  Array.from({ length: GOSSIP_ICON_COUNT }, (_, value) => ({ value, label: t(`creature_template.gossip.icons.${value}`) }))
+)
+
+const gossipTypeOptions = computed(() =>
+  Array.from({ length: GOSSIP_TYPE_COUNT }, (_, value) => ({ value, label: t(`creature_template.gossip.types.${value}`) }))
+)
 
 const gossipOptionColumns = computed<ColumnDef[]>(() => [
   { field: 'OptionID', header: t('creature_template.gossip.fields.OptionID'), type: 'number', width: '7rem' },
-  { field: 'OptionIcon', header: t('creature_template.gossip.fields.OptionIcon'), type: 'select', width: '10rem', options: gossipIconOptions },
+  { field: 'OptionIcon', header: t('creature_template.gossip.fields.OptionIcon'), type: 'select', width: '10rem', options: gossipIconOptions.value },
   { field: 'OptionText', header: t('creature_template.gossip.fields.OptionText'), type: 'text' },
-  { field: 'OptionType', header: t('creature_template.gossip.fields.OptionType'), type: 'select', width: '11rem', options: gossipTypeOptions },
+  { field: 'OptionType', header: t('creature_template.gossip.fields.OptionType'), type: 'select', width: '11rem', options: gossipTypeOptions.value },
 ])
 
 const gossipOptionLocaleColumns = computed<ColumnDef[]>(() => [

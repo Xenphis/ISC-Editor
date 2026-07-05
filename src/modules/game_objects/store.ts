@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { reportLoadError } from '@/services/notify'
 import { ref } from 'vue'
 import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import { ReactiveSubTable, ArraySubTable } from '@/stores/SubTableManager'
@@ -143,7 +144,7 @@ function gameobjectQuestRelConfig(table: string): Omit<CompositeKeyConfig<Gameob
 let gameobjectRelCache: { id: number; promise: Promise<EntityQuestRelations | null> } | null = null
 function loadGameobjectQuestRelations(entry: number): Promise<EntityQuestRelations | null> {
   if (!gameobjectRelCache || gameobjectRelCache.id !== entry) {
-    const e = { id: entry, promise: gameObjectService.getGameObjectQuestRelations(entry).catch(() => null) }
+    const e = { id: entry, promise: gameObjectService.getGameObjectQuestRelations(entry).catch(reportLoadError('GameObjectQuestRelations', null)) }
     gameobjectRelCache = e
     e.promise.finally(() => { if (gameobjectRelCache === e) gameobjectRelCache = null })
   }
@@ -223,7 +224,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
       {
         manager: addon,
         load: async (entry) => {
-          const data = await gameObjectService.getGameObjectAddon(entry).catch(() => null)
+          const data = await gameObjectService.getGameObjectAddon(entry).catch(reportLoadError('GameObjectAddon', null))
           if (!data) return null
           const { entry: _entry, ...addonFields } = data
           return addonFields as AddonForm
@@ -233,7 +234,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
       {
         manager: loot,
         load: async (entry) => {
-          const rows = await gameObjectService.getGameObjectLoot(entry).catch(() => [])
+          const rows = await gameObjectService.getGameObjectLoot(entry).catch(reportLoadError('GameObjectLoot', []))
           return rows.map(row => ({
             Item: row.Item,
             Reference: row.Reference,
@@ -264,14 +265,14 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
       {
         manager: questItems,
         load: async (entry) => {
-          const rows = await gameObjectService.getGameObjectQuestItems(entry).catch(() => [])
+          const rows = await gameObjectService.getGameObjectQuestItems(entry).catch(reportLoadError('GameObjectQuestItems', []))
           return rows.map(row => ({ Idx: row.Idx, ItemId: row.ItemId })) satisfies QuestItemEntry[]
         },
       },
       {
         manager: locales,
         load: async (entry) => {
-          const rows = await gameObjectService.getGameObjectLocales(entry).catch(() => [])
+          const rows = await gameObjectService.getGameObjectLocales(entry).catch(reportLoadError('GameObjectLocales', []))
           return rows.map(row => ({
             locale: row.locale,
             name: row.name ?? null,

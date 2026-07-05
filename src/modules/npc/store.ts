@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { reportLoadError } from '@/services/notify'
 import { ref } from 'vue'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
@@ -434,7 +435,7 @@ function creatureQuestRelConfig(table: string): Omit<CompositeKeyConfig<Creature
 let creatureRelCache: { id: number; promise: Promise<EntityQuestRelations | null> } | null = null
 function loadCreatureQuestRelations(entry: number): Promise<EntityQuestRelations | null> {
   if (!creatureRelCache || creatureRelCache.id !== entry) {
-    const e = { id: entry, promise: npcService.getCreatureQuestRelations(entry).catch(() => null) }
+    const e = { id: entry, promise: npcService.getCreatureQuestRelations(entry).catch(reportLoadError('CreatureQuestRelations', null)) }
     creatureRelCache = e
     e.promise.finally(() => { if (creatureRelCache === e) creatureRelCache = null })
   }
@@ -593,7 +594,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
 
   async function fetchGossipMenuRows(menuId: number): Promise<GossipMenuEntry[]> {
     if (menuId <= 0) return []
-    const rows = await npcService.getGossipMenu(menuId).catch(() => [])
+    const rows = await npcService.getGossipMenu(menuId).catch(reportLoadError('GossipMenu', []))
     return rows.map(row => ({ TextID: row.TextID, VerifiedBuild: row.VerifiedBuild })) satisfies GossipMenuEntry[]
   }
 
@@ -601,7 +602,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     const menuRows = await fetchGossipMenuRows(menuId)
     const textIds = getGossipTextIds(menuRows)
     if (textIds.length === 0) return []
-    const rows = await npcService.getNpcTexts(textIds).catch(() => [])
+    const rows = await npcService.getNpcTexts(textIds).catch(reportLoadError('NpcTexts', []))
     const rowMap = new Map(rows.map(row => [row.ID, row]))
     return textIds.map(id => rowMap.get(id) ?? createDefaultNpcText(id))
   }
@@ -610,7 +611,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     const menuRows = await fetchGossipMenuRows(menuId)
     const textIds = getGossipTextIds(menuRows)
     if (textIds.length === 0) return []
-    return npcService.getNpcTextLocales(textIds).catch(() => [])
+    return npcService.getNpcTextLocales(textIds).catch(reportLoadError('NpcTextLocales', []))
   }
 
   async function loadGossipMenu(menuId: number) {
@@ -626,13 +627,13 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     ensureGossipMenuIdOption(menuId)
     const [menuRows, optionRows, optionLocaleRows] = await Promise.all([
       fetchGossipMenuRows(menuId),
-      npcService.getGossipMenuOptions(menuId).catch(() => []),
-      npcService.getGossipMenuOptionLocales(menuId).catch(() => []),
+      npcService.getGossipMenuOptions(menuId).catch(reportLoadError('GossipMenuOptions', [])),
+      npcService.getGossipMenuOptionLocales(menuId).catch(reportLoadError('GossipMenuOptionLocales', [])),
     ])
     const textIds = getGossipTextIds(menuRows)
     const [textRows, textLocaleRows] = await Promise.all([
-      textIds.length > 0 ? npcService.getNpcTexts(textIds).catch(() => []) : Promise.resolve([]),
-      textIds.length > 0 ? npcService.getNpcTextLocales(textIds).catch(() => []) : Promise.resolve([]),
+      textIds.length > 0 ? npcService.getNpcTexts(textIds).catch(reportLoadError('NpcTexts', [])) : Promise.resolve([]),
+      textIds.length > 0 ? npcService.getNpcTextLocales(textIds).catch(reportLoadError('NpcTextLocales', [])) : Promise.resolve([]),
     ])
     const textMap = new Map(textRows.map(row => [row.ID, row]))
 
@@ -682,14 +683,14 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: resistances,
         load: async (entry) => {
-          const rows = await npcService.getNpcResistances(entry).catch(() => [])
+          const rows = await npcService.getNpcResistances(entry).catch(reportLoadError('NpcResistances', []))
           return rows.map(row => ({ School: row.School, Resistance: row.Resistance })) satisfies ResistanceEntry[]
         },
       },
       {
         manager: movement,
         load: async (entry) => {
-          const data = await npcService.getNpcMovement(entry).catch(() => null)
+          const data = await npcService.getNpcMovement(entry).catch(reportLoadError('NpcMovement', null))
           if (!data) return null
           const { CreatureId: _creatureId, ...movementFields } = data
           return movementFields as MovementForm
@@ -699,7 +700,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: addon,
         load: async (entry) => {
-          const data = await npcService.getNpcAddon(entry).catch(() => null)
+          const data = await npcService.getNpcAddon(entry).catch(reportLoadError('NpcAddon', null))
           if (!data) return null
           const { entry: _entry, ...addonFields } = data
           return addonFields as AddonForm
@@ -709,28 +710,28 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: locales,
         load: async (entry) => {
-          const rows = await npcService.getNpcLocales(entry).catch(() => [])
+          const rows = await npcService.getNpcLocales(entry).catch(reportLoadError('NpcLocales', []))
           return rows.map(row => ({ locale: row.locale, Name: row.Name, Title: row.Title })) satisfies LocaleEntry[]
         },
       },
       {
         manager: equips,
         load: async (entry) => {
-          const rows = await npcService.getNpcEquip(entry).catch(() => [])
+          const rows = await npcService.getNpcEquip(entry).catch(reportLoadError('NpcEquip', []))
           return rows.map(row => ({ ID: row.ID, ItemID1: row.ItemID1, ItemID2: row.ItemID2, ItemID3: row.ItemID3 })) satisfies EquipEntry[]
         },
       },
       {
         manager: spells,
         load: async (entry) => {
-          const rows = await npcService.getNpcSpells(entry).catch(() => [])
+          const rows = await npcService.getNpcSpells(entry).catch(reportLoadError('NpcSpells', []))
           return rows.map(row => ({ Index: row.Index, Spell: row.Spell })) satisfies SpellEntry[]
         },
       },
       {
         manager: texts,
         load: async (entry) => {
-          const rows = await npcService.getCreatureTexts(entry).catch(() => [])
+          const rows = await npcService.getCreatureTexts(entry).catch(reportLoadError('CreatureTexts', []))
           return rows.map(row => ({
             GroupID: row.GroupID,
             ID: row.ID,
@@ -750,7 +751,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: textLocales,
         load: async (entry) => {
-          const rows = await npcService.getCreatureTextLocales(entry).catch(() => [])
+          const rows = await npcService.getCreatureTextLocales(entry).catch(reportLoadError('CreatureTextLocales', []))
           return rows.map(row => ({
             GroupID: row.GroupID,
             ID: row.ID,
@@ -762,7 +763,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: questItems,
         load: async (entry) => {
-          const rows = await npcService.getCreatureQuestItems(entry).catch(() => [])
+          const rows = await npcService.getCreatureQuestItems(entry).catch(reportLoadError('CreatureQuestItems', []))
           return rows.map(row => ({ Idx: row.Idx, ItemId: row.ItemId })) satisfies QuestItemEntry[]
         },
       },
@@ -783,7 +784,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
       {
         manager: onKillRep,
         load: async (entry) => {
-          const data = await npcService.getCreatureOnKillRep(entry).catch(() => null)
+          const data = await npcService.getCreatureOnKillRep(entry).catch(reportLoadError('CreatureOnKillRep', null))
           if (!data) return null
           const { creature_id: _creatureId, ...repFields } = data
           return repFields as OnKillRepForm
@@ -801,7 +802,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
         load: async (_entry, formData) => {
           const menuId = getGossipMenuParentId(formData)
           if (menuId <= 0) return []
-          const rows = await npcService.getGossipMenuOptions(menuId).catch(() => [])
+          const rows = await npcService.getGossipMenuOptions(menuId).catch(reportLoadError('GossipMenuOptions', []))
           return rows.map(row => ({
             OptionID: row.OptionID,
             OptionIcon: row.OptionIcon,
@@ -825,7 +826,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
         load: async (_entry, formData) => {
           const menuId = getGossipMenuParentId(formData)
           if (menuId <= 0) return []
-          const rows = await npcService.getGossipMenuOptionLocales(menuId).catch(() => [])
+          const rows = await npcService.getGossipMenuOptionLocales(menuId).catch(reportLoadError('GossipMenuOptionLocales', []))
           return rows.map(row => ({
             OptionID: row.OptionID,
             Locale: row.Locale,

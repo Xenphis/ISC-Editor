@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
+import { reportLoadError } from '@/services/notify'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
@@ -124,8 +125,8 @@ onMounted(async () => {
   try {
     const [spawns, addonData, overridesData] = await Promise.all([
       getGameObjectSpawns(props.goEntry),
-      getGameObjectSpawnAddon(props.spawnGuid).catch(() => null),
-      getGameObjectOverrides(props.spawnGuid).catch(() => null),
+      getGameObjectSpawnAddon(props.spawnGuid).catch(reportLoadError('GameObjectSpawnAddon', null)),
+      getGameObjectOverrides(props.spawnGuid).catch(reportLoadError('GameObjectOverrides', null)),
     ])
     const spawn = spawns.find(s => s.guid === props.spawnGuid)
     if (spawn) {

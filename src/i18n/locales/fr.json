@@ -111,7 +111,9 @@
     "filter": "Filtrer",
     "noEntries": "Aucune entrée",
     "save": "Sauvegarder",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "loadError": "Échec du chargement de {source}",
+    "saveError": "Échec de l'enregistrement des modifications"
   },
   "settings": {
     "title": "Paramètres",

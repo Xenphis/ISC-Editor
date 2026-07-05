@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { reportLoadError } from '@/services/notify'
 import { ref } from 'vue'
 import type { QuestTemplate } from '@/modules/quests/types/quest_template'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
@@ -234,7 +235,7 @@ function relationConfig(table: string): Omit<CompositeKeyConfig<RelationEntry>, 
 let questRelCache: { id: number; promise: Promise<QuestRelations | null> } | null = null
 function loadQuestRelations(id: number): Promise<QuestRelations | null> {
   if (!questRelCache || questRelCache.id !== id) {
-    const entry = { id, promise: questService.getQuestRelations(id).catch(() => null) }
+    const entry = { id, promise: questService.getQuestRelations(id).catch(reportLoadError('QuestRelations', null)) }
     questRelCache = entry
     entry.promise.finally(() => { if (questRelCache === entry) questRelCache = null })
   }
@@ -334,7 +335,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: addon,
         load: async (id) => {
-          const data = await questService.getQuestAddon(id).catch(() => null)
+          const data = await questService.getQuestAddon(id).catch(reportLoadError('QuestAddon', null))
           if (!data) return null
           const { ID: _id, ...addonFields } = data
           return addonFields as AddonForm
@@ -344,7 +345,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: offerReward,
         load: async (id) => {
-          const data = await questService.getQuestOfferReward(id).catch(() => null)
+          const data = await questService.getQuestOfferReward(id).catch(reportLoadError('QuestOfferReward', null))
           if (!data) return null
           return {
             Emote1: data.Emote1, Emote2: data.Emote2, Emote3: data.Emote3, Emote4: data.Emote4,
@@ -358,7 +359,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: requestItems,
         load: async (id) => {
-          const data = await questService.getQuestRequestItems(id).catch(() => null)
+          const data = await questService.getQuestRequestItems(id).catch(reportLoadError('QuestRequestItems', null))
           if (!data) return null
           return {
             EmoteOnComplete: data.EmoteOnComplete,
@@ -371,7 +372,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: details,
         load: async (id) => {
-          const data = await questService.getQuestDetails(id).catch(() => null)
+          const data = await questService.getQuestDetails(id).catch(reportLoadError('QuestDetails', null))
           if (!data) return null
           return {
             Emote1: data.Emote1, Emote2: data.Emote2, Emote3: data.Emote3, Emote4: data.Emote4,
@@ -384,7 +385,7 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: locales,
         load: async (id) => {
-          const rows = await questService.getQuestLocales(id).catch(() => [])
+          const rows = await questService.getQuestLocales(id).catch(reportLoadError('QuestLocales', []))
           return rows.map(row => ({
             locale: row.locale,
             Title: row.Title ?? null,
@@ -402,14 +403,14 @@ export const useQuestModuleStore = defineStore('questModule', () => {
       {
         manager: offerRewardLocales,
         load: async (id) => {
-          const rows = await questService.getQuestOfferRewardLocales(id).catch(() => [])
+          const rows = await questService.getQuestOfferRewardLocales(id).catch(reportLoadError('QuestOfferRewardLocales', []))
           return rows.map(r => ({ locale: r.locale, RewardText: r.RewardText ?? null })) satisfies OfferRewardLocaleEntry[]
         },
       },
       {
         manager: requestItemsLocales,
         load: async (id) => {
-          const rows = await questService.getQuestRequestItemsLocales(id).catch(() => [])
+          const rows = await questService.getQuestRequestItemsLocales(id).catch(reportLoadError('QuestRequestItemsLocales', []))
           return rows.map(r => ({ locale: r.locale, CompletionText: r.CompletionText ?? null })) satisfies RequestItemsLocaleEntry[]
         },
       },

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { reportLoadError } from '@/services/notify'
 import { ref } from 'vue'
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
 import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
@@ -94,7 +95,7 @@ export const useTrainerStore = defineStore('trainer', () => {
       {
         manager: spells,
         load: async (id) => {
-          const rows = await npcService.getTrainerSpells(id).catch(() => [])
+          const rows = await npcService.getTrainerSpells(id).catch(reportLoadError('TrainerSpells', []))
           return rows.map(row => ({
             SpellId: row.SpellId,
             MoneyCost: row.MoneyCost,
@@ -110,7 +111,7 @@ export const useTrainerStore = defineStore('trainer', () => {
       {
         manager: creatureLinks,
         load: async (id) => {
-          const rows = await npcService.getCreatureDefaultTrainers(id).catch(() => [])
+          const rows = await npcService.getCreatureDefaultTrainers(id).catch(reportLoadError('CreatureDefaultTrainers', []))
           return rows.map(row => ({ CreatureId: row.CreatureId })) satisfies CreatureDefaultTrainerEntry[]
         },
       },

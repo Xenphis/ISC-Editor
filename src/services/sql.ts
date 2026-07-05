@@ -1,4 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
+import i18n from '@/i18n'
+import { notifyError } from '@/services/notify'
 
 /**
  * Execute a list of SQL statements in a single backend transaction.
@@ -6,5 +8,10 @@ import { invoke } from '@tauri-apps/api/core'
  */
 export async function executeBatch(queries: string[]): Promise<void> {
   if (queries.length === 0) return
-  return invoke('execute_batch', { queries })
+  try {
+    await invoke('execute_batch', { queries })
+  } catch (error) {
+    notifyError(i18n.global.t('common.saveError'), error)
+    throw error
+  }
 }
