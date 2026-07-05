@@ -1,5 +1,6 @@
 import { computed, type Ref } from 'vue'
-import { update, insert, delete_ } from 'squel-ts'
+import { update, insert, delete_, rstr } from 'squel-ts'
+import { toSqlLiteral } from '@/utils/sql'
 
 type AnyRow = Record<string, unknown>
 
@@ -13,11 +14,12 @@ const SQUEL_CONFIG = {
 
 // --- Value helpers ---
 
-function escapeValue(value: unknown): string | number | null {
-  if (value === null || value === undefined) return null
-  if (typeof value === 'number') return value
-  if (typeof value === 'boolean') return value ? 1 : 0
-  return String(value).replace(/'/g, "''")
+// Values are rendered to SQL literals by toSqlLiteral (single escaping
+// source) and handed to squel wrapped in rstr() so squel does not apply
+// its own quote-doubling on top — that combination corrupted strings
+// containing quotes and left backslashes unescaped.
+function sqlValue(value: unknown) {
+  return rstr(toSqlLiteral(value))
 }
 
 function normalizeValue(value: unknown): unknown {
@@ -29,11 +31,6 @@ function valuesAreEqual(a: unknown, b: unknown): boolean {
   const na = normalizeValue(a)
   const nb = normalizeValue(b)
   if (na === null && nb === null) return true
-  if (na === null || nb === null) return false
-  if (typeof na === 'number' && typeof nb === 'number') {
-    if (Number.isInteger(na) && Number.isInteger(nb)) return na === nb
-    return Math.abs(na - nb) < 1e-6
-  }
   return na === nb
 }
 
@@ -58,13 +55,13 @@ export function generateDiffQuery(
     if (key === primaryKey) continue
     if (!valuesAreEqual(originalRow[key], currentRow[key])) {
       hasDiff = true
-      query.set(key, escapeValue(currentRow[key]))
+      query.set(key, sqlValue(currentRow[key]))
     }
   }
 
   if (!hasDiff) return ''
 
-  query.where(`\`${primaryKey}\` = ${originalRow[primaryKey]}`)
+  query.where(`\`${primaryKey}\` = ${toSqlLiteral(originalRow[primaryKey])}`)
   return query.toString() + ';'
 }
 
@@ -75,12 +72,15 @@ export function generateFullQuery(
 ): string {
   const delQuery = delete_(SQUEL_CONFIG)
     .from(table)
-    .where(`\`${primaryKey}\` = ${row[primaryKey]}`)
+    .where(`\`${primaryKey}\` = ${toSqlLiteral(row[primaryKey])}`)
     .toString()
 
+  const literalRow = Object.fromEntries(
+    Object.entries(row).map(([key, value]) => [key, sqlValue(value)]),
+  )
   const insQuery = insert(SQUEL_CONFIG)
     .into(table)
-    .setFieldsRows([row])
+    .setFieldsRows([literalRow])
     .toString()
 
   return delQuery + ';\n' + insQuery + ';'
@@ -93,7 +93,7 @@ export function generateDeleteQuery(
 ): string {
   return delete_(SQUEL_CONFIG)
     .from(table)
-    .where(`\`${primaryKey}\` = ${id}`)
+    .where(`\`${primaryKey}\` = ${toSqlLiteral(id)}`)
     .toString() + ';'
 }
 
@@ -158,8 +158,7 @@ export function generateCompositeKeyDiffSql<T>(
       return buildWhereClause(entry, parentId)
     }
     // Default: single childKey
-    const keyVal = typeof entry[childKey] === 'string' ? `'${entry[childKey]}'` : entry[childKey]
-    return `\`${parentKey}\` = ${parentId} AND \`${childKey}\` = ${keyVal}`
+    return `\`${parentKey}\` = ${parentId} AND \`${childKey}\` = ${toSqlLiteral(entry[childKey])}`
   }
 
   // Deleted entries
@@ -176,8 +175,7 @@ export function generateCompositeKeyDiffSql<T>(
       lines.push(`DELETE FROM \`${table}\` WHERE ${getWhereClause(cur)};`)
       if (!skipInsert || !skipInsert(cur)) {
         const colNames = [`\`${parentKey}\``, `\`${childKey}\``, ...columns.map(c => `\`${c}\``)].join(', ')
-        const childKeyVal = typeof cur[childKey] === 'string' ? `'${cur[childKey]}'` : cur[childKey]
-        const vals = [parentId, childKeyVal, ...toSqlValues(cur)].join(', ')
+        const vals = [parentId, toSqlLiteral(cur[childKey]), ...toSqlValues(cur)].join(', ')
         lines.push(`INSERT INTO \`${table}\` (${colNames}) VALUES (${vals});`)
       }
     }

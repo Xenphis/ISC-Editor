@@ -8,6 +8,33 @@ export function escapeSQL(val: string): string {
   return val.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
 }
 
+/**
+ * Render a text column value as a SQL literal. Empty strings are treated
+ * as NULL (matches how the editors reset optional text columns).
+ */
+export function sqlText(value: string | null | undefined): string {
+  return value != null && value !== '' ? `'${escapeSQL(value)}'` : 'NULL'
+}
+
+/**
+ * Render a numeric column value as a SQL literal.
+ */
+export function sqlNumber(value: number | null | undefined): string | number {
+  return value == null || !Number.isFinite(value) ? 'NULL' : value
+}
+
+/**
+ * Render any scalar value as a SQL literal. Single escaping source for
+ * generated queries: strings go through escapeSQL, numbers/booleans are
+ * emitted raw, null/undefined become NULL.
+ */
+export function toSqlLiteral(value: unknown): string {
+  if (value === null || value === undefined) return 'NULL'
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : 'NULL'
+  if (typeof value === 'boolean') return value ? '1' : '0'
+  return `'${escapeSQL(String(value))}'`
+}
+
 // ─── SQL syntax highlighting (HTML) ────────────────────────────────
 
 /**
