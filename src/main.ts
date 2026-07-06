@@ -24,6 +24,26 @@ const TrinityPreset = definePreset(Aura, {
       800: '{cyan.800}',
       900: '{cyan.900}',
       950: '{cyan.950}'
+    },
+    colorScheme: {
+      dark: {
+        // Align PrimeVue dark surfaces (drawers, dialogs, overlays) with the
+        // app's slate-blue design instead of the default zinc.
+        surface: {
+          0: '#ffffff',
+          50: '{slate.50}',
+          100: '{slate.100}',
+          200: '{slate.200}',
+          300: '{slate.300}',
+          400: '{slate.400}',
+          500: '{slate.500}',
+          600: '{slate.600}',
+          700: '{slate.700}',
+          800: '{slate.800}',
+          900: '{slate.900}',
+          950: '{slate.950}'
+        }
+      }
     }
   }
 })
@@ -37,7 +57,11 @@ app.use(PrimeVue, {
   theme: {
     preset: TrinityPreset,
     options: {
-      darkModeSelector: 'html',
+      // Must be a class selector matched by <html class="dark"> (index.html).
+      // A bare element selector like 'html' is treated as a "custom" rule by
+      // @primeuix and generates `html { :root { ... } }`, which never matches:
+      // dark tokens silently stay off and every overlay renders light.
+      darkModeSelector: '.dark',
       cssLayer: false
     }
   }
