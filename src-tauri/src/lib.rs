@@ -1,13 +1,18 @@
 mod db;
 mod debug;
 mod commands;
+mod liquids;
+mod minimap;
 mod model_proxy;
+mod wmo;
 
 use db::DbState;
 use debug::{DebugState, set_debug_mode, get_debug_mode};
+use minimap::{MinimapState, minimap_load_client, minimap_adt_liquids};
+use minimap::{minimap_adt_wmo_placements, minimap_global_wmo_placements, minimap_wmo_model, minimap_creature_models};
 use commands::addon::{get_npc_addon, save_npc_addon};
 use commands::connection::{connect_db, disconnect_db};
-use commands::creature::{get_creature_spawns, save_creature_spawn, delete_creature_spawn};
+use commands::creature::{get_creature_spawns, get_creature_spawns_in_bounds, save_creature_spawn, delete_creature_spawn};
 use commands::creature_addon::{get_creature_addon, save_creature_addon};
 use commands::creature_movement_override::{get_creature_movement_override, save_creature_movement_override};
 use commands::creature_text::{get_creature_texts, save_creature_texts};
@@ -57,6 +62,9 @@ pub fn run() {
   tauri::Builder::default()
     .manage(DbState::new())
     .manage(DebugState::new())
+    .manage(MinimapState::new())
+    // Native open/save dialogs (map editor's client folder picker).
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(
@@ -75,6 +83,22 @@ pub fn run() {
         responder.respond(model_proxy::proxy_request(request).await);
       });
     })
+    // `minimap://` serves the map-editor tile pyramid rendered from the local
+    // client MPQs (see minimap.rs). Blocking work (MPQ reads, BLP decode).
+    .register_asynchronous_uri_scheme_protocol("minimap", |ctx, request, responder| {
+      let app = ctx.app_handle().clone();
+      tauri::async_runtime::spawn_blocking(move || {
+        responder.respond(minimap::handle_request(&app, request));
+      });
+    })
+    // `mpq://` serves raw files from the same client archives; the map
+    // editor's 3D view streams terrain/model/texture assets through it.
+    .register_asynchronous_uri_scheme_protocol("mpq", |ctx, request, responder| {
+      let app = ctx.app_handle().clone();
+      tauri::async_runtime::spawn_blocking(move || {
+        responder.respond(minimap::handle_file_request(&app, request));
+      });
+    })
     .invoke_handler(tauri::generate_handler![
       connect_db,
       disconnect_db,
@@ -91,6 +115,7 @@ pub fn run() {
       get_npc_addon,
       save_npc_addon,
       get_creature_spawns,
+      get_creature_spawns_in_bounds,
       save_creature_spawn,
       delete_creature_spawn,
       get_npc_equip,
@@ -200,6 +225,12 @@ pub fn run() {
       save_creature_questitem,
       get_creature_onkill_reputation,
       save_creature_onkill_reputation,
+      minimap_load_client,
+      minimap_adt_liquids,
+      minimap_adt_wmo_placements,
+      minimap_global_wmo_placements,
+      minimap_wmo_model,
+      minimap_creature_models,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

@@ -1,0 +1,47 @@
+{
+  "mapEditor": {
+    "title": "Map Editor",
+    "description": "Browse the game world rendered from your client's minimap data",
+    "clientPath": {
+      "placeholder": "Path to your 3.3.5 client folder (or its Data folder)",
+      "load": "Load",
+      "browse": "Browse…",
+      "browseTitle": "Select the WoW 3.3.5 client folder"
+    },
+    "map": "Map",
+    "tiles": "{count} tiles",
+    "scene": {
+      "streaming": "Streaming terrain…",
+      "controls": "WASD/arrows: move · Space/C: up/down · Shift: fast · Left-drag: pan · Right-drag: look · Right-click: position"
+    },
+    "picked": {
+      "copy": "Copy position",
+      "clear": "Clear"
+    },
+    "spawns": {
+      "toggle": "Spawns",
+      "toggleHint": "Show creature spawns as models around the camera",
+      "noMapId": "This map has no Map.dbc id, so database spawns can't be linked",
+      "unknown": "Unknown creature",
+      "panelTitle": "Selected spawn",
+      "entry": "Template ID",
+      "guid": "GUID",
+      "displayId": "Display ID",
+      "scale": "Scale",
+      "none": "None",
+      "openEditor": "Open in NPC editor",
+      "original": "Original",
+      "move": "Move here",
+      "moveArmed": "Right-click the ground",
+      "moveHint": "Right-click a spot on the terrain to move this spawn.",
+      "newPos": "New",
+      "copySql": "Copy SQL",
+      "close": "Close"
+    },
+    "states": {
+      "noClient": "Point the editor at a 3.3.5 client folder to browse its maps.",
+      "loading": "Indexing the client archives…",
+      "error": "Failed to load the client: {message}"
+    }
+  }
+}

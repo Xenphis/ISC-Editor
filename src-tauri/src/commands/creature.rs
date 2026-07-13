@@ -60,6 +60,97 @@ pub async fn get_creature_spawns(
     ).map_err(|e| format!("Query failed: {}", e))
 }
 
+/// A lightweight creature spawn for the 3D map view: only what's needed to
+/// place and identify a model, kept small because a camera region can pull
+/// thousands of rows. `display_id` is the effective display (the spawn's
+/// `modelid` override, else the template's `modelid1`); the client resolves it
+/// to an M2 path via `minimap_creature_models`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CreatureSpawnMarker {
+    pub guid: u32,
+    pub id: u32,
+    pub position_x: f32,
+    pub position_y: f32,
+    pub position_z: f32,
+    pub orientation: f32,
+    pub display_id: u32,
+    pub name: String,
+    pub scale: f32,
+}
+
+/// Raw joined row. The effective display id / name / scale are computed in Rust
+/// rather than with SQL COALESCE/CASE: those change the column's wire type
+/// (e.g. to BIGINT) and make sqlx's strict decode into `u32`/`f32` fail. The
+/// individual columns decode exactly like the `Creature` struct already does.
+#[derive(Debug, FromRow)]
+struct CreatureSpawnRow {
+    guid: u32,
+    id: u32,
+    position_x: f32,
+    position_y: f32,
+    position_z: f32,
+    orientation: f32,
+    modelid: u32,
+    template_modelid: Option<u32>,
+    name: Option<String>,
+    scale: Option<f32>,
+}
+
+/// Creature spawns inside a world-space bounding box on one map. Used by the 3D
+/// view to stream only the spawns around the camera (tile-sized boxes), so big
+/// continents don't load tens of thousands of rows at once. `limit` is a safety
+/// cap against a pathologically dense box.
+#[tauri::command]
+pub async fn get_creature_spawns_in_bounds(
+    state: State<'_, DbState>,
+    app: tauri::AppHandle,
+    debug: State<'_, DebugState>,
+    map: u16,
+    min_x: f32,
+    max_x: f32,
+    min_y: f32,
+    max_y: f32,
+    limit: i64,
+) -> Result<Vec<CreatureSpawnMarker>, String> {
+    let db = state.pool.lock().await;
+    let pool = db.as_ref().ok_or("Not connected to database")?;
+
+    const SQL: &str = "SELECT c.guid, c.id, c.position_x, c.position_y, c.position_z, c.orientation, \
+         c.modelid, ct.modelid1 AS template_modelid, ct.name, ct.scale \
+         FROM creature c \
+         LEFT JOIN creature_template ct ON ct.entry = c.id \
+         WHERE c.map = ? AND c.position_x BETWEEN ? AND ? AND c.position_y BETWEEN ? AND ? \
+         LIMIT ?";
+    let rows = debug_sql!(app, debug, SQL,
+        sqlx::query_as::<_, CreatureSpawnRow>(SQL)
+        .bind(map)
+        .bind(min_x)
+        .bind(max_x)
+        .bind(min_y)
+        .bind(max_y)
+        .bind(limit)
+        .fetch_all(pool)
+        .await,
+        map, min_x, max_x, min_y, max_y, limit
+    ).map_err(|e| format!("Query failed: {}", e))?;
+
+    Ok(rows
+        .into_iter()
+        .map(|r| CreatureSpawnMarker {
+            guid: r.guid,
+            id: r.id,
+            position_x: r.position_x,
+            position_y: r.position_y,
+            position_z: r.position_z,
+            orientation: r.orientation,
+            // The spawn's modelid overrides the template's first display.
+            display_id: if r.modelid != 0 { r.modelid } else { r.template_modelid.unwrap_or(0) },
+            name: r.name.unwrap_or_default(),
+            scale: r.scale.unwrap_or(1.0),
+        })
+        .collect())
+}
+
 #[tauri::command]
 pub async fn save_creature_spawn(
     state: State<'_, DbState>,

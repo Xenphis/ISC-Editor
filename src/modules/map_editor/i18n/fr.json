@@ -1,0 +1,47 @@
+{
+  "mapEditor": {
+    "title": "Éditeur de carte",
+    "description": "Parcourez le monde du jeu rendu depuis les minimaps de votre client",
+    "clientPath": {
+      "placeholder": "Chemin du client 3.3.5 (ou de son dossier Data)",
+      "load": "Charger",
+      "browse": "Parcourir…",
+      "browseTitle": "Sélectionnez le dossier du client WoW 3.3.5"
+    },
+    "map": "Carte",
+    "tiles": "{count} tuiles",
+    "scene": {
+      "streaming": "Chargement du terrain…",
+      "controls": "ZQSD/flèches : déplacer · Espace/C : monter/descendre · Maj : rapide · Glisser gauche : panoramique · Glisser droit : regarder · Clic droit : position"
+    },
+    "picked": {
+      "copy": "Copier la position",
+      "clear": "Effacer"
+    },
+    "spawns": {
+      "toggle": "Spawns",
+      "toggleHint": "Afficher les spawns de créatures en modèles autour de la caméra",
+      "noMapId": "Cette carte n'a pas d'id Map.dbc : impossible de lier les spawns de la base",
+      "unknown": "Créature inconnue",
+      "panelTitle": "Spawn sélectionné",
+      "entry": "ID modèle",
+      "guid": "GUID",
+      "displayId": "ID d'affichage",
+      "scale": "Échelle",
+      "none": "Aucun",
+      "openEditor": "Ouvrir dans l'éditeur PNJ",
+      "original": "Origine",
+      "move": "Déplacer ici",
+      "moveArmed": "Clic droit au sol",
+      "moveHint": "Clic droit sur un point du terrain pour déplacer ce spawn.",
+      "newPos": "Nouvelle",
+      "copySql": "Copier le SQL",
+      "close": "Fermer"
+    },
+    "states": {
+      "noClient": "Indiquez le dossier d'un client 3.3.5 pour parcourir ses cartes.",
+      "loading": "Indexation des archives du client…",
+      "error": "Échec du chargement du client : {message}"
+    }
+  }
+}

@@ -13,6 +13,7 @@ import { questRoutes } from '@/modules/quests/routes'
 import { mapRoutes } from '@/modules/map/routes'
 import { lootAndItemRoutes } from '@/modules/loot_and_item/routes'
 import { mapViewerRoutes } from '@/modules/map_viewer/routes'
+import { mapEditorRoutes } from '@/modules/map_editor/routes'
 import npcFr from '@/modules/npc/i18n/fr.json'
 import npcEn from '@/modules/npc/i18n/en.json'
 import goFr from '@/modules/game_objects/i18n/fr.json'
@@ -29,6 +30,8 @@ import modelViewerFr from '@/modules/model_viewer/i18n/fr.json'
 import modelViewerEn from '@/modules/model_viewer/i18n/en.json'
 import mapViewerFr from '@/modules/map_viewer/i18n/fr.json'
 import mapViewerEn from '@/modules/map_viewer/i18n/en.json'
+import mapEditorFr from '@/modules/map_editor/i18n/fr.json'
+import mapEditorEn from '@/modules/map_editor/i18n/en.json'
 
 export type AppLocale = 'en' | 'fr'
 
@@ -134,6 +137,15 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/model-viewer',
     i18n: { en: modelViewerEn, fr: modelViewerFr },
     routes: [],
+  },
+  {
+    // World map browser rendered from the local client's minimap data
+    // (phase 1 of the map editor: visualize + navigate).
+    id: 'map-editor',
+    basePath: '/map-editor',
+    navigation: { id: 'map-editor', icon: 'pi pi-globe' },
+    i18n: { en: mapEditorEn, fr: mapEditorFr },
+    routes: mapEditorRoutes,
   },
   {
     // Shared capability module: zone-map spawn viewer. Its only route is the

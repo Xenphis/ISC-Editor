@@ -23,9 +23,19 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.11.0", features = [] }
 tauri-plugin-log = "2"
+tauri-plugin-dialog = "2"
 tauri-plugin-mcp-bridge = "0.11"
 sqlx = { version = "0.8", features = ["runtime-tokio", "mysql"] }
 tokio = { version = "1", features = ["full"] }
 # Used to proxy the Wowhead model-viewer CDN from the Rust side, bypassing the
 # webview's CORS restriction on cross-origin data requests (see model_proxy.rs).
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+# Map-editor minimap pipeline: reads the 3.3.5 client MPQs, decodes the hashed
+# minimap BLPs and serves them as a PNG tile pyramid (see minimap.rs).
+wow-mpq = "0.6"
+wow-blp = "0.6"
+# Parses ADT terrain to extract the MH2O liquid chunk for the 3D water layer.
+wow-adt = "0.6"
+image = { version = "0.25", default-features = false, features = ["png"] }
+wow-wmo = "0.6"
+wow-wdt = "0.6"
