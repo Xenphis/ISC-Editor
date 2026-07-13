@@ -100,6 +100,8 @@
   "gameobjectSpawnEditor": {
     "back": "Back",
     "save": "Save",
+    "editorTitle": "Spawn",
+    "discard": "Discard",
     "tooltips": {
       "phaseMask": "Bitmask of phases in which the object is visible. Phase 1 = 1, Phase 2 = 2, Phase 1+2 = 3, etc.",
       "overrides_faction": "Replaces gameobject_template_addon.faction for this spawn only.",

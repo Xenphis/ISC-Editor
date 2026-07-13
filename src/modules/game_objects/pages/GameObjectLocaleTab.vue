@@ -115,11 +115,11 @@ const localeFields: { key: string; labelKey: string }[] = [
   justify-content: center;
   gap: 1rem;
   padding: 1.5rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
 }
 
 .field-group-modified {
-  border-color: rgba(6, 182, 212, 0.4) !important;
+  border-color: var(--accent-focus) !important;
 }
 </style>

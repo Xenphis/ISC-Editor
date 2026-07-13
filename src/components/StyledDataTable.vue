@@ -22,9 +22,9 @@ defineProps<{
 
 <style scoped>
 .styled-datatable {
-  background: rgba(30, 41, 59, 0.3);
+  background: var(--surface-hover);
   border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   overflow: hidden;
 }
 
@@ -34,29 +34,29 @@ defineProps<{
 }
 
 :deep(.p-datatable-thead > tr > th) {
-  background: rgba(30, 41, 59, 0.5) !important;
-  border-color: rgba(51, 65, 85, 0.5) !important;
-  color: #cbd5e1 !important;
+  background: var(--surface-elevated) !important;
+  border-color: var(--border-input-soft) !important;
+  color: var(--text-soft) !important;
   font-weight: 600;
   font-size: 0.875rem;
 }
 
 :deep(.p-datatable-tbody > tr) {
   background: transparent !important;
-  border-color: rgba(51, 65, 85, 0.3) !important;
+  border-color: var(--border-default) !important;
 }
 
 :deep(.p-datatable-tbody > tr:hover) {
-  background: rgba(51, 65, 85, 0.2) !important;
+  background: var(--border-default) !important;
 }
 
 :deep(.p-datatable-tbody > tr > td) {
-  border-color: rgba(51, 65, 85, 0.3) !important;
-  color: #e2e8f0;
+  border-color: var(--border-default) !important;
+  color: var(--text);
   font-size: 0.875rem;
 }
 
 :deep(.p-datatable-striped .p-datatable-tbody > tr:nth-child(even)) {
-  background: rgba(15, 23, 42, 0.2) !important;
+  background: var(--surface-panel) !important;
 }
 </style>

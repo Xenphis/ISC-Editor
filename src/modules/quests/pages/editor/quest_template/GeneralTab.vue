@@ -251,7 +251,7 @@ function addEnder() {
 @import './quest-editor.css';
 
 .giver-empty {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   padding: 0.75rem 0;
   text-align: center;
@@ -290,7 +290,7 @@ function addEnder() {
   align-items: center;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  border-top: 1px solid var(--border-default);
 }
 
 .giver-kind-select {
@@ -298,6 +298,6 @@ function addEnder() {
 }
 
 .field-group-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 </style>

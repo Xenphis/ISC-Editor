@@ -117,6 +117,26 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
 
   const combinedFullQuery = computed(() => fullQuery.value)
 
+  /** Ids with unsaved edits — drives the "modified" dot in EntityListPanel.
+      Known blind spot: sub-table-only changes on cached, non-active entries
+      are not detected here (the SQL session badge remains authoritative). */
+  const modifiedIds = computed<Set<number>>(() => {
+    const ids = new Set<number>()
+    for (const [id, cached] of dirtyCache.value) {
+      if (id === editingId.value && editorDataLoaded.value) continue
+      const changed = getChangedFields(
+        cached.originalValue as unknown as Record<string, unknown>,
+        cached.formData as unknown as Record<string, unknown>,
+        options.primaryKey,
+      )
+      if (changed.length > 0) ids.add(id)
+    }
+    if (editingId.value != null && editorDataLoaded.value && combinedHasChanges.value) {
+      ids.add(editingId.value)
+    }
+    return ids
+  })
+
   function resetSubTables() {
     for (const subTable of subTables) {
       subTable.reset()
@@ -363,6 +383,7 @@ export function createEntityEditorStore<T extends object>(options: CreateEntityE
     combinedHasChanges,
     combinedChangedFields,
     combinedFullQuery,
+    modifiedIds,
     saveToCache,
     restoreFromCache,
     openEditor,

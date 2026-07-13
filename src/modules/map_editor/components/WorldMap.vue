@@ -108,7 +108,7 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 0;
   border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   /* Ocean cells have no minimap tile: show a deep-sea backdrop instead. */
   background: #060d1f;
 }
@@ -116,12 +116,12 @@ onBeforeUnmount(() => {
 /* Leaflet's default controls are white; align them with the slate theme.
  * The map DOM is created by leaflet at runtime, hence :deep(). */
 .world-map :deep(.leaflet-control-zoom a) {
-  background: #1e293b;
-  color: #e2e8f0;
-  border-color: rgba(51, 65, 85, 0.8);
+  background: var(--surface-elevated);
+  color: var(--text);
+  border-color: var(--surface-strong);
 }
 
 .world-map :deep(.leaflet-control-zoom a:hover) {
-  background: #334155;
+  background: var(--border-input);
 }
 </style>

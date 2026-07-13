@@ -265,10 +265,10 @@ function isOfferModified(field: keyof typeof offerForm): boolean {
   grid-template-columns: 2rem 1fr 8rem;
   gap: 0.75rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
   padding-bottom: 0.25rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .obj-header-3 {
@@ -276,15 +276,15 @@ function isOfferModified(field: keyof typeof offerForm): boolean {
   grid-template-columns: 2rem 1fr 1fr 1fr;
   gap: 0.75rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
   padding-bottom: 0.25rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .obj-index {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
   text-align: right;
   padding-bottom: 0.6rem;
 }

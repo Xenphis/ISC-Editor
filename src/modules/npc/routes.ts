@@ -7,43 +7,22 @@ export const npcRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/npc/pages/NpcHub.vue'),
   },
   {
-    path: 'npc/creature-template',
-    name: 'npc-list',
-    component: () => import('@/modules/npc/pages/NpcModule.vue'),
+    // Single workspace route: no param = list only, 'new' = create mode,
+    // otherwise the entry to edit. The component is reused across param
+    // changes (list/tabs state survives, dirtyCache handles form state).
+    path: 'npc/creature-template/:entry?',
+    name: 'npc-creature-template',
+    component: () => import('@/modules/npc/pages/CreatureTemplateWorkspace.vue'),
   },
   {
-    path: 'npc/creature-template/new',
-    name: 'npc-new',
-    component: () => import('@/modules/npc/pages/CreatureTemplateEditor.vue'),
+    // Composite key: both params or none.
+    path: 'npc/creature-classlevelstats/:level?/:classId?',
+    name: 'npc-classlevelstats',
+    component: () => import('@/modules/npc/pages/ClassLevelStatsWorkspace.vue'),
   },
   {
-    path: 'npc/creature-template/:entry',
-    name: 'npc-edit',
-    component: () => import('@/modules/npc/pages/CreatureTemplateEditor.vue'),
-  },
-  {
-    path: 'npc/creature-classlevelstats',
-    name: 'creature-classlevelstats-list',
-    component: () => import('@/modules/npc/pages/CreatureClassLevelStatsModule.vue'),
-  },
-  {
-    path: 'npc/trainer',
-    name: 'trainer-list',
-    component: () => import('@/modules/npc/pages/TrainerModule.vue'),
-  },
-  {
-    path: 'npc/trainer/new',
-    name: 'trainer-new',
-    component: () => import('@/modules/npc/pages/TrainerEditor.vue'),
-  },
-  {
-    path: 'npc/trainer/:id',
-    name: 'trainer-edit',
-    component: () => import('@/modules/npc/pages/TrainerEditor.vue'),
-  },
-  {
-    path: 'npc/creature-classlevelstats/:level/:classId',
-    name: 'creature-classlevelstats-edit',
-    component: () => import('@/modules/npc/pages/editor/class_level_stats/ClassLevelStatsEditor.vue'),
+    path: 'npc/trainer/:id?',
+    name: 'npc-trainer',
+    component: () => import('@/modules/npc/pages/TrainerWorkspace.vue'),
   },
 ]

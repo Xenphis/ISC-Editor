@@ -86,7 +86,7 @@ function onSearchInput(val: string) {
 .module-title {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -94,7 +94,7 @@ function onSearchInput(val: string) {
 }
 
 .module-description {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -112,18 +112,18 @@ function onSearchInput(val: string) {
 }
 
 .filter-btn {
-  background: rgba(30, 41, 59, 0.5) !important;
-  border: 1px solid rgba(51, 65, 85, 0.5) !important;
-  color: #cbd5e1 !important;
+  background: var(--surface-elevated) !important;
+  border: 1px solid var(--border-input-soft) !important;
+  color: var(--text-soft) !important;
 }
 
 .filter-btn:hover {
-  background: rgba(51, 65, 85, 0.5) !important;
-  color: white !important;
+  background: var(--border-input-soft) !important;
+  color: var(--text) !important;
 }
 
 .add-btn {
-  background: linear-gradient(to right, #2563eb, #06b6d4) !important;
+  background: var(--accent-gradient) !important;
   border: none !important;
   font-weight: 500 !important;
 }
@@ -134,14 +134,14 @@ function onSearchInput(val: string) {
 
 /* Dark theme search input */
 .search-wrapper :deep(.p-inputtext) {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(51, 65, 85, 0.5) !important;
-  color: #e2e8f0 !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border-input-soft) !important;
+  color: var(--text) !important;
 }
 
 .search-wrapper :deep(.p-inputtext:focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring-soft) !important;
 }
 
 .search-wrapper :deep(.p-inputtext::placeholder) {
@@ -149,6 +149,6 @@ function onSearchInput(val: string) {
 }
 
 .search-wrapper :deep(.p-icon) {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
 }
 </style>

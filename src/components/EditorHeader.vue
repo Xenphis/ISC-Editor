@@ -5,13 +5,18 @@ withDefaults(defineProps<{
   title?: string
   subtitle?: string
   id?: string | number
+  /** Small mono chip showing the DB table name, e.g. "creature_template". */
+  table?: string
   backLabel?: string
+  /** Workspaces pass false — the persistent list replaces the back button. */
+  showBack?: boolean
   hasChanges?: boolean
   showDiscard?: boolean
   showExecute?: boolean
   executeLabel?: string
   discardLabel?: string
 }>(), {
+  showBack: true,
   showDiscard: true,
   showExecute: true,
 })
@@ -27,6 +32,7 @@ const emit = defineEmits<{
   <div class="editor-header">
     <div class="editor-header-left">
       <Button
+        v-if="showBack"
         icon="pi pi-arrow-left"
         :label="backLabel"
         severity="secondary"
@@ -37,6 +43,7 @@ const emit = defineEmits<{
         <span v-if="title">{{ title }}</span>
         <span v-if="subtitle" class="editor-subtitle">{{ subtitle }}</span>
         <span v-if="id != null" class="editor-id">#{{ id }}</span>
+        <span v-if="table" class="editor-table">{{ table }}</span>
       </h1>
     </div>
     <div class="editor-header-right">
@@ -65,14 +72,14 @@ const emit = defineEmits<{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 2rem;
+  margin-bottom: 1rem;
+  gap: 1.5rem;
 }
 
 .editor-header-left {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
   flex: 1;
   min-width: 0;
 }
@@ -80,19 +87,16 @@ const emit = defineEmits<{
 .editor-header-right {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.6rem;
 }
 
 .editor-title {
-  font-size: 1.75rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
   margin: 0;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.5rem;
   flex-wrap: wrap;
   white-space: nowrap;
@@ -101,61 +105,68 @@ const emit = defineEmits<{
 }
 
 .editor-subtitle {
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
 }
 
 .editor-id {
-  font-size: 1.4rem;
-  background: none;
-  -webkit-text-fill-color: #94a3b8;
-  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
+.editor-table {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--surface-hover);
+  border: 1px solid var(--border-default);
+  border-radius: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  align-self: center;
+}
 </style>
 
 <style>
 .editor-header .back-button.p-button {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
+  background: var(--surface-elevated) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text) !important;
   font-weight: 600 !important;
-  padding: 0.65rem 1.25rem !important;
+  padding: 0.4rem 0.9rem !important;
   transition: all 0.2s !important;
   flex-shrink: 0;
 }
 
 .editor-header .back-button.p-button:hover {
-  background: rgba(51, 65, 85, 0.9) !important;
-  border-color: rgba(71, 85, 105, 0.8) !important;
-  color: #ffffff !important;
+  background: var(--surface-strong) !important;
+  border-color: var(--border-input) !important;
+  color: var(--text) !important;
 }
 
 .editor-header .execute-button.p-button {
-  background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+  background: var(--accent-gradient) !important;
   border: none !important;
-  color: #fff !important;
+  color: var(--accent-contrast) !important;
   font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
+  padding: 0.4rem 1rem !important;
+  border-radius: var(--radius) !important;
 }
 
-.editor-header .execute-button.p-button:hover {
-  background: linear-gradient(135deg, #22d3ee, #06b6d4) !important;
+.editor-header .execute-button.p-button:hover:not(:disabled) {
+  filter: brightness(1.1);
 }
 
 .editor-header .discard-button.p-button {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+  background: var(--danger) !important;
   border: none !important;
   color: #fff !important;
   font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
+  padding: 0.4rem 1rem !important;
+  border-radius: var(--radius) !important;
 }
 
-.editor-header .discard-button.p-button:hover {
-  background: linear-gradient(135deg, #f87171, #e75151) !important;
+.editor-header .discard-button.p-button:hover:not(:disabled) {
+  filter: brightness(1.1);
 }
 </style>

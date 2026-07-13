@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppSidebar from '@/components/AppSidebar.vue'
+import AppNavbar from '@/components/AppNavbar.vue'
 import SqlDebugViewer from '@/components/SqlDebugViewer.vue'
 import { useConnectionStore } from '@/stores/connectionStore'
 import { useDebugStore } from '@/stores/debugStore'
@@ -17,9 +17,7 @@ async function handleDisconnect() {
 
 <template>
   <div class="app-layout">
-    <AppSidebar
-      @disconnect="handleDisconnect"
-    />
+    <AppNavbar @disconnect="handleDisconnect" />
 
     <main class="main-content">
       <router-view />
@@ -43,6 +41,7 @@ async function handleDisconnect() {
 <style scoped>
 .app-layout {
   display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100vh;
   overflow: hidden;
@@ -50,10 +49,10 @@ async function handleDisconnect() {
 
 .main-content {
   flex: 1;
+  min-height: 0;
   min-width: 0;
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   overflow-y: auto;
-  height: 100vh;
 }
 
 .debug-fab {
@@ -63,7 +62,7 @@ async function handleDisconnect() {
   width: 3rem;
   height: 3rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: var(--accent-gradient);
   border: none;
   color: white;
   font-size: 1.25rem;
@@ -85,7 +84,7 @@ async function handleDisconnect() {
   position: absolute;
   top: -0.25rem;
   right: -0.25rem;
-  background: #dc2626;
+  background: var(--danger);
   color: white;
   font-size: 0.65rem;
   font-weight: 700;

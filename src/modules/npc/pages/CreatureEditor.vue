@@ -1,15 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import EditorHeader from '@/components/EditorHeader.vue'
+import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
+import type { FieldChange } from '@/composables/useQueryGenerator'
 import type { Creature } from '@/modules/npc/types/creature/creature'
 import {
   movement_type_options,
@@ -34,15 +31,25 @@ import type { CreatureAddon } from '@/modules/npc/types/creature/creature_addon'
 import type { CreatureMovementOverride } from '@/modules/npc/types/creature/creature_movement_override'
 import { getCreatureSpawns, getCreatureAddon, getCreatureMovementOverride } from '@/modules/npc/service'
 import { useQueryGenerator } from '@/composables/useQueryGenerator'
-import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
 import BitmaskField from '@/components/BitmaskField.vue'
 import EditorField from '@/components/EditorField.vue'
+
+/** Shared reactive state pushed up to the workspace inspector (SQL + diff). */
+export interface SpawnInspectorState {
+  diffQuery: string
+  fullQuery: string
+  hasChanges: boolean
+  changedFields: FieldChange[]
+  modelid: number
+}
 
 const { t } = useI18n()
 
 const props = defineProps<{
   spawnGuid: number
   npcEntry: number
+  /** Optional reactive sink so the workspace right rail can show spawn SQL. */
+  inspector?: SpawnInspectorState
 }>()
 
 const emit = defineEmits<{
@@ -193,6 +200,23 @@ function isFieldModified(field: string): boolean {
   return modifiedFieldSet.value.has(field)
 }
 
+// Mirror the spawn's SQL/diff into the workspace inspector (right rail).
+watchEffect(() => {
+  if (!props.inspector) return
+  props.inspector.diffQuery = combinedDiffQuery.value
+  props.inspector.fullQuery = fullQuery.value
+  props.inspector.hasChanges = combinedHasChanges.value
+  props.inspector.changedFields = combinedChangedFields.value
+  props.inspector.modelid = form.modelid
+})
+
+const mainTabs = computed<SectionTabItem[]>(() => [
+  { value: 'general', label: t('creature.tabs.general') },
+  { value: 'movement', label: t('creature.tabs.position') },
+  { value: 'behavior', label: t('creature.tabs.advanced') },
+  { value: 'addon', label: t('creature.tabs.addon') },
+])
+
 function onDiscard() {
   if (originalValue.value) Object.assign(form, originalValue.value)
   if (originalAddon.value) Object.assign(addonForm, originalAddon.value)
@@ -250,8 +274,9 @@ onMounted(async () => {
   <div class="spawn-editor">
     <!-- Header -->
     <EditorHeader
-      :title="t('creature.editorTitle')"
+      :subtitle="t('creature.editorTitle')"
       :id="form.guid"
+      table="creature"
       :backLabel="t('creature.back')"
       :hasChanges="combinedHasChanges"
       :discardLabel="t('creature.discard')"
@@ -261,26 +286,10 @@ onMounted(async () => {
       @execute="onSave"
     />
 
-    <!-- SQL Query Panel -->
-    <SqlQueryPanel
-      :diffQuery="combinedDiffQuery"
-      :fullQuery="fullQuery"
-      :hasChanges="combinedHasChanges"
-      :changedFields="combinedChangedFields"
-    />
-
     <!-- Tabs -->
-    <Tabs value="general">
-      <TabList>
-        <Tab value="general">{{ t('creature.tabs.general') }}</Tab>
-        <Tab value="movement">{{ t('creature.tabs.position') }}</Tab>
-        <Tab value="behavior">{{ t('creature.tabs.advanced') }}</Tab>
-        <Tab value="addon">{{ t('creature.tabs.addon') }}</Tab>
-      </TabList>
-
-      <TabPanels>
+    <SectionTabs :tabs="mainTabs" variant="plain" defaultValue="general">
         <!-- ==================== GENERAL ==================== -->
-        <TabPanel value="general">
+        <template #general>
           <!-- Identification -->
           <div class="field-group">
             <div class="field-group-header">
@@ -368,10 +377,10 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== MOVEMENT ==================== -->
-        <TabPanel value="movement">
+        <template #movement>
           <!-- Movement -->
           <div class="field-group">
             <div class="field-group-header">
@@ -424,10 +433,10 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== BEHAVIOR ==================== -->
-        <TabPanel value="behavior">
+        <template #behavior>
           <!-- Animation -->
           <div class="field-group">
             <div class="field-group-header">
@@ -493,10 +502,10 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== ADDON ==================== -->
-        <TabPanel value="addon">
+        <template #addon>
           <!-- Creature Addon -->
           <div class="field-group">
             <div class="field-group-header">
@@ -525,52 +534,11 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+        </template>
+    </SectionTabs>
   </div>
 </template>
 
 <style scoped>
-.spawn-editor {
-  max-width: 80rem;
-}
-
-.field-group {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.field-group-header {
-  margin-bottom: 1rem;
-}
-
-.field-group-header h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  margin: 0 0 0.25rem 0;
-}
-
-.field-group-header p {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
+/* Layout primitives (.field-group, .field-grid) come from src/styles/forms.css. */
 </style>

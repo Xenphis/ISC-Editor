@@ -27,11 +27,11 @@ function formatTime(ms: number): string {
 function queryTypeColor(type: string): string {
   switch (type) {
     case 'SELECT': return '#60a5fa'
-    case 'INSERT': return '#4ade80'
+    case 'INSERT': return 'var(--success)'
     case 'REPLACE': return '#a78bfa'
     case 'UPDATE': return '#fbbf24'
-    case 'DELETE': return '#f87171'
-    default: return '#94a3b8'
+    case 'DELETE': return 'var(--danger)'
+    default: return 'var(--text-muted)'
   }
 }
 
@@ -59,11 +59,11 @@ async function copyAllLogs() {
     :style="{ width: '48rem', maxHeight: '70vh' }"
     position="bottomright"
     :pt="{
-      root: { style: 'background: #0f172a; border: 1px solid rgba(51,65,85,0.6); border-radius: 0.75rem; overflow: hidden;' },
-      header: { style: 'background: #0f172a; border-bottom: 1px solid rgba(51,65,85,0.4); padding: 0.75rem 1rem; color: #e2e8f0;' },
-      content: { style: 'background: #0f172a; padding: 0;' },
-      footer: { style: 'background: #0f172a; border-top: 1px solid rgba(51,65,85,0.4); padding: 0.5rem 1rem;' },
-      headerActions: { style: 'color: #94a3b8;' },
+      root: { style: 'background: var(--surface-base); border: 1px solid var(--border-input); border-radius: 0.75rem; overflow: hidden;' },
+      header: { style: 'background: var(--surface-base); border-bottom: 1px solid var(--border-default); padding: 0.75rem 1rem; color: var(--text);' },
+      content: { style: 'background: var(--surface-base); padding: 0;' },
+      footer: { style: 'background: var(--surface-base); border-top: 1px solid var(--border-default); padding: 0.5rem 1rem;' },
+      headerActions: { style: 'color: var(--text-muted);' },
     }"
   >
     <div ref="logContainer" class="debug-log-container">
@@ -130,14 +130,14 @@ async function copyAllLogs() {
 }
 
 .debug-log-container::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.6);
+  background: var(--border-input);
   border-radius: 3px;
 }
 
 .debug-empty {
   padding: 2rem;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.85rem;
 }
 
@@ -146,12 +146,12 @@ async function copyAllLogs() {
   align-items: baseline;
   gap: 0.5rem;
   padding: 0.3rem 0.75rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.2);
+  border-bottom: 1px solid var(--border-default);
   line-height: 1.5;
 }
 
 .debug-log-entry:hover {
-  background: rgba(51, 65, 85, 0.2);
+  background: var(--border-default);
 }
 
 .debug-log-error {
@@ -159,7 +159,7 @@ async function copyAllLogs() {
 }
 
 .log-time {
-  color: #64748b;
+  color: var(--text-muted);
   flex-shrink: 0;
   font-size: 0.7rem;
 }
@@ -171,14 +171,14 @@ async function copyAllLogs() {
 }
 
 .log-duration {
-  color: #94a3b8;
+  color: var(--text-muted);
   flex-shrink: 0;
   min-width: 3rem;
   text-align: right;
 }
 
 .log-error-badge {
-  background: #dc2626;
+  background: var(--danger);
   color: white;
   font-size: 0.6rem;
   font-weight: 700;
@@ -188,7 +188,7 @@ async function copyAllLogs() {
 }
 
 .log-sql {
-  color: #cbd5e1;
+  color: var(--text-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -204,7 +204,7 @@ async function copyAllLogs() {
 }
 
 .debug-count {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.8rem;
 }
 
@@ -217,7 +217,7 @@ async function copyAllLogs() {
 .debug-icon-btn {
   background: none;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 0.375rem;
@@ -235,11 +235,11 @@ async function copyAllLogs() {
 
 .debug-copy-btn:not(:disabled):hover {
   background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
+  color: var(--accent);
 }
 
 .debug-clear-btn:not(:disabled):hover {
   background: rgba(220, 38, 38, 0.15);
-  color: #dc2626;
+  color: var(--danger);
 }
 </style>

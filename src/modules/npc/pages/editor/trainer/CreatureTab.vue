@@ -24,16 +24,19 @@ function removeCreature(index: number) {
 </script>
 
 <template>
-  <EditableDataTable
-    :entries="creatureEntries"
-    :columns="creatureColumns"
-    :hasChanges="creatureHasChanges"
-    :title="t('trainer.groups.creatures')"
-    :description="t('trainer.groups.creaturesDesc')"
-    dataKey="CreatureId"
-    @add="addCreature"
-    @remove="removeCreature"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': creatureHasChanges }">
+    <EditableDataTable
+      :entries="creatureEntries"
+      :columns="creatureColumns"
+      :hasChanges="creatureHasChanges"
+      :title="t('trainer.groups.creatures')"
+      :description="t('trainer.groups.creaturesDesc')"
+      dataKey="CreatureId"
+      embedded
+      @add="addCreature"
+      @remove="removeCreature"
+    />
+  </div>
 </template>
 
 <style scoped>

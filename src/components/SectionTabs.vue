@@ -29,8 +29,12 @@ const props = withDefaults(defineProps<{
   description?: string
   /** Highlights the card border in cyan when true. */
   modified?: boolean
+  /** 'card' wraps tabs in a bordered card (default); 'plain' renders bare
+      chip tabs for use directly under an EditorHeader. */
+  variant?: 'card' | 'plain'
 }>(), {
   modified: false,
+  variant: 'card',
 })
 
 const active = ref<string>(props.defaultValue ?? props.tabs[0]?.value ?? '')
@@ -44,7 +48,7 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
 </script>
 
 <template>
-  <div class="section-tabs" :class="{ 'section-tabs-modified': modified }">
+  <div class="section-tabs" :class="{ 'section-tabs-modified': modified && variant === 'card', 'section-tabs-plain': variant === 'plain' }">
     <div v-if="title || description" class="section-tabs-header">
       <h4 v-if="title">{{ title }}</h4>
       <p v-if="description">{{ description }}</p>
@@ -80,17 +84,24 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
 
 <style scoped>
 .section-tabs {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
   transition: border-color 0.2s, background 0.2s;
 }
 
+.section-tabs.section-tabs-plain {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
 .section-tabs-modified {
-  border-color: rgba(6, 182, 212, 0.4);
-  background: rgba(6, 182, 212, 0.03);
+  border-color: var(--accent-focus);
+  background: var(--accent-soft);
 }
 
 .section-tabs-header {
@@ -100,13 +111,13 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
 .section-tabs-header h4 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   margin: 0 0 0.25rem 0;
 }
 
 .section-tabs-header p {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -118,7 +129,7 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
 
 .section-tab-count {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -126,11 +137,11 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: #22d3ee;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+  background: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-ring);
 }
 
-/* PrimeVue Tabs theming — matches the global editor look */
+/* PrimeVue Tabs theming — compact chip/pill tabs */
 :deep(.p-tabs),
 :deep(.p-tablist),
 :deep(.p-tablist-content),
@@ -140,40 +151,43 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
 }
 
 :deep(.p-tablist) {
-  border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+  border-bottom: 1px solid var(--border-default);
+  padding-bottom: 0.5rem;
 }
 
 :deep(.p-tablist-tab-list) {
   background: transparent !important;
   border: none !important;
+  gap: 0.35rem;
 }
 
 :deep(.p-tab) {
-  color: #94a3b8 !important;
-  background: rgba(2, 6, 23, 0.5) !important;
-  border: 1px solid rgba(51, 65, 85, 0.4) !important;
-  border-bottom: none !important;
-  border-radius: 0.5rem 0.5rem 0 0 !important;
-  padding: 0.55rem 1rem !important;
-  margin-right: 0.25rem !important;
+  color: var(--text-muted) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  padding: 0.3rem 0.85rem !important;
+  margin: 0 !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
 }
 
 :deep(.p-tab:hover) {
-  color: #e2e8f0 !important;
-  background: rgba(30, 41, 59, 0.6) !important;
+  color: var(--text) !important;
+  background: var(--surface-hover) !important;
 }
 
 :deep(.p-tab-active),
 :deep(.p-tab[data-p-active="true"]),
 :deep(.p-tab[aria-selected="true"]) {
-  color: #22d3ee !important;
-  background: rgba(30, 41, 59, 0.9) !important;
-  border-color: rgba(6, 182, 212, 0.4) !important;
-  border-bottom: 2px solid #22d3ee !important;
+  color: var(--accent) !important;
+  background: var(--accent-soft) !important;
+  border-color: var(--accent-focus) !important;
+  font-weight: 600 !important;
 }
 
 :deep(.p-tablist-active-bar) {
-  background: #22d3ee !important;
+  display: none !important;
 }
 
 :deep(.p-tabpanels) {

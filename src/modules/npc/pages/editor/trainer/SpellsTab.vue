@@ -44,16 +44,19 @@ function removeSpell(index: number) {
 </script>
 
 <template>
-  <EditableDataTable
-    :entries="spellEntries"
-    :columns="spellColumns"
-    :hasChanges="spellHasChanges"
-    :title="t('trainer.groups.spells')"
-    :description="t('trainer.groups.spellsDesc')"
-    dataKey="SpellId"
-    @add="addSpell"
-    @remove="removeSpell"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': spellHasChanges }">
+    <EditableDataTable
+      :entries="spellEntries"
+      :columns="spellColumns"
+      :hasChanges="spellHasChanges"
+      :title="t('trainer.groups.spells')"
+      :description="t('trainer.groups.spellsDesc')"
+      dataKey="SpellId"
+      embedded
+      @add="addSpell"
+      @remove="removeSpell"
+    />
+  </div>
 </template>
 
 <style scoped>

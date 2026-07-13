@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import TabPanels from 'primevue/tabpanels';
-import TabPanel from 'primevue/tabpanel';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import Select from 'primevue/select';
-import Button from 'primevue/button';
-import SqlQueryPanel from '@/components/SqlQueryPanel.vue';
+import EntityWorkspace from '@/components/workspace/EntityWorkspace.vue';
+import EntityListPanel from '@/components/workspace/EntityListPanel.vue';
+import InspectorPanel from '@/components/workspace/InspectorPanel.vue';
+import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue';
+import EditorHeader from '@/components/EditorHeader.vue';
+import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue';
 import EditorField from '@/components/EditorField.vue';
 import BitmaskField from '@/components/BitmaskField.vue';
+import type { ItemTemplate } from '@/modules/item/item_template';
 import { useItemModuleStore } from '@/modules/item/store';
 
 import {
@@ -46,15 +46,54 @@ const route = useRoute();
 const router = useRouter();
 const store = useItemModuleStore();
 
-const itemEntry = computed(() => {
+/** undefined = no selection, null = create mode, number = edit. */
+const entryParam = computed<number | null | undefined>(() => {
   const param = route.params.entry as string | undefined;
-  if (!param || param === 'new') return null;
+  if (param === undefined || param === '') return undefined;
+  if (param === 'new') return null;
   const n = Number(param);
-  return Number.isNaN(n) ? null : n;
+  return Number.isNaN(n) ? undefined : n;
 });
+const itemEntry = computed(() => entryParam.value ?? null);
 
 const loading = ref(false);
 const form = store.formData;
+
+// --- List ---
+function metaOf(item: ItemTemplate): string {
+  const quality = qualityOptions.find(q => q.value === item.Quality)?.label ?? `Q${item.Quality}`;
+  return `#${item.entry} · ${quality} · ilvl ${item.ItemLevel}`;
+}
+
+async function onListSearch(query: string) {
+  store.currentSearch = query;
+  await store.fetchItems(query || undefined, 50);
+}
+
+function onListSelect(item: ItemTemplate) {
+  router.push(`/item/${item.entry}`);
+}
+
+function onListAdd() {
+  router.push('/item/new');
+}
+
+async function onListRemove(item: ItemTemplate) {
+  try {
+    await store.deleteItem(item.entry);
+    if (entryParam.value === item.entry) {
+      router.push('/item');
+    }
+  } catch (e) {
+    console.error('Failed to delete item:', e);
+  }
+}
+
+onMounted(() => {
+  if (!store.listLoaded) {
+    store.fetchItems(undefined, 50);
+  }
+});
 
 // Convert options to PrimeVue format
 const classOptions = item_class_options.map((o) => ({ value: o.value, label: o.name }));
@@ -81,95 +120,85 @@ function isFieldModified(field: string): boolean {
   return modifiedFieldSet.value.has(field);
 }
 
-async function load() {
+watch(entryParam, async (val) => {
+  if (val === undefined) {
+    store.closeEditor();
+    return;
+  }
+  if (store.editorDataLoaded && store.editingEntry === val) return;
   loading.value = true;
   try {
-    if (itemEntry.value != null) {
-      await store.openEditor(itemEntry.value);
-    } else {
-      await store.openEditor('new');
-    }
+    await store.openEditor(val ?? 'new');
   } finally {
     loading.value = false;
   }
-}
+}, { immediate: true });
 
 async function save() {
   try {
+    const savedEntry = form.entry;
     await store.saveItem();
-    router.push('/item');
+    if (entryParam.value === null && savedEntry) {
+      router.push(`/item/${savedEntry}`);
+    }
   } catch (e) {
     console.error('Failed to save item:', e);
   }
-}
-
-function onClose() {
-  router.push('/item');
 }
 
 function onDiscard() {
   store.discardChanges();
 }
 
-onMounted(() => {
-  load();
-});
+const mainTabs = computed<SectionTabItem[]>(() => [
+  { value: '0', label: t('itemEditor.tabs.general') },
+  { value: '1', label: t('itemEditor.tabs.requirements') },
+  { value: '2', label: t('itemEditor.tabs.stats') },
+  { value: '3', label: t('itemEditor.tabs.misc') },
+]);
 </script>
 
 <template>
-  <div class="item-editor">
-    <!-- Header -->
-    <div class="editor-header">
-      <div class="editor-header-left">
-        <Button
-          icon="pi pi-arrow-left"
-          :label="t('itemEditor.back')"
-          severity="secondary"
-          @click="onClose"
-          class="back-button"
-        />
-        <h1 class="editor-title">
-          {{ t('itemEditor.editorTitle') }} <span v-if="form.name">{{ form.name }}</span> #{{ form.entry }}
-        </h1>
-      </div>
-      <div class="editor-header-right">
-        <Button
-          icon="pi pi-undo"
-          :label="t('itemEditor.discard')"
-          @click="onDiscard"
-          :disabled="!store.combinedHasChanges"
-          class="discard-button"
-        />
-        <Button
-          icon="pi pi-play"
-          :label="t('itemEditor.execute')"
-          @click="save"
-          :disabled="!store.combinedHasChanges"
-          class="execute-button"
-        />
-      </div>
-    </div>
+  <EntityWorkspace storageKey="item">
+    <template #list>
+      <EntityListPanel
+        :items="store.items"
+        :idOf="(i: ItemTemplate) => i.entry"
+        :titleOf="(i: ItemTemplate) => i.name"
+        :metaOf="metaOf"
+        :selectedId="entryParam ?? null"
+        :modifiedIds="store.modifiedIds"
+        :loading="store.loading"
+        :searchPlaceholder="t('item.searchPlaceholder')"
+        removable
+        @select="onListSelect"
+        @add="onListAdd"
+        @search="onListSearch"
+        @remove="onListRemove"
+      />
+    </template>
 
-    <!-- SQL Query Panel -->
-    <SqlQueryPanel
-      :diffQuery="store.combinedDiffQuery"
-      :fullQuery="store.combinedFullQuery"
-      :hasChanges="store.combinedHasChanges"
-      :changedFields="store.combinedChangedFields"
-    />
+    <template #editor>
+      <template v-if="entryParam !== undefined">
+        <EditorHeader
+          :subtitle="form.name || t('itemEditor.editorTitle')"
+          :id="form.entry"
+          table="item_template"
+          :showBack="false"
+          :hasChanges="store.combinedHasChanges"
+          :discardLabel="t('itemEditor.discard')"
+          :executeLabel="t('itemEditor.execute')"
+          @discard="onDiscard"
+          @execute="save"
+        />
 
-    <!-- Tabs -->
-    <Tabs value="0">
-          <TabList>
-            <Tab value="0">{{ t('itemEditor.tabs.general') }}</Tab>
-            <Tab value="1">{{ t('itemEditor.tabs.requirements') }}</Tab>
-            <Tab value="2">{{ t('itemEditor.tabs.stats') }}</Tab>
-            <Tab value="3">{{ t('itemEditor.tabs.misc') }}</Tab>
-          </TabList>
+        <div v-if="loading" class="editor-loading">
+          <i class="pi pi-spin pi-spinner"></i>
+        </div>
 
-          <TabPanels>
+        <SectionTabs v-else :tabs="mainTabs" variant="plain" defaultValue="0">
             <!-- General Tab -->
-            <TabPanel value="0">
+            <template #0>
               <!-- Basic Information -->
               <div class="field-group">
                 <div class="field-group-header">
@@ -281,10 +310,10 @@ onMounted(() => {
                   <Textarea v-model="form.description" rows="3" fluid />
                 </EditorField>
               </div>
-            </TabPanel>
+            </template>
 
             <!-- Requirements Tab -->
-            <TabPanel value="1">
+            <template #1>
               <!-- Level Requirements -->
               <div class="field-group">
                 <div class="field-group-header">
@@ -364,10 +393,10 @@ onMounted(() => {
                   </EditorField>
                 </div>
               </div>
-            </TabPanel>
+            </template>
 
             <!-- Stats Tab -->
-            <TabPanel value="2">
+            <template #2>
               <!-- Item Stats (1-10) -->
               <div class="field-group">
                 <div class="field-group-header">
@@ -551,10 +580,10 @@ onMounted(() => {
                   </EditorField>
                 </div>
               </div>
-            </TabPanel>
+            </template>
 
             <!-- Misc Tab -->
-            <TabPanel value="3">
+            <template #3>
               <!-- Flags -->
               <div class="field-group">
                 <div class="field-group-header">
@@ -684,98 +713,88 @@ onMounted(() => {
                   </EditorField>
                 </div>
               </div>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-  </div>
+            </template>
+        </SectionTabs>
+      </template>
+
+      <WorkspaceEmptyState v-else />
+    </template>
+
+    <template #inspector>
+      <InspectorPanel
+        v-if="entryParam !== undefined"
+        :title="t('workspace.inspector')"
+        :subtitle="form.name || undefined"
+        storageKey="item"
+        :changedFields="store.combinedChangedFields"
+        :diffQuery="store.combinedDiffQuery"
+        :fullQuery="store.combinedFullQuery"
+        :hasChanges="store.combinedHasChanges"
+      >
+        <template #facts>
+          <dl class="item-facts">
+            <div class="item-facts-row">
+              <dt>{{ t('item.columns.Quality') }}</dt>
+              <dd>{{ qualityOptions.find(q => q.value === form.Quality)?.label ?? form.Quality }}</dd>
+            </div>
+            <div class="item-facts-row">
+              <dt>{{ t('item.columns.ItemLevel') }}</dt>
+              <dd>{{ form.ItemLevel }}</dd>
+            </div>
+            <div class="item-facts-row">
+              <dt>{{ t('item.columns.class') }}</dt>
+              <dd>{{ classOptions.find(c => c.value === form.class)?.label ?? form.class }}</dd>
+            </div>
+          </dl>
+        </template>
+      </InspectorPanel>
+    </template>
+  </EntityWorkspace>
 </template>
 
 <style scoped>
-.editor-header {
+.editor-loading {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 2rem;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--accent);
+  font-size: 1.5rem;
 }
 
-.editor-header-left {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.editor-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.back-button {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.25rem !important;
-  transition: all 0.2s !important;
-}
-
-.back-button:hover {
-  background: rgba(51, 65, 85, 0.9) !important;
-  border-color: rgba(71, 85, 105, 0.8) !important;
-  color: #ffffff !important;
-}
-
-.execute-button {
-  background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
-}
-
-.execute-button:hover {
-  background: linear-gradient(135deg, #22d3ee, #06b6d4) !important;
-}
-
-.discard-button {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
-}
-
-.discard-button:hover {
-  background: linear-gradient(135deg, #f87171, #e75151) !important;
-}
-
-.editor-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #22d3ee;
+.item-facts {
   margin: 0;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.item-facts-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.item-facts-row dt {
+  color: var(--text-muted);
+}
+
+.item-facts-row dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .spell-header {
   grid-column: 1 / -1;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--text-soft);
   margin: 1rem 0 0.5rem 0;
   padding-top: 1rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.4);
+  border-top: 1px solid var(--border-default);
 }
 
 .spell-header:first-of-type {

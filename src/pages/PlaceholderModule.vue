@@ -15,7 +15,7 @@ const moduleId = route.path.replace('/', '')
       <p class="content-description">{{ t(`modules.${moduleId}.description`) }}</p>
     </div>
     <div class="content-placeholder">
-      <i class="pi pi-wrench" style="font-size: 3rem; color: #334155"></i>
+      <i class="pi pi-wrench" style="font-size: 3rem; color: var(--text-placeholder)"></i>
       <p>{{ t('modules.placeholder') }}</p>
     </div>
   </div>
@@ -29,7 +29,7 @@ const moduleId = route.path.replace('/', '')
 .content-title {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -37,7 +37,7 @@ const moduleId = route.path.replace('/', '')
 }
 
 .content-description {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -48,9 +48,9 @@ const moduleId = route.path.replace('/', '')
   justify-content: center;
   gap: 1rem;
   height: 50vh;
-  border: 2px dashed rgba(51, 65, 85, 0.5);
+  border: 2px dashed var(--border-input-soft);
   border-radius: 1rem;
-  color: #475569;
+  color: var(--text-placeholder);
   font-size: 0.95rem;
 }
 </style>

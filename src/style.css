@@ -13,7 +13,7 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.87);
+  color: var(--text);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -24,7 +24,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #172554 50%, #0f172a 100%);
+  background: var(--surface-page);
   overflow-x: hidden;
 }
 
@@ -32,41 +32,9 @@ body {
   min-height: 100vh;
 }
 
-/* PrimeVue Tabs font size */
-.p-tab {
-  font-size: 0.9rem !important;
-}
-
-/* PrimeVue Select Dropdown Styling */
+/* Glass effect on select overlays — colors come from the PrimeVue preset
+   (per-scheme surface mapping); only the blur is beyond the token system. */
 .p-select-overlay {
-  background: rgba(15, 23, 42, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
-}
-
-.p-select-option {
-  color: var(--text) !important;
-  background: transparent !important;
-  transition: background-color 0.2s, color 0.2s !important;
-}
-
-.p-select-option:hover {
-  background: rgba(6, 182, 212, 0.15) !important;
-  color: #ffffff !important;
-}
-
-.p-select-option.p-select-option-selected {
-  background: rgba(6, 182, 212, 0.25) !important;
-  color: var(--accent) !important;
-}
-
-.p-select-option.p-select-option-selected:hover {
-  background: rgba(6, 182, 212, 0.35) !important;
-  color: var(--accent) !important;
-}
-
-.p-select-list {
-  padding: 0.25rem !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }

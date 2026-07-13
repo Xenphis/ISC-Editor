@@ -363,8 +363,8 @@ function clearOverride() {
   font-size: 0.75rem;
 }
 
-.calibrate-status-baked { color: #22c55e; }
-.calibrate-status-override { color: #f59e0b; }
+.calibrate-status-baked { color: var(--success); }
+.calibrate-status-override { color: var(--warn); }
 .calibrate-status-none { color: var(--text-placeholder); }
 
 .calibrate-sample {
@@ -399,12 +399,12 @@ function clearOverride() {
 }
 
 .calibrate-error {
-  color: #ef4444;
+  color: var(--danger);
   font-size: 0.8rem;
 }
 
 .calibrate-warning {
-  color: #f59e0b;
+  color: var(--warn);
   font-size: 0.8rem;
 }
 

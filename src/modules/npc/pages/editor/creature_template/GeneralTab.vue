@@ -196,17 +196,20 @@ onMounted(() => {
   </div>
 
   <!-- Locales (creature_template_locale) -->
-  <EditableDataTable
-    :entries="localeEntries"
-    :columns="localeColumns"
-    :hasChanges="localeHasChanges"
-    :title="t('creature_template.groups.locales')"
-    :description="t('creature_template.groups.localesDesc')"
-    dataKey="locale"
-    showHeaderAdd
-    @add="addLocale"
-    @remove="removeLocale"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': localeHasChanges }">
+    <EditableDataTable
+      :entries="localeEntries"
+      :columns="localeColumns"
+      :hasChanges="localeHasChanges"
+      :title="t('creature_template.groups.locales')"
+      :description="t('creature_template.groups.localesDesc')"
+      dataKey="locale"
+      showHeaderAdd
+      embedded
+      @add="addLocale"
+      @remove="removeLocale"
+    />
+  </div>
 </template>
 
 <style scoped>

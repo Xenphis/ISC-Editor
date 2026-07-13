@@ -199,12 +199,12 @@ async function handleSubmit() {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--surface-elevated);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 0.85rem;
@@ -213,8 +213,8 @@ async function handleSubmit() {
 }
 
 .lang-btn:hover {
-  background: rgba(51, 65, 85, 0.5);
-  color: white;
+  background: var(--border-input-soft);
+  color: var(--text);
 }
 
 .login-header {
@@ -228,7 +228,7 @@ async function handleSubmit() {
   justify-content: center;
   width: 5rem;
   height: 5rem;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: var(--accent-gradient);
   border-radius: 1rem;
   margin-bottom: 1rem;
   box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
@@ -237,7 +237,7 @@ async function handleSubmit() {
 .login-title {
   font-size: 2.25rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -245,16 +245,16 @@ async function handleSubmit() {
 }
 
 .login-subtitle {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
 .login-card {
   position: relative;
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--surface-elevated);
   backdrop-filter: blur(12px);
   border-radius: 1rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   padding: 2rem;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
 }
@@ -267,15 +267,15 @@ async function handleSubmit() {
   border: none;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 1.1rem;
 }
 
 .settings-btn:hover {
-  background: rgba(51, 65, 85, 0.5);
-  color: white;
+  background: var(--border-input-soft);
+  color: var(--text);
 }
 
 .login-form {
@@ -294,11 +294,11 @@ async function handleSubmit() {
 .form-field label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--text-soft);
 }
 
 .connect-btn {
-  background: linear-gradient(to right, #2563eb, #06b6d4) !important;
+  background: var(--accent-gradient) !important;
   border: none !important;
   padding: 0.75rem 1.5rem !important;
   font-weight: 500 !important;
@@ -331,27 +331,27 @@ async function handleSubmit() {
   background: rgba(127, 29, 29, 0.2);
   border: 1px solid rgba(185, 28, 28, 0.4);
   border-radius: 0.75rem;
-  color: #f87171;
+  color: var(--danger);
   font-size: 0.85rem;
 }
 
 .login-info {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: rgba(30, 58, 138, 0.2);
-  border: 1px solid rgba(29, 78, 216, 0.3);
-  border-radius: 0.75rem;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-ring);
+  border-radius: var(--radius-lg);
 }
 
 .login-info p {
   font-size: 0.875rem;
-  color: rgba(147, 197, 253, 0.8);
+  color: var(--text-muted);
   text-align: center;
 }
 
 .login-footer {
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   margin-top: 1.5rem;
 }

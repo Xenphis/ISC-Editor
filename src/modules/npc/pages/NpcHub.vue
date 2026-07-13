@@ -116,7 +116,7 @@ function onCardClick(mod: typeof submodules[number]) {
 .module-header-icon {
   width: 3rem;
   height: 3rem;
-  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  background: var(--accent-gradient);
   border-radius: 0.875rem;
   display: flex;
   align-items: center;
@@ -133,14 +133,14 @@ function onCardClick(mod: typeof submodules[number]) {
 .module-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text);
   line-height: 1.2;
   margin: 0;
 }
 
 .module-description {
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 0.25rem 0 0;
 }
 
@@ -152,8 +152,8 @@ function onCardClick(mod: typeof submodules[number]) {
 
 .submodule-card {
   position: relative;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  background: var(--surface-1);
+  border: 1px solid var(--border-input-soft);
   border-radius: 1rem;
   padding: 1.5rem;
   display: flex;
@@ -172,8 +172,8 @@ function onCardClick(mod: typeof submodules[number]) {
 }
 
 .card-available:hover {
-  border-color: rgba(6, 182, 212, 0.4);
-  background: rgba(15, 23, 42, 0.8);
+  border-color: var(--accent-focus);
+  background: var(--surface-input);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
@@ -200,14 +200,14 @@ function onCardClick(mod: typeof submodules[number]) {
 .card-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   margin: 0 0 0.375rem;
   line-height: 1.3;
 }
 
 .card-desc {
   font-size: 0.8125rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
 }
@@ -223,9 +223,9 @@ function onCardClick(mod: typeof submodules[number]) {
   gap: 0.375rem;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #475569;
-  background: rgba(51, 65, 85, 0.4);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  color: var(--text-placeholder);
+  background: var(--border-default);
+  border: 1px solid var(--border-input-soft);
   padding: 0.25rem 0.625rem;
   border-radius: 0.375rem;
 }
@@ -240,24 +240,24 @@ function onCardClick(mod: typeof submodules[number]) {
   justify-content: center;
   width: 2rem;
   height: 2rem;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: var(--accent-ring-soft);
+  border: 1px solid var(--accent-ring);
   border-radius: 0.5rem;
-  color: #22d3ee;
+  color: var(--accent);
   font-size: 0.875rem;
   margin-left: auto;
   transition: all 0.2s;
 }
 
 .card-available:hover .badge-open {
-  background: rgba(6, 182, 212, 0.2);
-  border-color: rgba(6, 182, 212, 0.5);
+  background: var(--accent-ring);
+  border-color: var(--accent-focus);
 }
 
 .card-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(2, 6, 23, 0.25);
+  background: var(--surface-veil);
   border-radius: inherit;
   pointer-events: none;
 }

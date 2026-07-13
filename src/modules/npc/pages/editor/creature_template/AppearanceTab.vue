@@ -122,17 +122,20 @@ function removeEquip(index: number) {
   </div>
 
   <!-- Equipment (creature_equip_template) -->
-  <EditableDataTable
-    :entries="equipEntries"
-    :columns="equipColumns"
-    :hasChanges="equipHasChanges"
-    :title="t('creature_template.groups.equipment')"
-    :description="t('creature_template.groups.equipmentDesc')"
-    dataKey="ID"
-    showHeaderAdd
-    @add="addEquipSet"
-    @remove="removeEquip"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': equipHasChanges }">
+    <EditableDataTable
+      :entries="equipEntries"
+      :columns="equipColumns"
+      :hasChanges="equipHasChanges"
+      :title="t('creature_template.groups.equipment')"
+      :description="t('creature_template.groups.equipmentDesc')"
+      dataKey="ID"
+      showHeaderAdd
+      embedded
+      @add="addEquipSet"
+      @remove="removeEquip"
+    />
+  </div>
 </template>
 
 <style scoped>

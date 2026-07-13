@@ -351,7 +351,7 @@ function pinTooltip(placed: PlacedPin): string {
   border: none;
   background: none;
   cursor: pointer;
-  color: #f59e0b;
+  color: var(--warn);
   font-size: 1.4rem;
   line-height: 1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
@@ -363,13 +363,13 @@ function pinTooltip(placed: PlacedPin): string {
 }
 
 .zone-map-pin-selected {
-  color: #06b6d4;
+  color: var(--accent-strong);
   transform: translate(-50%, -100%) scale(1.35);
   z-index: 2;
 }
 
 .zone-map-pin-offmap {
-  color: #ef4444;
+  color: var(--danger);
   opacity: 0.75;
 }
 
@@ -382,7 +382,7 @@ function pinTooltip(placed: PlacedPin): string {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(239, 68, 68, 0.9);
+  background: color-mix(in srgb, var(--danger) 90%, transparent);
   color: white;
   font-size: 0.65rem;
   font-weight: 700;

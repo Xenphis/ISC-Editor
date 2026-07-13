@@ -48,7 +48,7 @@ const emit = defineEmits<{
 }
 
 .action-edit {
-  color: #60a5fa !important;
+  color: var(--accent) !important;
 }
 
 .action-edit:hover {
@@ -56,10 +56,10 @@ const emit = defineEmits<{
 }
 
 .action-delete {
-  color: #f87171 !important;
+  color: var(--danger) !important;
 }
 
 .action-delete:hover {
-  background: rgba(248, 113, 113, 0.1) !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
 }
 </style>

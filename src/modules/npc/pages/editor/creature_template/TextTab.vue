@@ -158,13 +158,13 @@ const textSectionTabs = computed<SectionTabItem[]>(() => [
       modal
       :style="{ width: '40rem' }"
       :dt="{
-        background: 'rgba(15, 23, 42, 0.95)',
-        borderColor: 'rgba(51, 65, 85, 0.5)',
-        color: '#e2e8f0',
+        background: 'var(--surface-input)',
+        borderColor: 'var(--border-input-soft)',
+        color: 'var(--text)',
         header: {
-          background: 'rgba(15, 23, 42, 0.95)',
-          color: '#e2e8f0',
-          borderColor: 'rgba(51, 65, 85, 0.4)',
+          background: 'var(--surface-input)',
+          color: 'var(--text)',
+          borderColor: 'var(--border-default)',
         },
       }"
     >

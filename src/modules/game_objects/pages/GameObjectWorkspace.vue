@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
 import { game_object_type_options } from '@/modules/game_objects/types/defines'
+import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
-import { getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
-import GameObjectSpawnEditor from './GameObjectSpawnEditor.vue'
+import { getGameObjects, deleteGameObject, getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
+import GameObjectSpawnEditor, { type GoSpawnInspectorState } from './GameObjectSpawnEditor.vue'
 import GameObjectLocaleTab from './GameObjectLocaleTab.vue'
-import GameObjectModelPanel from './GameObjectModelPanel.vue'
-import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
+import EntityWorkspace from '@/components/workspace/EntityWorkspace.vue'
+import EntityListPanel from '@/components/workspace/EntityListPanel.vue'
+import InspectorPanel from '@/components/workspace/InspectorPanel.vue'
+import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue'
+import EditorHeader from '@/components/EditorHeader.vue'
+import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
+import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 import EditorField from '@/components/EditorField.vue'
 import StyledDataTable from '@/components/StyledDataTable.vue'
 import ActionsColumn from '@/components/ActionsColumn.vue'
@@ -30,15 +31,69 @@ const route = useRoute()
 const router = useRouter()
 const store = useGameObjectModuleStore()
 
-const goEntry = computed(() => {
+const listTypeMap = new Map(game_object_type_options.map(o => [o.value, o.name]))
+
+/** undefined = no selection, null = create mode, number = edit. */
+const entryParam = computed<number | null | undefined>(() => {
   const param = route.params.entry as string | undefined
-  if (!param) return null
+  if (param === undefined || param === '') return undefined
+  if (param === 'new') return null
   const n = Number(param)
-  return Number.isNaN(n) ? null : n
+  return Number.isNaN(n) ? undefined : n
 })
 
 const loading = ref(false)
 const form = store.formData
+
+// --- List ---
+function metaOf(go: GameObjectTemplate): string {
+  const type = listTypeMap.get(go.type) ?? `Type ${go.type}`
+  return `#${go.entry} · ${type} · display ${go.displayId}`
+}
+
+async function loadGameObjects() {
+  store.loading = true
+  try {
+    const result = await getGameObjects(store.currentSearch || undefined, 50)
+    store.setGameObjects(result.data)
+    store.markListLoaded()
+  } catch (e) {
+    console.error('Failed to load game objects:', e)
+  } finally {
+    store.loading = false
+  }
+}
+
+async function onListSearch(query: string) {
+  store.currentSearch = query
+  await loadGameObjects()
+}
+
+function onListSelect(go: GameObjectTemplate) {
+  router.push(`/gameobject/${go.entry}`)
+}
+
+function onListAdd() {
+  router.push('/gameobject/new')
+}
+
+async function onListRemove(go: GameObjectTemplate) {
+  try {
+    await deleteGameObject(go.entry)
+    if (entryParam.value === go.entry) {
+      router.push('/gameobject')
+    }
+    await loadGameObjects()
+  } catch (e) {
+    console.error('Failed to delete game object:', e)
+  }
+}
+
+onMounted(() => {
+  if (!store.listLoaded) {
+    loadGameObjects()
+  }
+})
 
 const typeOptions = game_object_type_options.map(o => ({ value: o.value, label: o.name }))
 
@@ -127,11 +182,23 @@ const spawns = ref<GameObject[]>([])
 const spawnsLoading = ref(false)
 const editingSpawnGuid = ref<number | null>(null)
 
+// Filled by GameObjectSpawnEditor so the right rail can show the spawn's SQL/diff.
+const spawnInspector = reactive<GoSpawnInspectorState>({
+  diffQuery: '',
+  fullQuery: '',
+  hasChanges: false,
+  changedFields: [],
+})
+
 async function loadSpawns() {
-  if (goEntry.value == null) return
+  const entry = entryParam.value
+  if (entry == null) {
+    spawns.value = []
+    return
+  }
   spawnsLoading.value = true
   try {
-    spawns.value = await getGameObjectSpawns(goEntry.value!)
+    spawns.value = await getGameObjectSpawns(entry)
   } catch (e) {
     console.error('Failed to load spawns:', e)
   } finally {
@@ -167,112 +234,107 @@ async function onSpawnEditorSave(data: GameObject) {
   }
 }
 
-// --- Save / Close ---
+// --- Save / Discard ---
 async function onSave() {
   try {
+    const savedEntry = form.entry
     await store.saveCurrent()
-    store.discardEditor()
-    router.push('/gameobject')
+    await loadGameObjects()
+    if (entryParam.value === null && savedEntry) {
+      router.push(`/gameobject/${savedEntry}`)
+    }
   } catch (e) {
     console.error('Failed to save game object:', e)
   }
-}
-
-function onClose() {
-  store.closeEditor()
-  router.push('/gameobject')
 }
 
 function onDiscard() {
   store.discardChanges()
 }
 
-// --- Load data ---
-onMounted(async () => {
-  if (store.editorDataLoaded && store.editingEntry === goEntry.value) {
+// --- Load data on selection change ---
+watch(entryParam, async (val) => {
+  editingSpawnGuid.value = null
+  if (val === undefined) {
+    store.closeEditor()
+    return
+  }
+  if (store.editorDataLoaded && store.editingEntry === val) {
     loadSpawns()
     return
   }
-
   loading.value = true
   try {
-    await store.openEditor(goEntry.value)
+    await store.openEditor(val)
   } catch (e) {
     console.error('Failed to load game object:', e)
   } finally {
     loading.value = false
   }
-
   loadSpawns()
-})
+}, { immediate: true })
+
+// --- Tabs ---
+const mainTabs = computed<SectionTabItem[]>(() => [
+  { value: 'general', label: t('gameobjectEditor.tabs.general') },
+  { value: 'data', label: t('gameobjectEditor.tabs.data') },
+  { value: 'loot', label: t('gameobjectEditor.tabs.loot') },
+  { value: 'locale', label: t('gameobjectEditor.tabs.locale') },
+  { value: 'spawn', label: t('gameobjectEditor.tabs.spawn'), count: spawns.value.length },
+])
 </script>
 
 <template>
-  <!-- Spawn Editor -->
-  <GameObjectSpawnEditor
-    v-if="editingSpawnGuid != null"
-    :spawnGuid="editingSpawnGuid"
-    :goEntry="form.entry"
-    @close="onSpawnEditorClose"
-    @save="onSpawnEditorSave"
-  />
+  <EntityWorkspace storageKey="gameobject">
+    <template #list>
+      <EntityListPanel
+        :items="store.gameObjects"
+        :idOf="(g: GameObjectTemplate) => g.entry"
+        :titleOf="(g: GameObjectTemplate) => g.name"
+        :metaOf="metaOf"
+        :selectedId="entryParam ?? null"
+        :modifiedIds="store.modifiedIds"
+        :loading="store.loading"
+        :searchPlaceholder="t('gameobject.searchPlaceholder')"
+        removable
+        @select="onListSelect"
+        @add="onListAdd"
+        @search="onListSearch"
+        @remove="onListRemove"
+      />
+    </template>
 
-  <div v-else class="go-editor">
-    <!-- Header -->
-    <div class="editor-header">
-      <div class="editor-header-left">
-        <Button
-          icon="pi pi-arrow-left"
-          :label="t('gameobjectEditor.back')"
-          severity="secondary"
-          @click="onClose()"
-          class="back-button"
-        />
-        <h1 class="editor-title">
-          {{ t('gameobjectEditor.editorTitle') }} <span v-if="form.name">{{ form.name }}</span> #{{ form.entry }}
-        </h1>
-      </div>
-      <div class="editor-header-right">
-        <Button
-          icon="pi pi-undo"
-          :label="t('gameobjectEditor.discard')"
-          @click="onDiscard"
-          :disabled="!store.combinedHasChanges"
-          class="discard-button"
-        />
-        <Button
-          icon="pi pi-play"
-          :label="t('gameobjectEditor.execute')"
-          @click="onSave"
-          :disabled="!store.combinedHasChanges"
-          class="execute-button"
-        />
-      </div>
-    </div>
+    <template #editor>
+      <!-- Spawn Editor -->
+      <GameObjectSpawnEditor
+        v-if="editingSpawnGuid != null"
+        :spawnGuid="editingSpawnGuid"
+        :goEntry="form.entry"
+        :inspector="spawnInspector"
+        @close="onSpawnEditorClose"
+        @save="onSpawnEditorSave"
+      />
 
-    <div class="editor-split">
-      <div class="editor-main">
-        <!-- SQL Query Panel -->
-        <SqlQueryPanel
-          :diffQuery="store.combinedDiffQuery"
-          :fullQuery="store.combinedFullQuery"
+      <template v-else-if="entryParam !== undefined">
+        <EditorHeader
+          :subtitle="form.name || t('gameobjectEditor.editorTitle')"
+          :id="form.entry"
+          table="gameobject_template"
+          :showBack="false"
           :hasChanges="store.combinedHasChanges"
-          :changedFields="store.combinedChangedFields"
+          :discardLabel="t('gameobjectEditor.discard')"
+          :executeLabel="t('gameobjectEditor.execute')"
+          @discard="onDiscard"
+          @execute="onSave"
         />
 
-        <!-- Tabs -->
-        <Tabs value="general">
-      <TabList>
-        <Tab value="general">{{ t('gameobjectEditor.tabs.general') }}</Tab>
-        <Tab value="data">{{ t('gameobjectEditor.tabs.data') }}</Tab>
-        <Tab value="loot">{{ t('gameobjectEditor.tabs.loot') }}</Tab>
-        <Tab value="locale">{{ t('gameobjectEditor.tabs.locale') }}</Tab>
-        <Tab value="spawn">{{ t('gameobjectEditor.tabs.spawn') }} ({{ spawns.length }})</Tab>
-      </TabList>
+        <div v-if="loading" class="editor-loading">
+          <i class="pi pi-spin pi-spinner"></i>
+        </div>
 
-      <TabPanels>
+        <SectionTabs v-else :tabs="mainTabs" variant="plain" defaultValue="general">
         <!-- ==================== GENERAL ==================== -->
-        <TabPanel value="general">
+        <template #general>
           <!-- Identification -->
           <div class="field-group">
             <div class="field-group-header">
@@ -362,10 +424,10 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== DATA ==================== -->
-        <TabPanel value="data">
+        <template #data>
           <div class="field-group">
             <div class="field-group-header">
               <h4>{{ t('gameobjectEditor.groups.dataFields') }}</h4>
@@ -377,33 +439,39 @@ onMounted(async () => {
               </EditorField>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== LOOT & QUESTS ==================== -->
-        <TabPanel value="loot">
-          <EditableDataTable
-            :entries="lootEntries"
-            :columns="lootColumns"
-            :hasChanges="lootHasChanges"
-            :title="t('gameobjectEditor.groups.loot')"
-            :description="t('gameobjectEditor.groups.lootDesc')"
-            dataKey="Item"
-            showHeaderAdd
-            @add="addLoot"
-            @remove="removeLoot"
-          />
+        <template #loot>
+          <div class="field-group" :class="{ 'field-group-modified': lootHasChanges }">
+            <EditableDataTable
+              :entries="lootEntries"
+              :columns="lootColumns"
+              :hasChanges="lootHasChanges"
+              :title="t('gameobjectEditor.groups.loot')"
+              :description="t('gameobjectEditor.groups.lootDesc')"
+              dataKey="Item"
+              showHeaderAdd
+              embedded
+              @add="addLoot"
+              @remove="removeLoot"
+            />
+          </div>
 
-          <EditableDataTable
-            :entries="questItemEntries"
-            :columns="questItemColumns"
-            :hasChanges="questItemHasChanges"
-            :title="t('gameobjectEditor.groups.questItems')"
-            :description="t('gameobjectEditor.groups.questItemsDesc')"
-            dataKey="Idx"
-            showHeaderAdd
-            @add="addQuestItem"
-            @remove="removeQuestItem"
-          />
+          <div class="field-group" :class="{ 'field-group-modified': questItemHasChanges }">
+            <EditableDataTable
+              :entries="questItemEntries"
+              :columns="questItemColumns"
+              :hasChanges="questItemHasChanges"
+              :title="t('gameobjectEditor.groups.questItems')"
+              :description="t('gameobjectEditor.groups.questItemsDesc')"
+              dataKey="Idx"
+              showHeaderAdd
+              embedded
+              @add="addQuestItem"
+              @remove="removeQuestItem"
+            />
+          </div>
 
           <div class="field-group" :class="{ 'field-group-modified': questStartersHasChanges || questEndersHasChanges }">
             <div class="field-group-header">
@@ -438,15 +506,15 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-        </TabPanel>
+        </template>
 
         <!-- ==================== LOCALE ==================== -->
-        <TabPanel value="locale">
+        <template #locale>
           <GameObjectLocaleTab />
-        </TabPanel>
+        </template>
 
         <!-- ==================== SPAWN ==================== -->
-        <TabPanel value="spawn">
+        <template #spawn>
           <div class="field-group">
             <div class="field-group-header">
               <h4>{{ t('gameobjectEditor.groups.spawns') }}</h4>
@@ -473,118 +541,97 @@ onMounted(async () => {
               </Column>
             </StyledDataTable>
           </div>
-        </TabPanel>
-      </TabPanels>
-        </Tabs>
-      </div>
+        </template>
+        </SectionTabs>
+      </template>
 
-      <!-- Right info panel (collapsible) -->
-      <GameObjectModelPanel
-        :displayId="form.displayId"
-        :size="form.size"
-        :name="form.name"
-      />
-    </div>
-  </div>
+      <WorkspaceEmptyState v-else />
+    </template>
+
+    <template #inspector>
+      <!-- Spawn inspector (right rail) while editing a gameobject spawn -->
+      <InspectorPanel
+        v-if="editingSpawnGuid != null"
+        :title="t('workspace.inspector')"
+        :subtitle="`${t('gameobjectSpawnEditor.editorTitle')} #${editingSpawnGuid}`"
+        storageKey="gameobject.spawn"
+        :changedFields="spawnInspector.changedFields"
+        :diffQuery="spawnInspector.diffQuery"
+        :fullQuery="spawnInspector.fullQuery"
+        :hasChanges="spawnInspector.hasChanges"
+      >
+        <template #preview>
+          <ModelViewer kind="gameobject" :displayId="form.displayId" />
+        </template>
+      </InspectorPanel>
+
+      <InspectorPanel
+        v-else-if="entryParam !== undefined"
+        :title="t('workspace.inspector')"
+        :subtitle="form.name || undefined"
+        storageKey="gameobject"
+        :changedFields="store.combinedChangedFields"
+        :diffQuery="store.combinedDiffQuery"
+        :fullQuery="store.combinedFullQuery"
+        :hasChanges="store.combinedHasChanges"
+      >
+        <template #preview>
+          <ModelViewer kind="gameobject" :displayId="form.displayId" />
+        </template>
+        <template #facts>
+          <dl class="go-facts">
+            <div class="go-facts-row">
+              <dt>{{ t('gameobjectEditor.modelPanel.displayId') }}</dt>
+              <dd>{{ form.displayId || t('gameobjectEditor.modelPanel.none') }}</dd>
+            </div>
+            <div class="go-facts-row">
+              <dt>{{ t('gameobjectEditor.modelPanel.size') }}</dt>
+              <dd>{{ form.size ?? t('gameobjectEditor.modelPanel.none') }}</dd>
+            </div>
+          </dl>
+        </template>
+      </InspectorPanel>
+    </template>
+  </EntityWorkspace>
 </template>
 
 <style scoped>
-.editor-split {
+.editor-loading {
   display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--accent);
+  font-size: 1.5rem;
 }
 
-.editor-main {
-  flex: 1;
-  min-width: 0;
-}
-
-@media (max-width: 1100px) {
-  .editor-split {
-    flex-direction: column;
-  }
-}
-
-.editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 2rem;
-}
-
-.editor-header-left {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.editor-header-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.back-button {
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #e2e8f0 !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.25rem !important;
-  transition: all 0.2s !important;
-}
-
-.back-button:hover {
-  background: rgba(51, 65, 85, 0.9) !important;
-  border-color: rgba(71, 85, 105, 0.8) !important;
-  color: #ffffff !important;
-}
-
-.execute-button {
-  background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
-}
-
-.execute-button:hover {
-  background: linear-gradient(135deg, #22d3ee, #06b6d4) !important;
-}
-
-.discard-button {
-  background: linear-gradient(135deg, #ef4444, #dc2626) !important;
-  border: none !important;
-  color: #fff !important;
-  font-weight: 600 !important;
-  padding: 0.65rem 1.5rem !important;
-  border-radius: 0.5rem !important;
-}
-
-.discard-button:hover {
-  background: linear-gradient(135deg, #f87171, #e75151) !important;
-}
-
-.editor-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #22d3ee;
+.go-facts {
   margin: 0;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.go-facts-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.78rem;
+}
+
+.go-facts-row dt {
+  color: var(--text-muted);
+}
+
+.go-facts-row dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .qrel-empty {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.875rem;
   padding: 0.75rem 0;
   text-align: center;
@@ -600,7 +647,7 @@ onMounted(async () => {
 
 .qrel-tag {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -609,7 +656,7 @@ onMounted(async () => {
 }
 
 .field-group-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 
 .quest-rel-grid {

@@ -110,32 +110,38 @@ function removeResistance(index: number) {
   </div>
 
   <!-- Creature Template Spells (creature_template_spell) -->
-  <EditableDataTable
-    :entries="spellEntries"
-    :columns="spellColumns"
-    :hasChanges="spellHasChanges"
-    :maxRows="MAX_CREATURE_SPELLS"
-    :title="t('creature_template.groups.creatureSpells')"
-    :description="t('creature_template.groups.creatureSpellsDesc')"
-    dataKey="Index"
-    showHeaderAdd
-    @add="addSpell"
-    @remove="removeSpell"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': spellHasChanges }">
+    <EditableDataTable
+      :entries="spellEntries"
+      :columns="spellColumns"
+      :hasChanges="spellHasChanges"
+      :maxRows="MAX_CREATURE_SPELLS"
+      :title="t('creature_template.groups.creatureSpells')"
+      :description="t('creature_template.groups.creatureSpellsDesc')"
+      dataKey="Index"
+      showHeaderAdd
+      embedded
+      @add="addSpell"
+      @remove="removeSpell"
+    />
+  </div>
 
   <!-- Resistances (creature_template_resistance) -->
-  <EditableDataTable
-    :entries="resistanceEntries"
-    :columns="resistanceColumns"
-    :hasChanges="resistanceHasChanges"
-    :maxRows="MAX_RESISTANCES"
-    :title="t('creature_template.groups.resistances')"
-    :description="t('creature_template.groups.resistancesDesc')"
-    dataKey="School"
-    showHeaderAdd
-    @add="addResistance"
-    @remove="removeResistance"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': resistanceHasChanges }">
+    <EditableDataTable
+      :entries="resistanceEntries"
+      :columns="resistanceColumns"
+      :hasChanges="resistanceHasChanges"
+      :maxRows="MAX_RESISTANCES"
+      :title="t('creature_template.groups.resistances')"
+      :description="t('creature_template.groups.resistancesDesc')"
+      dataKey="School"
+      showHeaderAdd
+      embedded
+      @add="addResistance"
+      @remove="removeResistance"
+    />
+  </div>
 
   <!-- Immunities -->
   <div class="field-group">

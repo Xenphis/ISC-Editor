@@ -1,4 +1,9 @@
-/* Shared base styling for PrimeVue form/tab/panel components. */
+/* Shared base styling for PrimeVue form/tab/panel components.
+
+   Colors for inputs/selects/textareas come from the PrimeVue preset's
+   per-scheme `formField` tokens (src/main.ts) — do NOT re-add color
+   overrides here; only density/sizing and the few layout primitives the
+   token system cannot express live in this file. */
 
 /* ------------------------------------------------------------------ *
  * Form layout primitives (shared card + grid used by every editor)
@@ -6,24 +11,31 @@
 .field-group {
   background: var(--surface-1);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+.field-group-modified {
+  border-color: var(--accent-focus);
 }
 
 .field-group-header {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .field-group-header h4 {
-  font-size: 1.1rem;
+  font-size: var(--font-label);
   font-weight: 600;
-  color: var(--text);
-  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 0 0 0.15rem 0;
 }
 
 .field-group-header p {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   margin: 0;
 }
@@ -31,80 +43,31 @@
 .field-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: 0.6rem 0.9rem;
 }
 
 /* ------------------------------------------------------------------ *
- * Text & number inputs
+ * Density: compact inputs (colors come from the preset)
  * ------------------------------------------------------------------ */
 .p-inputtext,
 .p-inputnumber-input {
-  background: var(--surface-input) !important;
-  border: 1px solid var(--border-input) !important;
-  color: var(--text) !important;
-  height: var(--input-height) !important;
+  height: var(--input-height);
+  font-size: var(--font-field);
 }
 
-.p-inputtext:focus,
-.p-inputnumber-input:focus {
-  border-color: var(--accent-focus) !important;
-  box-shadow: 0 0 0 2px var(--accent-ring) !important;
-}
-
-.p-inputtext::placeholder,
-.p-inputnumber-input::placeholder {
-  color: var(--text-placeholder) !important;
-}
-
-.p-inputtext:disabled,
-.p-inputnumber-input:disabled {
-  border: 1px solid var(--border-default);
-  background: var(--surface-disabled) !important;
-  color: var(--text-muted) !important;
-  opacity: 0.8 !important;
-  cursor: not-allowed !important;
-}
-
-/* ------------------------------------------------------------------ *
- * Textarea
- * ------------------------------------------------------------------ */
 .p-textarea {
-  background: var(--surface-input) !important;
-  border: 1px solid var(--border-input) !important;
-  color: var(--text) !important;
-  font-size: 0.875rem;
+  font-size: var(--font-field);
   resize: vertical;
 }
 
-.p-textarea:enabled:focus {
-  border-color: var(--accent-focus) !important;
-  box-shadow: 0 0 0 2px var(--accent-ring) !important;
-}
-
-/* ------------------------------------------------------------------ *
- * Select
- * ------------------------------------------------------------------ */
 .p-select {
-  background: var(--surface-input) !important;
-  border: 1px solid var(--border-input) !important;
-  color: var(--text) !important;
-  height: var(--input-height) !important;
-}
-
-.p-select .p-select-label,
-.p-select-label {
-  color: var(--text) !important;
+  height: var(--input-height);
 }
 
 .p-select .p-select-label {
-  padding: 0 0.75rem !important;
-  line-height: var(--input-height) !important;
-}
-
-.p-select:focus,
-.p-select.p-focus {
-  border-color: var(--accent-focus) !important;
-  box-shadow: 0 0 0 2px var(--accent-ring) !important;
+  font-size: var(--font-field);
+  padding: 0 0.75rem;
+  line-height: calc(var(--input-height) - 2px);
 }
 
 /* ------------------------------------------------------------------ *
@@ -129,6 +92,7 @@
 }
 
 .p-tab {
+  font-size: 0.85rem;
   color: var(--text-muted) !important;
   background: transparent !important;
   border: none !important;
@@ -171,7 +135,7 @@
 }
 
 .p-tabpanels {
-  padding: 1.5rem 0 0 0 !important;
+  padding: 1rem 0 0 0 !important;
 }
 
 .p-tabpanel {
@@ -184,8 +148,8 @@
 .p-panel {
   background: transparent !important;
   border: none !important;
-  border-radius: 8px !important;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-lg) !important;
+  margin-bottom: 1rem;
 }
 
 .p-panel * {
@@ -195,7 +159,7 @@
 .p-panel-header {
   background: var(--surface-1) !important;
   border: 1px solid var(--border-default) !important;
-  border-radius: 8px 8px 0 0 !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
   color: var(--text) !important;
 }
 
@@ -205,10 +169,10 @@
 }
 
 .p-panel-content {
-  background: rgba(15, 23, 42, 0.3) !important;
+  background: var(--surface-panel) !important;
   border: 1px solid var(--border-default) !important;
   border-top: none !important;
-  border-radius: 0 0 8px 8px !important;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important;
   color: var(--text) !important;
 }
 

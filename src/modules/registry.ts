@@ -90,6 +90,8 @@ export const appModules: AppModuleDefinition[] = [
     routes: gameObjectRoutes,
   },
   {
+    // Reached via the "Loot & Items" hub's Items card, not its own navbar
+    // entry — avoids a redundant top-level icon next to "loot-items".
     id: 'item',
     basePath: '/item',
     i18n: { en: itemEn, fr: itemFr },

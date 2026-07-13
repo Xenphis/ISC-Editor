@@ -76,17 +76,20 @@ function removeQuestEnder(idx: number) { store.questEnders.removeNewEntry(idx) }
     </div>
   </div>
 
-  <EditableDataTable
-    :entries="questItemEntries"
-    :columns="questItemColumns"
-    :hasChanges="questItemHasChanges"
-    :maxRows="MAX_QUEST_ITEMS"
-    :title="t('creature_template.groups.questItems')"
-    :description="t('creature_template.groups.questItemsDesc')"
-    dataKey="Idx"
-    @add="addQuestItem"
-    @remove="removeQuestItem"
-  />
+  <div class="field-group" :class="{ 'field-group-modified': questItemHasChanges }">
+    <EditableDataTable
+      :entries="questItemEntries"
+      :columns="questItemColumns"
+      :hasChanges="questItemHasChanges"
+      :maxRows="MAX_QUEST_ITEMS"
+      :title="t('creature_template.groups.questItems')"
+      :description="t('creature_template.groups.questItemsDesc')"
+      dataKey="Idx"
+      embedded
+      @add="addQuestItem"
+      @remove="removeQuestItem"
+    />
+  </div>
 
   <div class="field-group" :class="{ 'field-group-modified': questRelHasChanges }">
     <div class="field-group-header">
@@ -171,6 +174,6 @@ function removeQuestEnder(idx: number) { store.questEnders.removeNewEntry(idx) }
 }
 
 .field-group-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 </style>

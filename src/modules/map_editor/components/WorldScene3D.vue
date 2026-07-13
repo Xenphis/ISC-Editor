@@ -505,7 +505,7 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 0;
   border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   overflow: hidden;
   background: #060d1f;
 }
@@ -524,8 +524,8 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.85);
-  color: #94a3b8;
+  background: var(--surface-input);
+  color: var(--text-muted);
   font-size: 0.85rem;
   pointer-events: none;
 }

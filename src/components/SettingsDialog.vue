@@ -33,10 +33,10 @@ function onToggleDebug(value: boolean) {
     :draggable="false"
     :style="{ width: '28rem' }"
     :pt="{
-      root: { style: 'background: #0f172a; border: 1px solid rgba(51,65,85,0.6); border-radius: 0.75rem; overflow: hidden;' },
-      header: { style: 'background: #0f172a; border-bottom: 1px solid rgba(51,65,85,0.4); padding: 1.25rem 1.5rem; color: #e2e8f0;' },
-      content: { style: 'background: #0f172a; padding: 1.5rem;' },
-      headerActions: { style: 'color: #94a3b8;' },
+      root: { style: 'background: var(--surface-base); border: 1px solid var(--border-input); border-radius: 0.75rem; overflow: hidden;' },
+      header: { style: 'background: var(--surface-base); border-bottom: 1px solid var(--border-default); padding: 1.25rem 1.5rem; color: var(--text);' },
+      content: { style: 'background: var(--surface-base); padding: 1.5rem;' },
+      headerActions: { style: 'color: var(--text-muted);' },
       mask: { style: 'background: rgba(0,0,0,0.6);' },
     }"
   >
@@ -94,20 +94,20 @@ function onToggleDebug(value: boolean) {
 
 .setting-label {
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text);
   font-size: 0.95rem;
 }
 
 .setting-desc {
   margin-top: 0.25rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
 .setting-divider {
   height: 1px;
-  background: rgba(51, 65, 85, 0.4);
+  background: var(--border-default);
   margin: 1.25rem 0;
 }
 
@@ -126,6 +126,6 @@ function onToggleDebug(value: boolean) {
 .setting-sublabel {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--text-soft);
 }
 </style>

@@ -72,11 +72,11 @@ function onDone() {
       :draggable="false"
       :style="{ width: '36rem' }"
       :pt="{
-        root: { style: 'background: #0f172a; border: 1px solid rgba(51,65,85,0.6); border-radius: 0.75rem; overflow: hidden;' },
-        header: { style: 'background: #0f172a; border-bottom: 1px solid rgba(51,65,85,0.4); padding: 1.25rem 1.5rem;' },
-        content: { style: 'background: #0f172a; padding: 0;' },
-        footer: { style: 'background: #0f172a; border-top: 1px solid rgba(51,65,85,0.4); padding: 1rem 1.5rem;' },
-        headerActions: { style: 'color: #94a3b8;' },
+        root: { style: 'background: var(--surface-base); border: 1px solid var(--border-input); border-radius: 0.75rem; overflow: hidden;' },
+        header: { style: 'background: var(--surface-base); border-bottom: 1px solid var(--border-default); padding: 1.25rem 1.5rem;' },
+        content: { style: 'background: var(--surface-base); padding: 0;' },
+        footer: { style: 'background: var(--surface-base); border-top: 1px solid var(--border-default); padding: 1rem 1.5rem;' },
+        headerActions: { style: 'color: var(--text-muted);' },
         mask: { style: 'background: rgba(0,0,0,0.6);' },
       }"
     >
@@ -128,7 +128,7 @@ function onDone() {
   display: flex;
   gap: 0.5rem;
   align-items: stretch;
-  height: 2.6rem;
+  height: var(--input-height);
 }
 
 .bitmask-input {
@@ -146,22 +146,22 @@ function onDone() {
 }
 
 .bitmask-browse-btn {
-  min-width: 2.6rem !important;
-  width: 2.6rem !important;
+  min-width: var(--input-height) !important;
+  width: var(--input-height) !important;
   height: 100% !important;
   padding: 0 !important;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
-  background: rgba(30, 41, 59, 0.8) !important;
-  border: 1px solid rgba(51, 65, 85, 0.6) !important;
-  color: #94a3b8 !important;
+  background: var(--surface-elevated) !important;
+  border: 1px solid var(--border-input) !important;
+  color: var(--text-muted) !important;
 }
 
 .bitmask-browse-btn:hover {
-  background: rgba(51, 65, 85, 0.8) !important;
-  color: #e2e8f0 !important;
-  border-color: rgba(6, 182, 212, 0.5) !important;
+  background: var(--surface-strong) !important;
+  color: var(--text) !important;
+  border-color: var(--accent-focus) !important;
 }
 
 .bitmask-dialog-header {
@@ -173,16 +173,16 @@ function onDone() {
 .bitmask-dialog-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 .bitmask-dialog-value {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .bitmask-dialog-value .value-number {
-  color: #22d3ee;
+  color: var(--accent);
   font-weight: 600;
 }
 
@@ -198,11 +198,11 @@ function onDone() {
 }
 
 .bitmask-options-list::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--surface-1);
 }
 
 .bitmask-options-list::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.8);
+  background: var(--surface-strong);
   border-radius: 3px;
 }
 
@@ -215,7 +215,7 @@ function onDone() {
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.2);
+  border-bottom: 1px solid var(--border-default);
   transition: background 0.15s ease;
 }
 
@@ -224,15 +224,15 @@ function onDone() {
 }
 
 .bitmask-option:hover {
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--surface-hover);
 }
 
 .bitmask-option-active {
-  background: rgba(6, 182, 212, 0.05);
+  background: var(--accent-soft);
 }
 
 .bitmask-option-active:hover {
-  background: rgba(6, 182, 212, 0.08);
+  background: var(--accent-soft);
 }
 
 .bitmask-option :deep(.p-toggleswitch) {
@@ -242,7 +242,7 @@ function onDone() {
 
 /* ToggleSwitch OFF state styling */
 .bitmask-option :deep(.p-toggleswitch:not(.p-toggleswitch-checked) .p-toggleswitch-slider) {
-  background: rgba(51, 65, 85, 0.8) !important;
+  background: var(--surface-strong) !important;
   border: 1px solid rgba(71, 85, 105, 0.8) !important;
 }
 
@@ -253,13 +253,13 @@ function onDone() {
 
 /* ToggleSwitch ON state styling - bleu ciel clair */
 .bitmask-option :deep(.p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider) {
-  background: linear-gradient(135deg, #06b6d4, #22d3ee) !important;
-  border: 1px solid #22d3ee !important;
+  background: linear-gradient(135deg, var(--accent-strong), var(--accent)) !important;
+  border: 1px solid var(--accent) !important;
 }
 
 .bitmask-option :deep(.p-toggleswitch.p-toggleswitch-checked .p-toggleswitch-slider:hover) {
-  background: linear-gradient(135deg, #22d3ee, #67e8f9) !important;
-  border-color: #67e8f9 !important;
+  background: linear-gradient(135deg, var(--accent), var(--accent)) !important;
+  border-color: var(--accent) !important;
 }
 
 .bitmask-option-info {
@@ -276,18 +276,18 @@ function onDone() {
 .bitmask-option-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
 }
 
 .bitmask-option-hex {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: monospace;
 }
 
 .bitmask-option-comment {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 0.25rem 0 0 0;
   line-height: 1.4;
 }
@@ -299,15 +299,15 @@ function onDone() {
 }
 
 .bitmask-done-btn {
-  background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+  background: var(--accent-gradient) !important;
   border: none !important;
-  color: #fff !important;
+  color: var(--accent-contrast) !important;
   font-weight: 600 !important;
   padding: 0.5rem 1.5rem !important;
   border-radius: 0.5rem !important;
 }
 
 .bitmask-done-btn:hover {
-  background: linear-gradient(135deg, #22d3ee, #06b6d4) !important;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong)) !important;
 }
 </style>

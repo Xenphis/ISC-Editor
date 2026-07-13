@@ -95,25 +95,25 @@ async function copyText(text: string, id: string) {
   width: 2rem;
   height: 2rem;
   border-radius: 0.5rem;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
 
 .copy-icon-btn:hover {
-  background: rgba(30, 41, 59, 0.5);
-  color: #22d3ee;
+  background: var(--surface-elevated);
+  color: var(--accent);
 }
 
 .copy-icon-btn .pi-check {
-  color: #4ade80;
+  color: var(--success);
 }
 
 .session-title {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -121,7 +121,7 @@ async function copyText(text: string, id: string) {
 }
 
 .session-description {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
   margin: 0;
 }
@@ -140,20 +140,20 @@ async function copyText(text: string, id: string) {
   justify-content: center;
   gap: 0.75rem;
   height: 50vh;
-  border: 2px dashed rgba(51, 65, 85, 0.5);
+  border: 2px dashed var(--border-input-soft);
   border-radius: 1rem;
-  color: #475569;
+  color: var(--text-placeholder);
 }
 
 .session-empty .pi-code {
   font-size: 3rem;
-  color: #334155;
+  color: var(--border-input);
 }
 
 .session-empty h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -168,8 +168,8 @@ async function copyText(text: string, id: string) {
 }
 
 .summary-badge {
-  background: rgba(6, 182, 212, 0.1);
-  color: #22d3ee;
+  background: var(--accent-ring-soft);
+  color: var(--accent);
   padding: 0.35rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.85rem;
@@ -178,8 +178,8 @@ async function copyText(text: string, id: string) {
 
 /* Query cards */
 .query-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-default);
   border-radius: 0.75rem;
   margin-bottom: 1rem;
   overflow: hidden;
@@ -190,7 +190,7 @@ async function copyText(text: string, id: string) {
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .query-card-info {
@@ -203,12 +203,12 @@ async function copyText(text: string, id: string) {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #c084fc;
+  color: var(--sql-field);
 }
 
 .query-entry {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -218,15 +218,15 @@ async function copyText(text: string, id: string) {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.8rem;
   line-height: 1.6;
-  color: #e2e8f0;
+  color: var(--text);
   white-space: pre-wrap;
   word-break: break-all;
 }
 
 /* Full script section */
 .full-script-section {
-  background: rgba(10, 15, 30, 0.8);
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  background: var(--surface-code);
+  border: 1px solid var(--border-default);
   border-radius: 0.75rem;
   margin-top: 2rem;
   overflow: hidden;
@@ -237,19 +237,19 @@ async function copyText(text: string, id: string) {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .full-script-header h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   margin: 0 0 0.25rem 0;
 }
 
 .full-script-header p {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin: 0;
 }
 
@@ -259,7 +259,7 @@ async function copyText(text: string, id: string) {
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.8rem;
   line-height: 1.6;
-  color: #e2e8f0;
+  color: var(--text);
   white-space: pre-wrap;
   word-break: break-all;
   max-height: 400px;
@@ -268,20 +268,20 @@ async function copyText(text: string, id: string) {
 
 /* SQL syntax highlighting */
 :deep(.sql-keyword) {
-  color: #22d3ee;
+  color: var(--accent);
   font-weight: 600;
 }
 
 :deep(.sql-string) {
-  color: #4ade80;
+  color: var(--success);
 }
 
 :deep(.sql-number) {
-  color: #fb923c;
+  color: var(--warn);
 }
 
 :deep(.sql-field) {
-  color: #c084fc;
+  color: var(--sql-field);
 }
 
 /* Scrollbar */
@@ -294,7 +294,7 @@ async function copyText(text: string, id: string) {
 }
 
 .full-script-code::-webkit-scrollbar-thumb {
-  background: rgba(51, 65, 85, 0.5);
+  background: var(--border-input-soft);
   border-radius: 3px;
 }
 </style>

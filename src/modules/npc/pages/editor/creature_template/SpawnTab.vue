@@ -97,7 +97,7 @@ function openMap(spawn?: Creature) {
 .spawn-coords {
   font-family: monospace;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .spawn-header-row {

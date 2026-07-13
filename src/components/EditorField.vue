@@ -25,11 +25,13 @@ defineProps<{
 .field label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--text-soft);
-  margin-bottom: 0.5rem;
+  gap: 0.4rem;
+  font-size: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
 }
 
 .field label i {
@@ -69,7 +71,7 @@ defineProps<{
 .field.field-modified :deep(.p-inputtext),
 .field.field-modified :deep(.p-inputnumber-input),
 .field.field-modified :deep(.p-select) {
-  border-color: rgba(6, 182, 212, 0.4) !important;
+  border-color: var(--accent-focus) !important;
   background: var(--accent-soft) !important;
 }
 </style>

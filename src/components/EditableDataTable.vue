@@ -199,9 +199,9 @@ function updateField(index: number, field: string, value: any) {
 
 <style scoped>
 .editable-table-wrapper {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--surface-1);
   border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  border: 1px solid var(--border-default);
   overflow: hidden;
   transition: border-color 0.2s;
   margin-bottom: 1.5rem;
@@ -220,7 +220,7 @@ function updateField(index: number, field: string, value: any) {
 }
 
 .editable-table-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 
 /* Header */
@@ -232,6 +232,20 @@ function updateField(index: number, field: string, value: any) {
   padding: 0 0 0.75rem;
 }
 
+/* Embedded inside a .field-group: match the .field-group-header micro-label. */
+.editable-table-embedded .editable-table-header h4 {
+  font-size: var(--font-label);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.editable-table-embedded .editable-table-count {
+  font-size: var(--font-label);
+  color: var(--text-placeholder);
+}
+
 .editable-table-title-row {
   display: flex;
   align-items: center;
@@ -241,36 +255,36 @@ function updateField(index: number, field: string, value: any) {
 .editable-table-header h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   margin: 0;
 }
 
 .editable-table-count {
   font-weight: 400;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-left: 0.5rem;
 }
 
 .editable-table-modified .editable-table-header h4 {
-  color: #22d3ee;
+  color: var(--accent);
 }
 
 /* Header add button */
 .header-add-btn {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   width: 2rem !important;
-  height: 2rem !important;
+  height: var(--input-height-sm) !important;
 }
 
 .header-add-btn:hover {
-  color: #22d3ee !important;
-  background: rgba(6, 182, 212, 0.1) !important;
+  color: var(--accent) !important;
+  background: var(--accent-ring-soft) !important;
 }
 
 .editable-table-desc {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 0.25rem 0 0 0;
 }
 
@@ -288,14 +302,14 @@ function updateField(index: number, field: string, value: any) {
 
 :deep(.p-datatable-table-container) {
   border-radius: 0.5rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   overflow: hidden;
 }
 
 :deep(.p-datatable-thead > tr > th) {
-  background: rgba(30, 41, 59, 0.5) !important;
-  border-color: rgba(51, 65, 85, 0.4) !important;
-  color: #cbd5e1 !important;
+  background: var(--surface-elevated) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-soft) !important;
   font-weight: 600;
   font-size: 0.8rem;
   padding: 0.6rem 0.75rem !important;
@@ -311,27 +325,27 @@ function updateField(index: number, field: string, value: any) {
 
 :deep(.p-datatable-tbody > tr) {
   background: transparent !important;
-  border-color: rgba(51, 65, 85, 0.3) !important;
+  border-color: var(--border-default) !important;
 }
 
 :deep(.p-datatable-tbody > tr:hover) {
-  background: rgba(51, 65, 85, 0.15) !important;
+  background: var(--surface-hover) !important;
 }
 
 :deep(.p-datatable-tbody > tr > td) {
-  border-color: rgba(51, 65, 85, 0.3) !important;
-  color: #e2e8f0;
+  border-color: var(--border-default) !important;
+  color: var(--text);
   font-size: 0.85rem;
   padding: 0.35rem 0.5rem !important;
   vertical-align: middle;
 }
 
 :deep(.p-datatable-tbody > tr:nth-child(even)) {
-  background: rgba(15, 23, 42, 0.2) !important;
+  background: var(--surface-panel) !important;
 }
 
 :deep(.p-datatable-tbody > tr:nth-child(even):hover) {
-  background: rgba(51, 65, 85, 0.15) !important;
+  background: var(--surface-hover) !important;
 }
 
 :deep(.p-datatable-tbody > tr:last-child > td:first-child) {
@@ -349,44 +363,44 @@ function updateField(index: number, field: string, value: any) {
 /* Compact inputs inside cells */
 .cell-input :deep(.p-inputtext),
 .cell-input :deep(.p-inputnumber-input) {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(51, 65, 85, 0.5) !important;
-  color: #e2e8f0 !important;
-  height: 2rem !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border-input-soft) !important;
+  color: var(--text) !important;
+  height: var(--input-height-sm) !important;
   font-size: 0.85rem !important;
   padding: 0 0.5rem !important;
 }
 
 .cell-input :deep(.p-inputtext:focus),
 .cell-input :deep(.p-inputnumber-input:focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring-soft) !important;
 }
 
 .cell-input:deep(.p-select) {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(51, 65, 85, 0.5) !important;
-  color: #e2e8f0 !important;
-  height: 2rem !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border-input-soft) !important;
+  color: var(--text) !important;
+  height: var(--input-height-sm) !important;
   font-size: 0.85rem !important;
 }
 
 .cell-input:deep(.p-select .p-select-label) {
   padding: 0 0.5rem !important;
-  line-height: 2rem !important;
+  line-height: var(--input-height-sm) !important;
   font-size: 0.85rem !important;
 }
 
 .cell-input:deep(.p-select:focus),
 .cell-input:deep(.p-select.p-focus) {
-  border-color: rgba(6, 182, 212, 0.5) !important;
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1) !important;
+  border-color: var(--accent-focus) !important;
+  box-shadow: 0 0 0 2px var(--accent-ring-soft) !important;
 }
 
 /* Readonly cell */
 .cell-readonly {
   font-weight: 500;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding: 0 0.25rem;
 }
 
@@ -399,31 +413,31 @@ function updateField(index: number, field: string, value: any) {
 }
 
 .action-detail {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   width: 1.75rem !important;
   height: 1.75rem !important;
 }
 
 .action-detail:hover {
-  color: #22d3ee !important;
-  background: rgba(6, 182, 212, 0.1) !important;
+  color: var(--accent) !important;
+  background: var(--accent-ring-soft) !important;
 }
 
 /* Delete button */
 .action-delete {
-  color: #f87171 !important;
+  color: var(--danger) !important;
   width: 1.75rem !important;
   height: 1.75rem !important;
 }
 
 .action-delete:hover {
-  background: rgba(248, 113, 113, 0.1) !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
 }
 
 /* Empty state */
 .editable-table-empty {
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.85rem;
   padding: 1rem 0;
 }
@@ -443,7 +457,7 @@ function updateField(index: number, field: string, value: any) {
 .editable-table-count-footer {
   padding: 0.5rem 1.25rem;
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .editable-table-footer :deep(.p-button) {

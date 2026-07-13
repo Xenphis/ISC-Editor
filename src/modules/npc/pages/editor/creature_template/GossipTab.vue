@@ -37,10 +37,10 @@ const yesNoOptions = computed(() => [
 ])
 
 const detailDialogPt = {
-  root: { style: 'background: #0f172a; border: 1px solid rgba(51,65,85,0.6); border-radius: 0.75rem; overflow: hidden; color: #e2e8f0;' },
-  header: { style: 'background: #0f172a; border-bottom: 1px solid rgba(51,65,85,0.4); padding: 1.25rem 1.5rem; color: #e2e8f0;' },
-  content: { style: 'background: #0f172a; padding: 1.5rem; color: #e2e8f0;' },
-  headerActions: { style: 'color: #94a3b8;' },
+  root: { style: 'background: var(--surface-base); border: 1px solid var(--border-input); border-radius: 0.75rem; overflow: hidden; color: var(--text);' },
+  header: { style: 'background: var(--surface-base); border-bottom: 1px solid var(--border-default); padding: 1.25rem 1.5rem; color: var(--text);' },
+  content: { style: 'background: var(--surface-base); padding: 1.5rem; color: var(--text);' },
+  headerActions: { style: 'color: var(--text-muted);' },
   mask: { style: 'background: rgba(0,0,0,0.6);' },
 }
 
@@ -600,19 +600,19 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 }
 
 .menu-id {
-  color: #22d3ee;
+  color: var(--accent);
   font-weight: 700;
   font-size: 1rem;
 }
 
 .gossip-menu-panel-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 
 .gossip-menu-content {
   display: grid;
   gap: 1.25rem;
-  border-top: 1px solid rgba(51, 65, 85, 0.45);
+  border-top: 1px solid var(--border-default);
   padding-top: 1.25rem;
 }
 
@@ -638,16 +638,16 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 }
 
 .editable-table-wrapper {
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--surface-1);
   border-radius: 0.75rem;
-  border: 1px solid rgba(51, 65, 85, 0.4);
+  border: 1px solid var(--border-default);
   overflow: hidden;
   transition: border-color 0.2s;
   margin-bottom: 1.5rem;
 }
 
 .editable-table-modified {
-  border-color: rgba(6, 182, 212, 0.4);
+  border-color: var(--accent-focus);
 }
 
 .editable-table-header {
@@ -663,24 +663,24 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 .editable-table-header h4 {
   font-size: 1rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text);
   margin: 0;
 }
 
 .editable-table-modified .editable-table-header h4 {
-  color: #22d3ee;
+  color: var(--accent);
 }
 
 .editable-table-count {
   font-weight: 400;
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-left: 0.5rem;
 }
 
 .editable-table-desc {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 0.25rem 0 0 0;
 }
 
@@ -692,14 +692,14 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 
 :deep(.p-datatable-table-container) {
   border-radius: 0.5rem;
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  border: 1px solid var(--border-input-soft);
   overflow: hidden;
 }
 
 :deep(.p-datatable-thead > tr > th) {
-  background: rgba(30, 41, 59, 0.5) !important;
-  border-color: rgba(51, 65, 85, 0.4) !important;
-  color: #cbd5e1 !important;
+  background: var(--surface-elevated) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-soft) !important;
   font-weight: 600;
   font-size: 0.8rem;
   padding: 0.6rem 0.75rem !important;
@@ -707,23 +707,23 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 
 :deep(.p-datatable-tbody > tr) {
   background: transparent !important;
-  border-color: rgba(51, 65, 85, 0.3) !important;
+  border-color: var(--border-default) !important;
 }
 
 :deep(.p-datatable-tbody > tr:hover) {
-  background: rgba(51, 65, 85, 0.15) !important;
+  background: var(--surface-hover) !important;
 }
 
 :deep(.p-datatable-tbody > tr > td) {
-  border-color: rgba(51, 65, 85, 0.3) !important;
-  color: #e2e8f0;
+  border-color: var(--border-default) !important;
+  color: var(--text);
   font-size: 0.85rem;
   padding: 0.35rem 0.5rem !important;
   vertical-align: middle;
 }
 
 :deep(.p-datatable-tbody > tr:nth-child(even)) {
-  background: rgba(15, 23, 42, 0.2) !important;
+  background: var(--surface-panel) !important;
 }
 
 :deep(.p-datatable-tbody > tr:last-child > td) {
@@ -731,14 +731,14 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 }
 
 .header-add-btn {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
   width: 2rem !important;
   height: 2rem !important;
 }
 
 .header-add-btn:hover {
-  color: #22d3ee !important;
-  background: rgba(6, 182, 212, 0.1) !important;
+  color: var(--accent) !important;
+  background: var(--accent-ring-soft) !important;
 }
 
 .action-buttons {
@@ -754,24 +754,24 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 }
 
 .action-detail {
-  color: #94a3b8 !important;
+  color: var(--text-muted) !important;
 }
 
 .action-detail:hover {
-  color: #22d3ee !important;
-  background: rgba(6, 182, 212, 0.1) !important;
+  color: var(--accent) !important;
+  background: var(--accent-ring-soft) !important;
 }
 
 .action-delete {
-  color: #f87171 !important;
+  color: var(--danger) !important;
 }
 
 .action-delete:hover {
-  background: rgba(239, 68, 68, 0.1) !important;
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
 }
 
 .editable-table-empty {
-  color: #64748b;
+  color: var(--text-muted);
   padding: 2rem;
   text-align: center;
 }
@@ -796,14 +796,14 @@ const optionSectionTabs = computed<SectionTabItem[]>(() => [
 }
 
 :deep(.p-dialog) {
-  background: rgba(15, 23, 42, 0.95) !important;
-  color: #e2e8f0 !important;
+  background: var(--surface-input) !important;
+  color: var(--text) !important;
 }
 
 :deep(.p-dialog-header),
 :deep(.p-dialog-content) {
-  background: rgba(15, 23, 42, 0.95) !important;
-  color: #e2e8f0 !important;
+  background: var(--surface-input) !important;
+  color: var(--text) !important;
 }
 
 

@@ -18,22 +18,24 @@
     "footer": "TrinityCore Database Editor v1.0",
     "advancedSettings": "Paramètres avancés"
   },
-  "sidebar": {
-    "appTitle": "Game DB Editor",
-    "appSubtitle": "Gestion SQL",
+  "workspace": {
+    "searchPlaceholder": "Nom, ID, type…",
+    "add": "Créer une nouvelle entrée",
+    "noResults": "Aucun résultat",
+    "selectEntity": "Sélectionnez une entrée dans la liste",
+    "inspector": "Aperçu"
+  },
+  "navbar": {
+    "appTitle": "ISC Editor",
+    "session": "Session",
+    "sessionCount": "aucune requête | {n} requête | {n} requêtes",
     "connected": "Connecté",
     "host": "Hôte :",
     "database": "BDD :",
     "user": "Utilisateur :",
     "disconnect": "Déconnexion",
-    "sql": {
-      "title": "Session SQL",
-      "changes": "modification(s)",
-      "noChanges": "Aucune modification",
-      "copy": "Copier",
-      "copied": "Copié !",
-      "open": "Ouvrir"
-    },
+    "themeToLight": "Passer en thème clair",
+    "themeToDark": "Passer en thème sombre",
     "modules": {
       "npc": "PNJs",
       "gameobject": "Objets de jeu",
@@ -44,10 +46,6 @@
       "loot-items": "Loot & Items",
       "spells": "Sorts",
       "misc": "Divers"
-    },
-    "sections": {
-      "loot": "Loot & Items",
-      "system": "Système"
     }
   },
   "modules": {

@@ -270,7 +270,7 @@ onMounted(() => {
         @move-spawn="onMoveSpawn"
       />
       <div v-else class="editor-empty">
-        <i class="pi pi-map" style="font-size: 3rem; color: #334155"></i>
+        <i class="pi pi-map" style="font-size: 3rem; color: var(--text-placeholder)"></i>
         <p>{{ loading ? t('mapEditor.states.loading') : t('mapEditor.states.noClient') }}</p>
       </div>
 
@@ -302,7 +302,7 @@ onMounted(() => {
 .editor-title {
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(to right, #60a5fa, #22d3ee);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -310,7 +310,7 @@ onMounted(() => {
 }
 
 .editor-description {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
@@ -331,14 +331,14 @@ onMounted(() => {
 }
 
 .map-option-tiles {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.8rem;
   margin-left: 0.5rem;
 }
 
 .cursor-coords {
   font-variant-numeric: tabular-nums;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
   white-space: nowrap;
 }
@@ -349,21 +349,21 @@ onMounted(() => {
   gap: 0.35rem;
   padding: 0.15rem 0.3rem 0.15rem 0.75rem;
   border-radius: 999px;
-  border: 1px solid rgba(51, 65, 85, 0.8);
-  background: rgba(30, 41, 59, 0.6);
-  color: #e2e8f0;
+  border: 1px solid var(--surface-strong);
+  background: var(--surface-elevated);
+  color: var(--text);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
 .picked-chip .pi-map-marker {
-  color: #22d3ee;
+  color: var(--accent);
   font-size: 0.85rem;
 }
 
 .editor-error {
-  color: #f87171;
+  color: var(--danger);
   font-size: 0.9rem;
 }
 
@@ -404,9 +404,9 @@ onMounted(() => {
   justify-content: center;
   gap: 1rem;
   flex: 1;
-  border: 2px dashed rgba(51, 65, 85, 0.5);
+  border: 2px dashed var(--border-input-soft);
   border-radius: 1rem;
-  color: #475569;
+  color: var(--text-placeholder);
   font-size: 0.95rem;
 }
 </style>

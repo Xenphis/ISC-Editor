@@ -1,24 +1,34 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import Button from 'primevue/button'
 import BitmaskField from '@/components/BitmaskField.vue'
+import EditorHeader from '@/components/EditorHeader.vue'
+import type { FieldChange } from '@/composables/useQueryGenerator'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
 import { spawn_mask_options, invisibility_type_options, go_flag_options } from '@/modules/game_objects/types/defines'
 import { getGameObjectSpawns, getGameObjectSpawnAddon, getGameObjectOverrides } from '@/modules/game_objects/service'
 import { useGameObjectModuleStore, type SpawnAddonForm, type SpawnOverridesForm } from '@/modules/game_objects/store'
 import { useQueryGenerator } from '@/composables/useQueryGenerator'
-import SqlQueryPanel from '@/components/SqlQueryPanel.vue'
 import EditorField from '@/components/EditorField.vue'
+
+/** Shared reactive state pushed up to the workspace inspector (SQL + diff). */
+export interface GoSpawnInspectorState {
+  diffQuery: string
+  fullQuery: string
+  hasChanges: boolean
+  changedFields: FieldChange[]
+}
 
 const { t } = useI18n()
 
 const props = defineProps<{
   spawnGuid: number
   goEntry: number
+  /** Optional reactive sink so the workspace right rail can show spawn SQL. */
+  inspector?: GoSpawnInspectorState
 }>()
 
 const emit = defineEmits<{
@@ -115,6 +125,27 @@ function isFieldModified(field: string): boolean {
   return modifiedFieldSet.value.has(field)
 }
 
+const combinedChangedFields = computed(() => [
+  ...changedFields.value,
+  ...addonChangedFields.value,
+  ...overridesChangedFields.value,
+])
+
+// Mirror the spawn's SQL/diff into the workspace inspector (right rail).
+watchEffect(() => {
+  if (!props.inspector) return
+  props.inspector.diffQuery = combinedDiffQuery.value
+  props.inspector.fullQuery = fullQuery.value
+  props.inspector.hasChanges = combinedHasChanges.value
+  props.inspector.changedFields = combinedChangedFields.value
+})
+
+function onDiscard() {
+  if (originalValue.value) Object.assign(form, originalValue.value)
+  if (addonOriginalValue.value) Object.assign(store.spawnAddon.newEntry, addonOriginalValue.value)
+  if (overridesOriginalValue.value) Object.assign(store.spawnOverrides.newEntry, overridesOriginalValue.value)
+}
+
 function onSave() {
   emit('save', { ...form })
 }
@@ -159,27 +190,17 @@ onMounted(async () => {
 <template>
   <div class="spawn-editor">
     <!-- Header -->
-    <div class="editor-header">
-      <Button
-        icon="pi pi-arrow-left"
-        :label="t('gameobjectSpawnEditor.back')"
-        severity="secondary"
-        text
-        @click="emit('close')"
-      />
-      <Button
-        icon="pi pi-save"
-        :label="t('gameobjectSpawnEditor.save')"
-        @click="onSave"
-      />
-    </div>
-
-    <!-- SQL Query Panel -->
-    <SqlQueryPanel
-      :diffQuery="combinedDiffQuery"
-      :fullQuery="fullQuery"
+    <EditorHeader
+      :subtitle="t('gameobjectSpawnEditor.editorTitle')"
+      :id="form.guid"
+      table="gameobject"
+      :backLabel="t('gameobjectSpawnEditor.back')"
       :hasChanges="combinedHasChanges"
-      :changedFields="changedFields"
+      :discardLabel="t('gameobjectSpawnEditor.discard')"
+      :executeLabel="t('gameobjectSpawnEditor.save')"
+      @back="emit('close')"
+      @discard="onDiscard"
+      @execute="onSave"
     />
 
     <!-- Identification -->
@@ -352,45 +373,5 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.spawn-editor {
-  max-width: 80rem;
-}
-
-.editor-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.field-group {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(51, 65, 85, 0.4);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.field-group-header {
-  margin-bottom: 1rem;
-}
-
-.field-group-header h4 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #e2e8f0;
-  margin: 0 0 0.25rem 0;
-}
-
-.field-group-header p {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  margin: 0;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
+/* Layout primitives (.field-group, .field-grid) come from src/styles/forms.css. */
 </style>
