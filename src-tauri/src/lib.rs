@@ -23,6 +23,8 @@ use commands::gameobject_addon::{get_gameobject_spawn_addon, save_gameobject_spa
 use commands::gameobject_overrides::{get_gameobject_overrides, save_gameobject_overrides};
 use commands::gameobject_spawn::{get_gameobject_spawns, save_gameobject_spawn, delete_gameobject_spawn};
 use commands::gameobject_loot::{get_gameobject_loot, save_gameobject_loot};
+use commands::creature_model_tags::search_creature_model_tags;
+use commands::gameobject_model_tags::search_gameobject_model_tags;
 use commands::gameobject_questitem::get_gameobject_questitem;
 use commands::gameobject_template_locale::get_gameobject_locales;
 use commands::gossip_menu::{get_gossip_menu_ids, get_next_custom_gossip_menu_id, get_gossip_menu, save_gossip_menu};
@@ -147,6 +149,8 @@ pub fn run() {
       save_gameobject_loot,
       get_gameobject_questitem,
       get_gameobject_locales,
+      search_creature_model_tags,
+      search_gameobject_model_tags,
       get_gossip_menu_ids,
       get_next_custom_gossip_menu_id,
       get_gossip_menu,

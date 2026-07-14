@@ -7,6 +7,35 @@ pub struct DbState {
     pub pool: Arc<Mutex<Option<MySqlPool>>>,
 }
 
+/// Additive, editor-owned feature tables that are NOT part of the AzerothCore /
+/// TrinityCore schema. They are created automatically (idempotently) right after
+/// a successful connection — see `connect_db` — so the model-search feature works
+/// out of the box. The tag data itself is filled in manually by the user.
+pub const FEATURE_SCHEMA: &[(&str, &str)] = &[
+    (
+        "creature_model_tags",
+        "CREATE TABLE IF NOT EXISTS `creature_model_tags` (\
+           `displayId` INT UNSIGNED NOT NULL, \
+           `name` VARCHAR(100) NULL DEFAULT NULL, \
+           `tags01` VARCHAR(64) NULL DEFAULT NULL, \
+           `tags02` VARCHAR(64) NULL DEFAULT NULL, \
+           `tags03` VARCHAR(64) NULL DEFAULT NULL, \
+           PRIMARY KEY (`displayId`)\
+         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+    ),
+    (
+        "gameobject_model_tags",
+        "CREATE TABLE IF NOT EXISTS `gameobject_model_tags` (\
+           `displayId` INT UNSIGNED NOT NULL, \
+           `name` VARCHAR(100) NULL DEFAULT NULL, \
+           `tags01` VARCHAR(64) NULL DEFAULT NULL, \
+           `tags02` VARCHAR(64) NULL DEFAULT NULL, \
+           `tags03` VARCHAR(64) NULL DEFAULT NULL, \
+           PRIMARY KEY (`displayId`)\
+         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci",
+    ),
+];
+
 impl DbState {
     pub fn new() -> Self {
         Self {

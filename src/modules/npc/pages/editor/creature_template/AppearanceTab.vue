@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
+import Button from 'primevue/button'
 import { vis_flags_options, stand_state_types, anim_tier_types, visibility_distance_options } from '@/modules/npc/types/defines'
 import EditorField from '@/components/EditorField.vue'
 import BitmaskField from '@/components/BitmaskField.vue'
 import EditableDataTable, { type ColumnDef } from '@/components/EditableDataTable.vue'
+import ModelSearchDialog from '@/modules/model_search/components/ModelSearchDialog.vue'
 import { useNpcModuleStore } from '@/modules/npc/store'
 import { useNpcFieldModifiers } from '@/modules/npc/pages/useNpcFieldModifiers'
 
@@ -17,6 +19,18 @@ const { isFieldModified, isAddonModified } = useNpcFieldModifiers()
 const form = store.formData
 const addonForm = store.addon.newEntry
 const equipEntries = computed(() => store.equips.getNewEntries())
+
+// --- Model search (picker dialog for the modelid fields) ---
+type ModelIdField = 'modelid1' | 'modelid2' | 'modelid3' | 'modelid4'
+const modelDialogVisible = ref(false)
+const modelTargetField = ref<ModelIdField>('modelid1')
+function openModelSearch(field: ModelIdField) {
+  modelTargetField.value = field
+  modelDialogVisible.value = true
+}
+function onModelSelect(displayId: number) {
+  form[modelTargetField.value] = displayId
+}
 
 const standStateOptions = stand_state_types.map(o => ({ value: o.value, label: o.name }))
 const animTierOptions = anim_tier_types.map(o => ({ value: o.value, label: o.name }))
@@ -50,16 +64,28 @@ function removeEquip(index: number) {
     </div>
     <div class="field-grid">
       <EditorField :label="t('creature_template.fields.modelid1')" :modified="isFieldModified('modelid1')">
-        <InputNumber v-model="form.modelid1" :useGrouping="false" fluid />
+        <div class="model-field">
+          <InputNumber v-model="form.modelid1" :useGrouping="false" fluid />
+          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid1')" />
+        </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid2')" :modified="isFieldModified('modelid2')">
-        <InputNumber v-model="form.modelid2" :useGrouping="false" fluid />
+        <div class="model-field">
+          <InputNumber v-model="form.modelid2" :useGrouping="false" fluid />
+          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid2')" />
+        </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid3')" :modified="isFieldModified('modelid3')">
-        <InputNumber v-model="form.modelid3" :useGrouping="false" fluid />
+        <div class="model-field">
+          <InputNumber v-model="form.modelid3" :useGrouping="false" fluid />
+          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid3')" />
+        </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid4')" :modified="isFieldModified('modelid4')">
-        <InputNumber v-model="form.modelid4" :useGrouping="false" fluid />
+        <div class="model-field">
+          <InputNumber v-model="form.modelid4" :useGrouping="false" fluid />
+          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid4')" />
+        </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.scale')" :modified="isFieldModified('scale')">
         <InputNumber v-model="form.scale" :minFractionDigits="1" :maxFractionDigits="5" :useGrouping="false" fluid />
@@ -136,8 +162,22 @@ function removeEquip(index: number) {
       @remove="removeEquip"
     />
   </div>
+
+  <ModelSearchDialog v-model:visible="modelDialogVisible" kind="creature" @select="onModelSelect" />
 </template>
 
 <style scoped>
 @import '../npc-editor.css';
+
+/* Model field: number input + "search a model" button on one row. */
+.model-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.model-field :deep(.p-inputnumber) {
+  flex: 1;
+  min-width: 0;
+}
 </style>

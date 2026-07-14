@@ -14,6 +14,7 @@ import { mapRoutes } from '@/modules/map/routes'
 import { lootAndItemRoutes } from '@/modules/loot_and_item/routes'
 import { mapViewerRoutes } from '@/modules/map_viewer/routes'
 import { mapEditorRoutes } from '@/modules/map_editor/routes'
+import { modelSearchRoutes } from '@/modules/model_search/routes'
 import npcFr from '@/modules/npc/i18n/fr.json'
 import npcEn from '@/modules/npc/i18n/en.json'
 import goFr from '@/modules/game_objects/i18n/fr.json'
@@ -32,6 +33,8 @@ import mapViewerFr from '@/modules/map_viewer/i18n/fr.json'
 import mapViewerEn from '@/modules/map_viewer/i18n/en.json'
 import mapEditorFr from '@/modules/map_editor/i18n/fr.json'
 import mapEditorEn from '@/modules/map_editor/i18n/en.json'
+import modelSearchFr from '@/modules/model_search/i18n/fr.json'
+import modelSearchEn from '@/modules/model_search/i18n/en.json'
 
 export type AppLocale = 'en' | 'fr'
 
@@ -88,6 +91,16 @@ export const appModules: AppModuleDefinition[] = [
     i18n: { en: goEn, fr: goFr },
     sessionStore: useGameObjectModuleStore,
     routes: gameObjectRoutes,
+  },
+  {
+    // Tag-based model finder for NPCs / GameObjects. Read-only: it searches the
+    // creature_model_tags / gameobject_model_tags tables (filled manually via
+    // SQL). Also embedded as a picker dialog in the NPC & GameObject editors.
+    // Reached via the "Misc" hub card, not its own navbar entry.
+    id: 'model-search',
+    basePath: '/model-search',
+    i18n: { en: modelSearchEn, fr: modelSearchFr },
+    routes: modelSearchRoutes,
   },
   {
     // Reached via the "Loot & Items" hub's Items card, not its own navbar
@@ -162,7 +175,7 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/server',
     navigation: { id: 'misc', icon: 'pi pi-server' },
     routes: [
-      { path: 'server', name: 'server', component: () => import('@/pages/PlaceholderModule.vue') },
+      { path: 'server', name: 'server', component: () => import('@/modules/misc_hub/MiscHub.vue') },
     ],
   },
 ]

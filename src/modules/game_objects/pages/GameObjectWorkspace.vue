@@ -20,6 +20,7 @@ import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue'
 import EditorHeader from '@/components/EditorHeader.vue'
 import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
 import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
+import ModelSearchDialog from '@/modules/model_search/components/ModelSearchDialog.vue'
 import EditorField from '@/components/EditorField.vue'
 import StyledDataTable from '@/components/StyledDataTable.vue'
 import ActionsColumn from '@/components/ActionsColumn.vue'
@@ -44,6 +45,12 @@ const entryParam = computed<number | null | undefined>(() => {
 
 const loading = ref(false)
 const form = store.formData
+
+// --- Model search (picker dialog for the displayId field) ---
+const modelDialogVisible = ref(false)
+function onModelSelect(displayId: number) {
+  form.displayId = displayId
+}
 
 // --- List ---
 function metaOf(go: GameObjectTemplate): string {
@@ -349,7 +356,16 @@ const mainTabs = computed<SectionTabItem[]>(() => [
                 <InputText v-model="form.name" fluid />
               </EditorField>
               <EditorField :label="t('gameobjectEditor.fields.displayId')" :tooltip="t('gameobjectEditor.tooltips.displayId')" :modified="isFieldModified('displayId')">
-                <InputNumber v-model="form.displayId" :useGrouping="false" fluid />
+                <div class="model-field">
+                  <InputNumber v-model="form.displayId" :useGrouping="false" fluid />
+                  <Button
+                    type="button"
+                    icon="pi pi-search"
+                    severity="secondary"
+                    v-tooltip.bottom="t('modelSearch.searchTooltip')"
+                    @click="modelDialogVisible = true"
+                  />
+                </div>
               </EditorField>
             </div>
           </div>
@@ -593,6 +609,8 @@ const mainTabs = computed<SectionTabItem[]>(() => [
       </InspectorPanel>
     </template>
   </EntityWorkspace>
+
+  <ModelSearchDialog v-model:visible="modelDialogVisible" kind="gameobject" @select="onModelSelect" />
 </template>
 
 <style scoped>
@@ -602,6 +620,18 @@ const mainTabs = computed<SectionTabItem[]>(() => [
   padding: 3rem 0;
   color: var(--accent);
   font-size: 1.5rem;
+}
+
+/* Model field: number input + "search a model" button on one row. */
+.model-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.model-field :deep(.p-inputnumber) {
+  flex: 1;
+  min-width: 0;
 }
 
 .go-facts {
