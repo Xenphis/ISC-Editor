@@ -141,11 +141,11 @@ export const appModules: AppModuleDefinition[] = [
     routes: [],
   },
   {
-    // World map browser rendered from the local client's minimap data
-    // (phase 1 of the map editor: visualize + navigate).
+    // World map browser rendered from the local client's minimap data.
+    // Reached via the "Maps" hub's Map Editor card, not its own navbar
+    // entry — avoids a redundant top-level icon next to "maps".
     id: 'map-editor',
     basePath: '/map-editor',
-    navigation: { id: 'map-editor', icon: 'pi pi-globe' },
     i18n: { en: mapEditorEn, fr: mapEditorFr },
     routes: mapEditorRoutes,
   },

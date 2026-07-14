@@ -7,6 +7,15 @@ const router = useRouter()
 
 const submodules = [
   {
+    key: 'mapEditor',
+    icon: 'pi pi-globe',
+    color: '#6366f1',
+    gradient: 'linear-gradient(135deg, #4338ca, #6366f1)',
+    shadow: 'rgba(99, 102, 241, 0.25)',
+    available: true,
+    route: '/map-editor',
+  },
+  {
     key: 'teleport',
     icon: 'pi pi-send',
     color: '#06b6d4',

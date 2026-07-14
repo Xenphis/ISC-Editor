@@ -3,6 +3,10 @@
     "title": "Maps & Zones",
     "description": "Manage world maps, zones, teleportation and exploration data",
     "submodules": {
+      "mapEditor": {
+        "title": "Map Editor",
+        "description": "Browse the world map from client data, inspect spawns and pick coordinates in 2D/3D"
+      },
       "teleport": {
         "title": "Teleportation",
         "description": "Teleport points, starting positions and waypoints"

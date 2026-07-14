@@ -3,6 +3,10 @@
     "title": "Cartes & Zones",
     "description": "Gérer les cartes du monde, zones, téléportations et données d'exploration",
     "submodules": {
+      "mapEditor": {
+        "title": "Éditeur de carte",
+        "description": "Parcourir la carte du monde à partir des données client, inspecter les spawns et relever des coordonnées en 2D/3D"
+      },
       "teleport": {
         "title": "Téléportation",
         "description": "Points de téléportation, positions de départ et waypoints"
