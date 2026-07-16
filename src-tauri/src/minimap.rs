@@ -89,10 +89,13 @@ pub struct MinimapData {
 pub struct CreatureModelInfo {
     pub model: String,
     pub scale: f32,
-    /// Skin BLPs from CreatureDisplayInfo's TextureVariation fields, resolved
-    /// to full paths next to the model (monster skins 1-3, empties dropped).
-    /// The M2's own texture list only names these by component slot, so a
-    /// renderer needs them to texture the creature at all.
+    /// Skin BLPs the M2's component-slot textures need to render at all — the
+    /// M2 names them only by component slot, leaving the renderer to supply the
+    /// actual images. For ordinary creatures these are the monster skins 1-3
+    /// from CreatureDisplayInfo's TextureVariation fields (empties dropped). For
+    /// humanoid NPCs built on character models (Defias, guards…) there is no
+    /// TextureVariation; their body is a single pre-baked composite named in
+    /// CreatureDisplayInfoExtra, and that one bake stands in for the slot(s).
     pub textures: Vec<String>,
 }
 
@@ -125,8 +128,15 @@ impl MinimapData {
         if self.creature_models.is_none() {
             let display = self.chain.read_file("DBFilesClient\\CreatureDisplayInfo.dbc");
             let model = self.chain.read_file("DBFilesClient\\CreatureModelData.dbc");
+            // Optional: humanoid NPCs on character models carry no
+            // TextureVariation and instead name a pre-baked skin here. Missing
+            // DBC just means those NPCs keep rendering untextured.
+            let extra = self
+                .chain
+                .read_file("DBFilesClient\\CreatureDisplayInfoExtra.dbc")
+                .ok();
             let resolved = match (display, model) {
-                (Ok(d), Ok(m)) => build_creature_models(&d, &m),
+                (Ok(d), Ok(m)) => build_creature_models(&d, &m, extra.as_deref()),
                 _ => {
                     log::warn!("minimap: CreatureDisplayInfo/ModelData.dbc unavailable, creatures unresolved");
                     HashMap::new()
@@ -597,22 +607,40 @@ fn parse_map_dbc(bytes: &[u8]) -> Option<HashMap<String, (u32, String)>> {
 /// field 4 = CreatureModelScale; CreatureModelData field 2 = ModelName string
 /// and field 4 = ModelScale. The two scales multiply; `creature_template.scale`
 /// is applied on the client.
-fn build_creature_models(display_bytes: &[u8], model_bytes: &[u8]) -> HashMap<u32, CreatureModelInfo> {
+fn build_creature_models(
+    display_bytes: &[u8],
+    model_bytes: &[u8],
+    extra_bytes: Option<&[u8]>,
+) -> HashMap<u32, CreatureModelInfo> {
     let displays = parse_creature_display_info(display_bytes).unwrap_or_default();
     let models = parse_creature_model_data(model_bytes).unwrap_or_default();
+    let bakes = extra_bytes
+        .and_then(parse_creature_display_info_extra)
+        .unwrap_or_default();
     let mut out = HashMap::with_capacity(displays.len());
-    for (display_id, (model_data_id, display_scale, variations)) in displays {
+    for (display_id, (model_data_id, extended_id, display_scale, variations)) in displays {
         if let Some((path, model_scale)) = models.get(&model_data_id) {
             if path.is_empty() {
                 continue;
             }
-            // TextureVariation entries are bare file names living next to the M2.
-            let dir = &path[..path.rfind(['\\', '/']).map_or(0, |i| i + 1)];
-            let textures = variations
-                .iter()
-                .filter(|v| !v.is_empty())
-                .map(|v| format!("{dir}{v}.blp"))
-                .collect();
+            // Humanoid NPCs on character models (HumanMale.mdx and friends)
+            // carry no TextureVariation; their fully-composited body skin is a
+            // single baked BLP named in CreatureDisplayInfoExtra, living under
+            // textures\BakedNpcTextures. Without it the M2's COMPONENT_SKIN slot
+            // samples an empty (black) texture and the NPC is a black
+            // silhouette. Prefer the bake; fall back to the monster skins.
+            let textures = match bakes.get(&extended_id).filter(|b| !b.is_empty()) {
+                Some(bake) => vec![format!("textures\\BakedNpcTextures\\{bake}")],
+                None => {
+                    // TextureVariation entries are bare file names next to the M2.
+                    let dir = &path[..path.rfind(['\\', '/']).map_or(0, |i| i + 1)];
+                    variations
+                        .iter()
+                        .filter(|v| !v.is_empty())
+                        .map(|v| format!("{dir}{v}.blp"))
+                        .collect()
+                }
+            };
             out.insert(
                 display_id,
                 CreatureModelInfo {
@@ -627,10 +655,14 @@ fn build_creature_models(display_bytes: &[u8], model_bytes: &[u8]) -> HashMap<u3
 }
 
 /// CreatureDisplayInfo.dbc: field 0 = id, field 1 = CreatureModelData id,
-/// field 4 = CreatureModelScale, fields 6-8 = TextureVariation (bare skin BLP
-/// names, no path/extension). Returns id -> (model-data id, scale, variations).
-/// Only fixed field offsets are read, so trailing fields don't matter.
-fn parse_creature_display_info(bytes: &[u8]) -> Option<HashMap<u32, (u32, f32, [String; 3])>> {
+/// field 3 = ExtendedDisplayInfoID (into CreatureDisplayInfoExtra, 0 for
+/// ordinary creatures), field 4 = CreatureModelScale, fields 6-8 =
+/// TextureVariation (bare skin BLP names, no path/extension). Returns
+/// id -> (model-data id, extended-display id, scale, variations). Only fixed
+/// field offsets are read, so trailing fields don't matter.
+fn parse_creature_display_info(
+    bytes: &[u8],
+) -> Option<HashMap<u32, (u32, u32, f32, [String; 3])>> {
     let u32_at = |offset: usize| -> Option<u32> {
         Some(u32::from_le_bytes(bytes.get(offset..offset + 4)?.try_into().ok()?))
     };
@@ -656,6 +688,7 @@ fn parse_creature_display_info(bytes: &[u8]) -> Option<HashMap<u32, (u32, f32, [
         let base = 20 + record * record_size;
         let id = u32_at(base)?;
         let model_data_id = u32_at(base + 4)?;
+        let extended_id = u32_at(base + 12)?;
         let scale = f32_at(base + 16).filter(|s| *s > 0.0).unwrap_or(1.0);
         let mut variations: [String; 3] = Default::default();
         if record_size >= 36 {
@@ -663,7 +696,44 @@ fn parse_creature_display_info(bytes: &[u8]) -> Option<HashMap<u32, (u32, f32, [
                 *variation = string_at(base + 24 + i * 4).unwrap_or_default();
             }
         }
-        index.insert(id, (model_data_id, scale, variations));
+        index.insert(id, (model_data_id, extended_id, scale, variations));
+    }
+    Some(index)
+}
+
+/// CreatureDisplayInfoExtra.dbc: field 0 = id, last field = BakeName (a
+/// string-block offset to the pre-composited NPC skin file name, e.g.
+/// "<md5>.blp", living under textures\BakedNpcTextures). This is what dresses
+/// humanoid NPCs built on character models; only the id and the trailing
+/// BakeName are read, so the exact count of item/geoset fields in between is
+/// irrelevant. Returns extended-display id -> bake file name (empties dropped).
+fn parse_creature_display_info_extra(bytes: &[u8]) -> Option<HashMap<u32, String>> {
+    let u32_at = |offset: usize| -> Option<u32> {
+        Some(u32::from_le_bytes(bytes.get(offset..offset + 4)?.try_into().ok()?))
+    };
+    if bytes.get(..4)? != b"WDBC" {
+        return None;
+    }
+    let record_count = u32_at(4)? as usize;
+    let record_size = u32_at(12)? as usize;
+    let strings_start = 20 + record_count * record_size;
+    // Need at least the id plus the trailing BakeName string offset.
+    if record_size < 8 || bytes.len() < strings_start {
+        return None;
+    }
+    let string_at = |offset: usize| -> Option<String> {
+        let tail = bytes.get(strings_start + u32_at(offset)? as usize..)?;
+        let end = tail.iter().position(|&b| b == 0).unwrap_or(tail.len());
+        Some(String::from_utf8_lossy(&tail[..end]).into_owned())
+    };
+    let mut index = HashMap::with_capacity(record_count);
+    for record in 0..record_count {
+        let base = 20 + record * record_size;
+        let id = u32_at(base)?;
+        let bake = string_at(base + record_size - 4).unwrap_or_default();
+        if !bake.is_empty() {
+            index.insert(id, bake);
+        }
     }
     Some(index)
 }

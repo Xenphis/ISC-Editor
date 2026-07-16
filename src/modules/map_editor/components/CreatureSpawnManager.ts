@@ -166,7 +166,10 @@ export class CreatureSpawnManager {
    * black, so untextured creatures render as silhouettes. The empty slots are
    * recognizable by their missing image and are filled in encounter order,
    * matching the variation order for the single-skin models that make up
-   * nearly all creatures.
+   * nearly all creatures. Humanoid NPCs on character models (Defias, guards…)
+   * have no monster skins; the backend resolves their single pre-baked body
+   * composite (CreatureDisplayInfoExtra) into `info.textures`, so it flows
+   * through the same slot-filling here instead of leaving the body black.
    */
   #applySkinTextures(model: THREE.Object3D, info: CreatureModelInfo): void {
     const skins = info.textures
