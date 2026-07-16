@@ -27,7 +27,7 @@ use commands::creature_model_tags::search_creature_model_tags;
 use commands::gameobject_model_tags::search_gameobject_model_tags;
 use commands::gameobject_questitem::get_gameobject_questitem;
 use commands::gameobject_template_locale::get_gameobject_locales;
-use commands::gossip_menu::{get_gossip_menu_ids, get_next_custom_gossip_menu_id, get_gossip_menu, save_gossip_menu};
+use commands::gossip_menu::{get_gossip_menu_ids, get_gossip_menu, save_gossip_menu};
 use commands::gossip_menu_option::{get_gossip_menu_options, save_gossip_menu_options};
 use commands::gossip_menu_option_locale::{get_gossip_menu_option_locales, save_gossip_menu_option_locales};
 use commands::equip::{get_npc_equip, save_npc_equip};
@@ -152,7 +152,6 @@ pub fn run() {
       search_creature_model_tags,
       search_gameobject_model_tags,
       get_gossip_menu_ids,
-      get_next_custom_gossip_menu_id,
       get_gossip_menu,
       save_gossip_menu,
       get_gossip_menu_options,

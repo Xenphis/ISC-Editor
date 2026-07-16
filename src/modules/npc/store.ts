@@ -890,22 +890,6 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     await loadGossipMenu(nextMenuId)
   }
 
-  async function createNextCustomGossipMenu() {
-    const menuId = await npcService.getNextCustomGossipMenuId(50000)
-    editor.formData.gossip_menu_id = menuId
-    ensureGossipMenuIdOption(menuId)
-    gossipMenus.setOriginalEntries([])
-    gossipMenus.setNewEntries([{ TextID: menuId, VerifiedBuild: 0 }])
-    gossipOptions.setOriginalEntries([])
-    gossipOptions.setNewEntries([])
-    gossipOptionLocales.setOriginalEntries([])
-    gossipOptionLocales.setNewEntries([])
-    npcTexts.setOriginalEntries([])
-    npcTexts.setNewEntries([createDefaultNpcText(menuId)])
-    npcTextLocales.setOriginalEntries([])
-    npcTextLocales.setNewEntries([])
-  }
-
   function markListLoaded() {
     listLoaded.value = true
   }
@@ -922,6 +906,6 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
     gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales,
     ...editor,
     editingEntry: editor.editingId,
-    markListLoaded, setNpcs, loadGossipMenuIds, loadGossipMenu, setGossipMenuId, createNextCustomGossipMenu,
+    markListLoaded, setNpcs, loadGossipMenuIds, loadGossipMenu, setGossipMenuId,
   }
 })

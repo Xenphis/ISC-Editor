@@ -65,10 +65,6 @@ async function onGossipMenuChange(value: number | string | null) {
   await store.setGossipMenuId(value)
 }
 
-async function createGossipMenu() {
-  await store.createNextCustomGossipMenu()
-}
-
 onMounted(() => {
   store.loadGossipMenuIds()
 })
@@ -131,14 +127,6 @@ onMounted(() => {
             editable
             fluid
             @update:modelValue="onGossipMenuChange"
-          />
-          <Button
-            icon="pi pi-plus"
-            severity="secondary"
-            text
-            rounded
-            :title="t('creature_template.gossip.createMenu')"
-            @click="createGossipMenu"
           />
         </div>
       </EditorField>

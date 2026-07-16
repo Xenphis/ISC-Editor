@@ -58,31 +58,6 @@ pub async fn get_gossip_menu_ids(
 }
 
 #[tauri::command]
-pub async fn get_next_custom_gossip_menu_id(
-    state: State<'_, DbState>,
-    app: tauri::AppHandle,
-    debug: State<'_, DebugState>,
-    min_id: Option<u32>,
-) -> Result<u32, String> {
-    let db = state.pool.lock().await;
-    let pool = db.as_ref().ok_or("Not connected to database")?;
-    let min_id = min_id.unwrap_or(50000);
-    let floor = min_id.saturating_sub(1);
-
-    const SQL: &str = "SELECT COALESCE(MAX(MenuID), ?) + 1 AS next_id FROM gossip_menu WHERE MenuID >= ?";
-    let row: (u32,) = debug_sql!(app, debug, SQL,
-        sqlx::query_as(SQL)
-            .bind(floor)
-            .bind(min_id)
-            .fetch_one(pool)
-            .await,
-        floor, min_id
-    ).map_err(|e| format!("Query failed: {}", e))?;
-
-    Ok(row.0.max(min_id))
-}
-
-#[tauri::command]
 pub async fn get_gossip_menu(
     state: State<'_, DbState>,
     app: tauri::AppHandle,

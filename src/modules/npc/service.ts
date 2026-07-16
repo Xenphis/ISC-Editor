@@ -154,10 +154,6 @@ export async function getGossipMenuIds(search?: string, limit?: number): Promise
   return invoke('get_gossip_menu_ids', { search, limit })
 }
 
-export async function getNextCustomGossipMenuId(minId = 50000): Promise<number> {
-  return invoke('get_next_custom_gossip_menu_id', { minId })
-}
-
 export async function getGossipMenu(menuId: number): Promise<GossipMenu[]> {
   return invoke('get_gossip_menu', { menuId })
 }
