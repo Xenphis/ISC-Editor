@@ -201,9 +201,18 @@ onMounted(() => {
   // Creature spawns (DB) stream as models around the camera when enabled.
   // Ground ring that highlights the currently selected spawn (Z is up, so a
   // default XY-plane torus lies flat on the terrain).
-  const ringMaterial = new THREE.MeshBasicMaterial({ color: 0x22d3ee })
-  selectionRing = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.35, 8, 32), ringMaterial)
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color: 0xf87171,
+    transparent: true,
+    opacity: 0.6,
+    depthWrite: false,
+    // Never let the terrain occlude the ring: on a slope a flat ring would
+    // otherwise clip under the higher ground. Draw it on top of the scene.
+    depthTest: false,
+  })
+  selectionRing = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.12, 12, 48), ringMaterial)
   selectionRing.frustumCulled = false
+  selectionRing.renderOrder = 999
   selectionRing.visible = false
   scene.add(selectionRing)
   if (props.showSpawns) enableSpawns()
