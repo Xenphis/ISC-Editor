@@ -40,6 +40,10 @@ const TILE_ZOOM: u32 = 8;
 const MIN_ZOOM: u32 = 4;
 const TILE_SIZE: u32 = 256;
 
+/// Bump when the tile pipeline's output changes for identical archives (e.g.
+/// the wow-blp 0.7 palettized-BLP R↔B fix), so cached PNGs are rebuilt.
+const PIPELINE_VERSION: u32 = 2;
+
 /// Cap of the in-memory MPQ read cache (raw, still-compressed-on-disk assets
 /// decompressed once and reused across 3D re-opens within a session).
 const READ_CACHE_BYTES: usize = 128 * 1024 * 1024;
@@ -774,6 +778,7 @@ fn open_chain(archives: Vec<(PathBuf, i32)>) -> Result<PatchChain, String> {
 /// on-disk index/tile caches invalidate when the data changes.
 fn archives_signature(archives: &[(PathBuf, i32)]) -> String {
     let mut hasher = DefaultHasher::new();
+    PIPELINE_VERSION.hash(&mut hasher);
     for (path, _) in archives {
         path.to_string_lossy().hash(&mut hasher);
         if let Ok(meta) = std::fs::metadata(path) {

@@ -32,10 +32,10 @@ tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 # Map-editor minimap pipeline: reads the 3.3.5 client MPQs, decodes the hashed
 # minimap BLPs and serves them as a PNG tile pyramid (see minimap.rs).
-wow-mpq = "0.6"
-wow-blp = "0.6"
+wow-mpq = "0.7"
+wow-blp = "0.7"
 # Parses ADT terrain to extract the MH2O liquid chunk for the 3D water layer.
-wow-adt = "0.6"
+wow-adt = "0.7"
 image = { version = "0.25", default-features = false, features = ["png"] }
-wow-wmo = "0.6"
-wow-wdt = "0.6"
+wow-wmo = "0.7"
+wow-wdt = "0.7"

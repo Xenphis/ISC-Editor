@@ -124,13 +124,14 @@ fn append_instance(
     }
     // The instance header bounds the true surface: every real vertex height
     // lies in [min_height_level, max_height_level]. We clamp to it because
-    // wow-adt 0.6.4 mis-parses the MH2O vertex data — it reads height+depth as
-    // an interleaved 5-byte record, but WotLK stores the heightmap and depthmap
-    // as two *separate* arrays. The 1-byte-per-vertex drift produces periodic
-    // garbage heights (e.g. -1.6e29 spikes) that otherwise punch degenerate
-    // triangles through the terrain. Clamping keeps genuine height variation on
-    // sloped water while discarding those out-of-range spikes; flat instances
-    // (min == max, the common case) collapse to a clean level plane.
+    // wow-adt (still as of 0.7.0) mis-parses the MH2O vertex data — it reads
+    // height+depth as an interleaved 5-byte record, but WotLK stores the
+    // heightmap and depthmap as two *separate* arrays. The 1-byte-per-vertex
+    // drift produces periodic garbage heights (e.g. -1.6e29 spikes) that
+    // otherwise punch degenerate triangles through the terrain. Clamping keeps
+    // genuine height variation on sloped water while discarding those
+    // out-of-range spikes; flat instances (min == max, the common case)
+    // collapse to a clean level plane.
     let lo = instance.min_height_level;
     let hi = instance.max_height_level.max(lo);
     let level = lo;
