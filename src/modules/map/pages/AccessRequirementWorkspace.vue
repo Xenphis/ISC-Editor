@@ -222,6 +222,9 @@ function onDiscard() {
               <EditorField :label="t('access_requirement.fields.level_max')" :modified="isFieldModified('level_max')">
                 <InputNumber v-model="form.level_max" :useGrouping="false" :min="0" :max="80" fluid />
               </EditorField>
+              <EditorField :label="t('access_requirement.fields.item_level')" :modified="isFieldModified('item_level')">
+                <InputNumber v-model="form.item_level" :useGrouping="false" :min="0" fluid />
+              </EditorField>
             </div>
           </div>
 
@@ -288,6 +291,10 @@ function onDiscard() {
             <div class="ws-facts-row">
               <dt>{{ t('access_requirement.fields.level_max') }}</dt>
               <dd>{{ form.level_max || '—' }}</dd>
+            </div>
+            <div class="ws-facts-row">
+              <dt>{{ t('access_requirement.fields.item_level') }}</dt>
+              <dd>{{ form.item_level || '—' }}</dd>
             </div>
           </dl>
         </template>

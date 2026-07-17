@@ -3,6 +3,7 @@ export interface AccessRequirement {
   difficulty: number
   level_min: number
   level_max: number
+  item_level: number
   item: number
   item2: number
   quest_done_A: number

@@ -183,7 +183,9 @@
       "RewardText": "Texte de remise",
       "CompletionText": "Texte de complétion",
       "EmoteOnComplete": "Emote (complété)",
+      "EmoteOnCompleteDelay": "Délai emote (complété)",
       "EmoteOnIncomplete": "Emote (incomplet)",
+      "EmoteOnIncompleteDelay": "Délai emote (incomplet)",
       "emote": "Emote",
       "emoteDelay": "Délai (ms)"
     }

@@ -50,6 +50,7 @@
       "difficulty": "Difficulté",
       "level_min": "Niveau minimum",
       "level_max": "Niveau maximum",
+      "item_level": "Niveau d'objet minimum",
       "item": "Item requis 1",
       "item2": "Item requis 2",
       "quest_done_A": "Quête Alliance",

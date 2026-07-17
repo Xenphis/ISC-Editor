@@ -13,6 +13,7 @@ pub struct AccessRequirement {
     pub difficulty: u8,
     pub level_min: u8,
     pub level_max: u8,
+    pub item_level: u16,
     pub item: u32,
     pub item2: u32,
     pub quest_done_A: u32,
@@ -102,15 +103,16 @@ pub async fn save_access_requirement(
     let db = state.pool.lock().await;
     let pool = db.as_ref().ok_or("Not connected to database")?;
     const SQL: &str = "REPLACE INTO access_requirement \
-        (mapId, difficulty, level_min, level_max, item, item2, \
+        (mapId, difficulty, level_min, level_max, item_level, item, item2, \
          quest_done_A, quest_done_H, completed_achievement, quest_failed_text, comment) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     debug_sql!(app, debug, SQL,
         sqlx::query(SQL)
             .bind(data.mapId)
             .bind(data.difficulty)
             .bind(data.level_min)
             .bind(data.level_max)
+            .bind(data.item_level)
             .bind(data.item)
             .bind(data.item2)
             .bind(data.quest_done_A)
@@ -120,7 +122,7 @@ pub async fn save_access_requirement(
             .bind(&data.comment)
             .execute(pool)
             .await,
-        data.mapId, data.difficulty, data.level_min, data.level_max,
+        data.mapId, data.difficulty, data.level_min, data.level_max, data.item_level,
         data.item, data.item2,
         data.quest_done_A, data.quest_done_H, data.completed_achievement, &data.quest_failed_text, &data.comment
     ).map_err(|e| format!("Save failed: {}", e))?;

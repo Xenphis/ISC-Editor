@@ -13,7 +13,7 @@ function escapeVal(v: unknown): string {
 }
 
 const EDITABLE_KEYS: (keyof AccessRequirement)[] = [
-  'level_min', 'level_max',
+  'level_min', 'level_max', 'item_level',
   'item', 'item2',
   'quest_done_A', 'quest_done_H',
   'completed_achievement',
@@ -38,7 +38,7 @@ export function generateDiffQuery(original: AccessRequirement, current: AccessRe
 
 export function generateFullQuery(row: AccessRequirement): string {
   const cols: (keyof AccessRequirement)[] = [
-    'mapId', 'difficulty', 'level_min', 'level_max',
+    'mapId', 'difficulty', 'level_min', 'level_max', 'item_level',
     'item', 'item2',
     'quest_done_A', 'quest_done_H', 'completed_achievement',
     'quest_failed_text', 'comment',
@@ -68,6 +68,7 @@ function createDefault(): AccessRequirement {
     difficulty: 0,
     level_min: 0,
     level_max: 0,
+    item_level: 0,
     item: 0,
     item2: 0,
     quest_done_A: 0,

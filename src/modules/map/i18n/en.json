@@ -50,6 +50,7 @@
       "difficulty": "Difficulty",
       "level_min": "Minimum level",
       "level_max": "Maximum level",
+      "item_level": "Minimum item level",
       "item": "Required item 1",
       "item2": "Required item 2",
       "quest_done_A": "Alliance quest",

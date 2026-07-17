@@ -183,7 +183,9 @@
       "RewardText": "Turn-in Text",
       "CompletionText": "Completion Text",
       "EmoteOnComplete": "Emote (complete)",
+      "EmoteOnCompleteDelay": "Emote delay (complete)",
       "EmoteOnIncomplete": "Emote (incomplete)",
+      "EmoteOnIncompleteDelay": "Emote delay (incomplete)",
       "emote": "Emote",
       "emoteDelay": "Delay (ms)"
     }
