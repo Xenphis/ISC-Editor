@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { InstanceTemplate } from '../types/instance_template'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
 import * as mapService from '../service'
 
 // ─── SQL helpers (primary key: map) ──────────────────────────────────
@@ -122,15 +121,6 @@ export const useInstanceTemplateStore = defineStore('instanceTemplateModule', ()
     }
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    const query = originalValue.value
-      ? generateDiffQuery(originalValue.value, formData)
-      : generateFullQuery(formData)
-    if (!query) return []
-    return [{ table: 'instance_template', entry: formData.map, query }]
-  }
-
   return {
     entries,
     loading,
@@ -144,6 +134,5 @@ export const useInstanceTemplateStore = defineStore('instanceTemplateModule', ()
     openNew,
     saveEntry,
     deleteEntry,
-    getAllDiffQueries,
   }
 })

@@ -9,7 +9,7 @@ import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue'
 import EditorHeader from '@/components/EditorHeader.vue'
 import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
 import type { QuestTemplate } from '@/modules/quests/types/quest_template'
-import { getQuests, deleteQuest } from '@/modules/quests/service'
+import { getQuests } from '@/modules/quests/service'
 import { useQuestModuleStore } from '@/modules/quests/store'
 import QuestTabGeneral from './editor/quest_template/GeneralTab.vue'
 import QuestTabObjectives from './editor/quest_template/ObjectivesTab.vue'
@@ -95,7 +95,7 @@ function onAdd() {
 
 async function onRemove(quest: QuestTemplate) {
   try {
-    await deleteQuest(quest.ID)
+    await store.deleteCurrent(quest.ID)
     if (idParam.value === quest.ID) {
       router.push('/quests')
     }

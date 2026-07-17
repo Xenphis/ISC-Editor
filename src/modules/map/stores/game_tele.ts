@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { GameTele } from '../types/game_tele'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
+import { useSessionTracking } from '@/composables/useSessionTracking'
 import * as mapService from '../service'
 
 // ─── SQL helpers (primary key: id) ───────────────────────────────────
@@ -81,6 +81,32 @@ export const useGameTeleStore = defineStore('gameTeleModule', () => {
   const originalValue = ref<GameTele | null>(null)
   const editorDataLoaded = ref(false)
 
+  // --- Session tracking ---
+  const tracking = useSessionTracking<GameTele>({
+    scopeId: 'game_tele',
+    table: 'game_tele',
+    editorDataLoaded,
+    watchSources: [formData],
+    isNew: () => originalValue.value === null,
+    cloneCurrent: () => ({ ...formData }),
+    cloneOriginal: () => (originalValue.value ? { ...originalValue.value } : null),
+    getId: current => current.id,
+    buildStatements: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [`DELETE FROM \`game_tele\` WHERE \`id\` = ${Number(id)};`]
+      }
+      if (original === null) return generateFullQuery(current).split('\n')
+      const query = generateDiffQuery(original, current)
+      return query ? [query] : []
+    },
+    buildFieldChanges: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [{ field: 'game_tele', oldValue: `#${id}`, newValue: '(deleted)' }]
+      }
+      return getChangedFields(original ?? createDefault(), current)
+    },
+  })
+
   // ─── Actions ─────────────────────────────────────────────────────
 
   async function fetchEntries(search?: string, limit?: number, offset?: number) {
@@ -116,7 +142,11 @@ export const useGameTeleStore = defineStore('gameTeleModule', () => {
   }
 
   async function saveEntry() {
+    tracking.flush()
     await mapService.saveGameTele(formData)
+    tracking.onSaved()
+    // Sync the unsaved layer with what was just persisted.
+    originalValue.value = { ...formData }
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
@@ -124,18 +154,10 @@ export const useGameTeleStore = defineStore('gameTeleModule', () => {
 
   async function deleteEntry(id: number) {
     await mapService.deleteGameTele(id)
+    tracking.trackDeleted(id, entries.value.find(e => e.id === id) ?? { ...createDefault(), id })
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
-  }
-
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    const query = originalValue.value
-      ? generateDiffQuery(originalValue.value, formData)
-      : generateFullQuery(formData)
-    if (!query) return []
-    return [{ table: 'game_tele', entry: formData.id, query }]
   }
 
   return {
@@ -151,6 +173,5 @@ export const useGameTeleStore = defineStore('gameTeleModule', () => {
     openNew,
     saveEntry,
     deleteEntry,
-    getAllDiffQueries,
   }
 })

@@ -1,19 +1,53 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSessionChangesStore } from '@/stores/sessionChanges'
+import { useSessionTrackerStore, type SessionChangeKind } from '@/stores/sessionTracker'
+import ChangedFieldsList from '@/components/workspace/ChangedFieldsList.vue'
 import { highlightSql } from '@/utils/sql'
 import { copyToClipboard } from '@/utils/clipboard'
 
 const { t } = useI18n()
-const session = useSessionChangesStore()
+const session = useSessionTrackerStore()
 
 const copiedId = ref<string | null>(null)
+const expandedSql = ref(new Set<string>())
+const clearArmed = ref(false)
+let clearArmTimer: ReturnType<typeof setTimeout> | null = null
 
 async function copyText(text: string, id: string) {
   await copyToClipboard(text)
   copiedId.value = id
   setTimeout(() => { copiedId.value = null }, 2000)
+}
+
+function toggleSql(key: string) {
+  const next = new Set(expandedSql.value)
+  if (next.has(key)) {
+    next.delete(key)
+  } else {
+    next.add(key)
+  }
+  expandedSql.value = next
+}
+
+// Two-step confirm: the first click arms the button for 3 s.
+function onClearClick() {
+  if (!clearArmed.value) {
+    clearArmed.value = true
+    clearArmTimer = setTimeout(() => { clearArmed.value = false }, 3000)
+    return
+  }
+  if (clearArmTimer != null) clearTimeout(clearArmTimer)
+  clearArmed.value = false
+  session.reset()
+}
+
+function kindLabel(kind: SessionChangeKind): string {
+  switch (kind) {
+    case 'created': return t('sqlSession.statusCreated')
+    case 'deleted': return t('sqlSession.statusDeleted')
+    default: return t('sqlSession.statusModified')
+  }
 }
 </script>
 
@@ -25,6 +59,16 @@ async function copyText(text: string, id: string) {
         <h2 class="session-title">{{ t('sqlSession.title') }}</h2>
         <p class="session-description">{{ t('sqlSession.description') }}</p>
       </div>
+      <div v-if="session.totalChanges > 0" class="session-actions">
+        <button
+          class="clear-session-btn"
+          :class="{ armed: clearArmed }"
+          @click="onClearClick"
+        >
+          <i class="pi pi-trash" />
+          {{ clearArmed ? t('sqlSession.clearSessionConfirm') : t('sqlSession.clearSession') }}
+        </button>
+      </div>
     </div>
 
     <!-- Empty state -->
@@ -34,7 +78,7 @@ async function copyText(text: string, id: string) {
       <p>{{ t('sqlSession.emptyDescription') }}</p>
     </div>
 
-    <!-- Query list -->
+    <!-- Change list -->
     <div v-else class="session-content">
       <!-- Summary bar -->
       <div class="session-summary">
@@ -43,22 +87,35 @@ async function copyText(text: string, id: string) {
         </span>
       </div>
 
-      <!-- Individual queries -->
+      <!-- Individual changes -->
       <div
-        v-for="item in session.allDiffQueries"
-        :key="`${item.table}-${item.entry}`"
+        v-for="change in session.changes"
+        :key="change.key"
         class="query-card"
       >
         <div class="query-card-header">
           <div class="query-card-info">
-            <span class="query-table">{{ item.table }}</span>
-            <span class="query-entry">#{{ item.entry }}</span>
+            <span class="query-table">{{ change.table }}</span>
+            <span class="query-entry">#{{ change.id }}</span>
+            <span class="kind-badge" :class="`kind-${change.kind}`">{{ kindLabel(change.kind) }}</span>
           </div>
-          <button class="copy-icon-btn" @click="copyText(item.query, `${item.table}-${item.entry}`)">
-            <i :class="copiedId === `${item.table}-${item.entry}` ? 'pi pi-check' : 'pi pi-copy'" />
-          </button>
+          <div class="query-card-actions">
+            <button
+              class="copy-icon-btn"
+              :title="expandedSql.has(change.key) ? t('sqlSession.hideSql') : t('sqlSession.showSql')"
+              @click="toggleSql(change.key)"
+            >
+              <i :class="expandedSql.has(change.key) ? 'pi pi-chevron-up' : 'pi pi-code'" />
+            </button>
+            <button class="copy-icon-btn" @click="copyText(change.sql, change.key)">
+              <i :class="copiedId === change.key ? 'pi pi-check' : 'pi pi-copy'" />
+            </button>
+          </div>
         </div>
-        <pre class="query-code" v-html="highlightSql(item.query)" />
+        <div class="query-fields">
+          <ChangedFieldsList :changed-fields="change.fieldChanges" />
+        </div>
+        <pre v-if="expandedSql.has(change.key)" class="query-code" v-html="highlightSql(change.sql)" />
       </div>
 
       <!-- Full script -->
@@ -84,6 +141,10 @@ async function copyText(text: string, id: string) {
 }
 
 .session-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 2rem;
 }
 
@@ -132,6 +193,32 @@ async function copyText(text: string, id: string) {
   flex-shrink: 0;
 }
 
+.clear-session-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-default);
+  color: var(--danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.clear-session-btn:hover {
+  background: var(--surface-elevated);
+  border-color: var(--danger);
+}
+
+.clear-session-btn.armed {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
 /* Empty state */
 .session-empty {
   display: flex;
@@ -176,7 +263,7 @@ async function copyText(text: string, id: string) {
   font-weight: 600;
 }
 
-/* Query cards */
+/* Change cards */
 .query-card {
   background: var(--surface-1);
   border: 1px solid var(--border-default);
@@ -199,6 +286,12 @@ async function copyText(text: string, id: string) {
   gap: 0.5rem;
 }
 
+.query-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .query-table {
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.85rem;
@@ -212,9 +305,39 @@ async function copyText(text: string, id: string) {
   font-weight: 500;
 }
 
+.kind-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kind-badge.kind-modified {
+  background: var(--accent-ring-soft);
+  color: var(--accent);
+}
+
+.kind-badge.kind-created {
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+  color: var(--success);
+}
+
+.kind-badge.kind-deleted {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
+}
+
+.query-fields {
+  padding: 0.35rem 1rem;
+}
+
 .query-code {
   margin: 0;
   padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-default);
+  background: var(--surface-code);
   font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 0.8rem;
   line-height: 1.6;

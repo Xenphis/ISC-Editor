@@ -10,7 +10,7 @@ export interface SubTableSnapshot {
 }
 
 export interface SubTableManager {
-  /** Table name for sessionChanges identification */
+  /** Table name for session-tracker snapshot identification */
   readonly tableName: string
   /** Take a snapshot for the dirty cache */
   snapshot(): SubTableSnapshot
@@ -30,6 +30,21 @@ export interface SubTableManager {
   getSqlDiffStatements(parentId: number): string[]
   /** Get list of changed fields for display */
   getChangedFields(parentId: number): FieldChange[]
+  /** Reactive live draft (newEntry / newEntries ref) — deep-watch source for session tracking */
+  getLive(): object
+  /** Plain clone of the live draft, for session snapshots */
+  cloneLive(): unknown
+  /** Plain clone of the DB reference; null when absent */
+  cloneOriginal(): unknown | null
+  /**
+   * Pure diff statements between two plain snapshots. A null original means
+   * the parent entity did not exist (diff against defaults / empty list); a
+   * null current means the parent entity was deleted (no sub-table SQL — the
+   * delete commands only remove the main row).
+   */
+  buildStatements(original: unknown | null, current: unknown | null, parentId: number): string[]
+  /** Pure display field-changes between two plain snapshots (same conventions) */
+  buildFieldChanges(original: unknown | null, current: unknown | null, parentId: number): FieldChange[]
 }
 
 // ─── ReactiveSubTable: single-row sub-tables (movement, addon, resistance) ──
@@ -120,16 +135,44 @@ export class ReactiveSubTable<T extends object> implements SubTableManager {
     if (!this.originalEntry.value) {
       return []
     }
+    return this.buildStatements(this.originalEntry.value, { ...(this.newEntry as any) }, parentId)
+  }
+
+  getChangedFields(parentId: number): FieldChange[] {
+    if (!this.originalEntry.value) {
+      return []
+    }
+    return this.buildFieldChanges(this.originalEntry.value, { ...(this.newEntry as any) }, parentId)
+  }
+
+  getLive(): object {
+    return this.newEntry as object
+  }
+
+  cloneLive(): unknown {
+    return { ...(this.newEntry as any) }
+  }
+
+  cloneOriginal(): unknown | null {
+    return this.originalEntry.value ? { ...this.originalEntry.value } : null
+  }
+
+  buildStatements(original: unknown | null, current: unknown | null, parentId: number): string[] {
+    if (current == null) {
+      return []
+    }
+    const base = (original ?? this.createDefault()) as T
+    const draft = current as T
     if (this.compositeConfig && this.toRows) {
       return generateCompositeKeyDiffStatements(
         { ...this.compositeConfig, parentId },
-        this.toRows(this.originalEntry.value),
-        this.toRows(this.newEntry as unknown as T),
+        this.toRows(base),
+        this.toRows(draft),
       )
     }
     // Inject the parent ID as the primary key value
-    const originalWithKey = { ...this.originalEntry.value, [this.primaryKey]: parentId } as Record<string, unknown>
-    const currentWithKey = { ...(this.newEntry as object), [this.primaryKey]: parentId } as Record<string, unknown>
+    const originalWithKey = { ...base, [this.primaryKey]: parentId } as Record<string, unknown>
+    const currentWithKey = { ...draft, [this.primaryKey]: parentId } as Record<string, unknown>
     const changed = getChangedFields(originalWithKey, currentWithKey, this.primaryKey)
     if (changed.length === 0) {
       return []
@@ -139,13 +182,15 @@ export class ReactiveSubTable<T extends object> implements SubTableManager {
     return [generateUpsertQuery(this.tableName, currentWithKey, changed.map(c => c.field))]
   }
 
-  getChangedFields(_parentId: number): FieldChange[] {
-    if (!this.originalEntry.value) {
+  buildFieldChanges(original: unknown | null, current: unknown | null, _parentId: number): FieldChange[] {
+    if (current == null) {
       return []
     }
+    const base = (original ?? this.createDefault()) as T
+    const draft = current as T
     if (this.compositeConfig && this.toRows) {
-      const origRows = this.toRows(this.originalEntry.value)
-      const curRows = this.toRows(this.newEntry as unknown as T)
+      const origRows = this.toRows(base)
+      const curRows = this.toRows(draft)
       const changes: FieldChange[] = []
       const origMap = new Map(origRows.map((r: any) => [r[this.compositeConfig!.childKey], r]))
       const curMap = new Map(curRows.map((r: any) => [r[this.compositeConfig!.childKey], r]))
@@ -163,8 +208,8 @@ export class ReactiveSubTable<T extends object> implements SubTableManager {
       return changes
     }
     return getChangedFields(
-      this.originalEntry.value as unknown as Record<string, unknown>,
-      this.newEntry as unknown as Record<string, unknown>,
+      base as unknown as Record<string, unknown>,
+      draft as unknown as Record<string, unknown>,
       this.primaryKey,
     )
   }
@@ -269,21 +314,49 @@ export class ArraySubTable<T extends Record<string, any>> implements SubTableMan
     if (!this.originalEntries.value) {
       return []
     }
-    return generateCompositeKeyDiffStatements(
-      { ...this.compositeConfig, parentId },
-      this.originalEntries.value,
-      this.newEntries.value,
-    )
+    return this.buildStatements(this.originalEntries.value, this.newEntries.value, parentId)
   }
 
-  getChangedFields(_parentId: number): FieldChange[] {
+  getChangedFields(parentId: number): FieldChange[] {
     if (!this.originalEntries.value) {
       return []
     }
+    return this.buildFieldChanges(this.originalEntries.value, this.newEntries.value, parentId)
+  }
+
+  getLive(): object {
+    return this.newEntries
+  }
+
+  cloneLive(): unknown {
+    return this.newEntries.value.map(e => ({ ...e }))
+  }
+
+  cloneOriginal(): unknown | null {
+    return this.originalEntries.value ? this.originalEntries.value.map(e => ({ ...e })) : null
+  }
+
+  buildStatements(original: unknown | null, current: unknown | null, parentId: number): string[] {
+    if (current == null) {
+      return []
+    }
+    return generateCompositeKeyDiffStatements(
+      { ...this.compositeConfig, parentId },
+      (original ?? []) as T[],
+      current as T[],
+    )
+  }
+
+  buildFieldChanges(original: unknown | null, current: unknown | null, _parentId: number): FieldChange[] {
+    if (current == null) {
+      return []
+    }
+    const origEntries = (original ?? []) as T[]
+    const curEntries = current as T[]
     const changes: FieldChange[] = []
     const keyFn = this.compositeConfig.getUniqueKey || ((entry: T) => String(entry[this.childKey]))
-    const origMap = new Map(this.originalEntries.value.map(o => [keyFn(o), o]))
-    const curMap = new Map(this.newEntries.value.map(c => [keyFn(c), c]))
+    const origMap = new Map(origEntries.map(o => [keyFn(o), o]))
+    const curMap = new Map(curEntries.map(c => [keyFn(c), c]))
     for (const [key, orig] of origMap) {
       if (!curMap.has(key)) {
         changes.push({ field: `${this.fieldPrefix}_${key}`, oldValue: this.summarize(orig), newValue: '(deleted)' })
@@ -419,14 +492,42 @@ export class DetachedArraySubTable<T extends Record<string, any>> implements Sub
     return this.getSqlDiffStatements(parentId).join('\n')
   }
 
-  getSqlDiffStatements(_parentId: number): string[] {
+  getSqlDiffStatements(parentId: number): string[] {
     if (!this.originalEntries.value) {
       return []
     }
+    return this.buildStatements(this.originalEntries.value, this.newEntries.value, parentId)
+  }
+
+  getChangedFields(parentId: number): FieldChange[] {
+    if (!this.originalEntries.value) {
+      return []
+    }
+    return this.buildFieldChanges(this.originalEntries.value, this.newEntries.value, parentId)
+  }
+
+  getLive(): object {
+    return this.newEntries
+  }
+
+  cloneLive(): unknown {
+    return this.newEntries.value.map(e => ({ ...e }))
+  }
+
+  cloneOriginal(): unknown | null {
+    return this.originalEntries.value ? this.originalEntries.value.map(e => ({ ...e })) : null
+  }
+
+  buildStatements(original: unknown | null, current: unknown | null, _parentId: number): string[] {
+    if (current == null) {
+      return []
+    }
+    const origEntries = (original ?? []) as T[]
+    const curEntries = current as T[]
 
     const lines: string[] = []
-    const originalMap = new Map(this.originalEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
-    const currentMap = new Map(this.newEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+    const originalMap = new Map(origEntries.map(entry => [this.getUniqueKey(entry), entry]))
+    const currentMap = new Map(curEntries.map(entry => [this.getUniqueKey(entry), entry]))
 
     if (this.deleteMissing) {
       for (const [key, original] of originalMap) {
@@ -449,14 +550,16 @@ export class DetachedArraySubTable<T extends Record<string, any>> implements Sub
     return lines
   }
 
-  getChangedFields(_parentId: number): FieldChange[] {
-    if (!this.originalEntries.value) {
+  buildFieldChanges(original: unknown | null, current: unknown | null, _parentId: number): FieldChange[] {
+    if (current == null) {
       return []
     }
+    const origEntries = (original ?? []) as T[]
+    const curEntries = current as T[]
 
     const changes: FieldChange[] = []
-    const originalMap = new Map(this.originalEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
-    const currentMap = new Map(this.newEntries.value.map(entry => [this.getUniqueKey(entry), entry]))
+    const originalMap = new Map(origEntries.map(entry => [this.getUniqueKey(entry), entry]))
+    const currentMap = new Map(curEntries.map(entry => [this.getUniqueKey(entry), entry]))
 
     if (this.deleteMissing) {
       for (const [key, original] of originalMap) {

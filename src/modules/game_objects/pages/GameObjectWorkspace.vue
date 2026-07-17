@@ -10,7 +10,7 @@ import Column from 'primevue/column'
 import { game_object_type_options } from '@/modules/game_objects/types/defines'
 import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
-import { getGameObjects, deleteGameObject, getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
+import { getGameObjects, getGameObjectSpawns, saveGameObjectSpawn, deleteGameObjectSpawn } from '@/modules/game_objects/service'
 import GameObjectSpawnEditor, { type GoSpawnInspectorState } from './GameObjectSpawnEditor.vue'
 import GameObjectLocaleTab from './GameObjectLocaleTab.vue'
 import EntityWorkspace from '@/components/workspace/EntityWorkspace.vue'
@@ -86,7 +86,7 @@ function onListAdd() {
 
 async function onListRemove(go: GameObjectTemplate) {
   try {
-    await deleteGameObject(go.entry)
+    await store.deleteCurrent(go.entry)
     if (entryParam.value === go.entry) {
       router.push('/gameobject')
     }

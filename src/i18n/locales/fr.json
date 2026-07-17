@@ -92,13 +92,20 @@
   },
   "sqlSession": {
     "title": "Session SQL",
-    "description": "Récapitulatif de toutes les modifications SQL en cours de session",
+    "description": "Modifications nettes depuis le début de la session, exécutions incluses",
     "copyAll": "Tout copier",
     "entries": "entrée(s) modifiée(s)",
     "fullScript": "Script complet",
-    "fullScriptDesc": "Toutes les requêtes combinées, prêtes à être exécutées",
-    "emptyTitle": "Aucune modification en cours",
-    "emptyDescription": "Les requêtes SQL apparaîtront ici lorsque vous modifierez des entrées"
+    "fullScriptDesc": "Patch net de la session : de l'état d'origine à l'état actuel de chaque entrée modifiée",
+    "emptyTitle": "Aucune modification cette session",
+    "emptyDescription": "Les requêtes SQL apparaîtront ici lorsque vous modifierez des entrées",
+    "clearSession": "Vider la session",
+    "clearSessionConfirm": "Cliquer à nouveau pour confirmer",
+    "statusCreated": "créé",
+    "statusModified": "modifié",
+    "statusDeleted": "supprimé",
+    "showSql": "Voir le SQL",
+    "hideSql": "Masquer le SQL"
   },
   "bitmaskField": {
     "currentValue": "Valeur actuelle :",

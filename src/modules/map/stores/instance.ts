@@ -4,7 +4,7 @@ import type { InstanceTemplate } from '../types/instance_template'
 import type { InstanceSpawnGroup } from '../types/instance_spawn_groups'
 import type { InstanceEncounter } from '../types/instance_encounters'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
+import { useSessionTracking } from '@/composables/useSessionTracking'
 import * as mapService from '../service'
 import {
   generateDiffQuery as tplDiff,
@@ -67,6 +67,75 @@ function newSpawnGroup(map: number): WithUid<InstanceSpawnGroup> {
 
 function newEncounter(): WithUid<InstanceEncounter> {
   return { _uid: nextUid(), entry: 0, creditType: 0, creditEntry: 0, lastEncounterDungeon: 0, comment: '' }
+}
+
+// ─── Pure aggregate diff (uid-stripped snapshots) ────────────────────
+
+export interface InstanceAggregate {
+  template: InstanceTemplate
+  spawnGroups: InstanceSpawnGroup[]
+  encounters: InstanceEncounter[]
+}
+
+/** Per-table changes between two plain aggregates; null original = new instance. */
+function buildInstanceQueries(
+  original: InstanceAggregate | null,
+  current: InstanceAggregate,
+): { table: string; query: string }[] {
+  const out: { table: string; query: string }[] = []
+
+  // Template
+  if (original) {
+    const q = tplDiff(original.template, current.template)
+    if (q) out.push({ table: 'instance_template', query: q })
+  } else {
+    out.push({ table: 'instance_template', query: tplFull(current.template) })
+  }
+
+  // Spawn groups
+  const curSg = current.spawnGroups
+  const origSg = original?.spawnGroups ?? []
+  // removed
+  for (const orig of origSg) {
+    const stillThere = curSg.some(c => rowsEqual(c, orig))
+    const sameKey = curSg.some(c =>
+      c.instanceMapId === orig.instanceMapId && c.bossStateId === orig.bossStateId &&
+      c.bossStates === orig.bossStates && c.spawnGroupId === orig.spawnGroupId)
+    if (!stillThere && !sameKey) {
+      out.push({ table: 'instance_spawn_groups', query: spawnGroupDelete(orig) })
+    }
+  }
+  // added / changed
+  for (const cur of curSg) {
+    const orig = origSg.find(o =>
+      o.instanceMapId === cur.instanceMapId && o.bossStateId === cur.bossStateId &&
+      o.bossStates === cur.bossStates && o.spawnGroupId === cur.spawnGroupId)
+    if (!orig) {
+      out.push({ table: 'instance_spawn_groups', query: sgFull(cur) })
+    } else if (!rowsEqual(orig, cur)) {
+      const q = sgDiff(orig, cur)
+      if (q) out.push({ table: 'instance_spawn_groups', query: q })
+    }
+  }
+
+  // Encounters
+  const curEnc = current.encounters
+  const origEnc = original?.encounters ?? []
+  for (const orig of origEnc) {
+    const sameKey = curEnc.some(c => c.entry === orig.entry)
+    if (!sameKey) out.push({ table: 'instance_encounters', query: encounterDelete(orig) })
+  }
+  for (const cur of curEnc) {
+    const orig = origEnc.find(o => o.entry === cur.entry)
+    if (!orig) {
+      out.push({ table: 'instance_encounters', query: encFull(cur) })
+    } else if (!rowsEqual(orig, cur)) {
+      const q = encDiff(orig, cur)
+      if (q) out.push({ table: 'instance_encounters', query: q })
+    }
+  }
+
+  return out
 }
 
 // ─── Store ───────────────────────────────────────────────────────────
@@ -162,64 +231,26 @@ export const useInstanceStore = defineStore('instanceModule', () => {
 
   // ─── Diff helpers ────────────────────────────────────────────────
 
-  /** Per-table changes used for the SQL panel & the global SQL session. */
+  function liveAggregate(): InstanceAggregate {
+    return {
+      template: { ...template },
+      spawnGroups: spawnGroups.value.map(strip),
+      encounters: encounters.value.map(strip),
+    }
+  }
+
+  function originalAggregate(): InstanceAggregate | null {
+    if (!originalTemplate.value) return null
+    return {
+      template: { ...originalTemplate.value },
+      spawnGroups: originalSpawnGroups.value.map(r => ({ ...r })),
+      encounters: originalEncounters.value.map(r => ({ ...r })),
+    }
+  }
+
+  /** Per-table changes used for the SQL panel. */
   function buildQueries(): { table: string; query: string }[] {
-    const out: { table: string; query: string }[] = []
-
-    // Template
-    if (originalTemplate.value) {
-      const q = tplDiff(originalTemplate.value, template)
-      if (q) out.push({ table: 'instance_template', query: q })
-    } else {
-      out.push({ table: 'instance_template', query: tplFull(template) })
-    }
-
-    // Spawn groups
-    const curSg = spawnGroups.value
-    const origSg = originalSpawnGroups.value
-    // removed
-    for (const orig of origSg) {
-      const stillThere = curSg.some(c => rowsEqual(strip(c), orig))
-      const sameKey = curSg.some(c =>
-        c.instanceMapId === orig.instanceMapId && c.bossStateId === orig.bossStateId &&
-        c.bossStates === orig.bossStates && c.spawnGroupId === orig.spawnGroupId)
-      if (!stillThere && !sameKey) {
-        out.push({ table: 'instance_spawn_groups', query: spawnGroupDelete(orig) })
-      }
-    }
-    // added / changed
-    for (const cur of curSg) {
-      const plain = strip(cur)
-      const orig = origSg.find(o =>
-        o.instanceMapId === cur.instanceMapId && o.bossStateId === cur.bossStateId &&
-        o.bossStates === cur.bossStates && o.spawnGroupId === cur.spawnGroupId)
-      if (!orig) {
-        out.push({ table: 'instance_spawn_groups', query: sgFull(plain) })
-      } else if (!rowsEqual(orig, plain)) {
-        const q = sgDiff(orig, plain)
-        if (q) out.push({ table: 'instance_spawn_groups', query: q })
-      }
-    }
-
-    // Encounters
-    const curEnc = encounters.value
-    const origEnc = originalEncounters.value
-    for (const orig of origEnc) {
-      const sameKey = curEnc.some(c => c.entry === orig.entry)
-      if (!sameKey) out.push({ table: 'instance_encounters', query: encounterDelete(orig) })
-    }
-    for (const cur of curEnc) {
-      const plain = strip(cur)
-      const orig = origEnc.find(o => o.entry === cur.entry)
-      if (!orig) {
-        out.push({ table: 'instance_encounters', query: encFull(plain) })
-      } else if (!rowsEqual(orig, plain)) {
-        const q = encDiff(orig, plain)
-        if (q) out.push({ table: 'instance_encounters', query: q })
-      }
-    }
-
-    return out
+    return buildInstanceQueries(originalAggregate(), liveAggregate())
   }
 
   function diffQueryText(): string {
@@ -238,14 +269,46 @@ export const useInstanceStore = defineStore('instanceModule', () => {
     return buildQueries().length > 0
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    return buildQueries().map(q => ({ table: q.table, entry: template.map, query: q.query }))
-  }
+  // --- Session tracking ---
+  const tracking = useSessionTracking<InstanceAggregate>({
+    scopeId: 'instance',
+    table: 'instance_template',
+    editorDataLoaded,
+    watchSources: [template, spawnGroups, encounters],
+    isNew: () => originalTemplate.value === null,
+    cloneCurrent: liveAggregate,
+    cloneOriginal: originalAggregate,
+    getId: current => current.template.map,
+    buildStatements: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [`DELETE FROM \`instance_template\` WHERE \`map\` = ${Number(id)};`]
+      }
+      return buildInstanceQueries(original, current).map(q => q.query)
+    },
+    buildFieldChanges: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [{ field: 'instance_template', oldValue: `#${id}`, newValue: '(deleted)' }]
+      }
+      const fields = tplChanged(original?.template ?? createTemplate(), current.template)
+      // Child tables: summarize row counts when their rows differ.
+      const queries = buildInstanceQueries(original, current)
+      for (const [table, origRows, curRows] of [
+        ['instance_spawn_groups', original?.spawnGroups ?? [], current.spawnGroups],
+        ['instance_encounters', original?.encounters ?? [], current.encounters],
+      ] as const) {
+        if (queries.some(q => q.table === table)) {
+          fields.push({ field: table, oldValue: `${origRows.length} row(s)`, newValue: `${curRows.length} row(s)` })
+        }
+      }
+      return fields
+    },
+  })
 
   // ─── Persistence ─────────────────────────────────────────────────
 
   async function saveEntry() {
+    tracking.flush()
+
     // Template
     await mapService.saveInstanceTemplate(template)
 
@@ -271,6 +334,12 @@ export const useInstanceStore = defineStore('instanceModule', () => {
       await mapService.saveInstanceEncounter(strip(cur))
     }
 
+    tracking.onSaved()
+    // Sync the unsaved layer with what was just persisted.
+    originalTemplate.value = { ...template }
+    originalSpawnGroups.value = spawnGroups.value.map(strip)
+    originalEncounters.value = encounters.value.map(strip)
+
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
@@ -278,6 +347,11 @@ export const useInstanceStore = defineStore('instanceModule', () => {
 
   async function deleteEntry(map: number) {
     await mapService.deleteInstanceTemplate(map)
+    tracking.trackDeleted(map, {
+      template: entries.value.find(e => e.map === map) ?? { ...createTemplate(), map },
+      spawnGroups: [],
+      encounters: [],
+    })
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
@@ -306,7 +380,6 @@ export const useInstanceStore = defineStore('instanceModule', () => {
     diffQueryText,
     changedFields,
     hasChanges,
-    getAllDiffQueries,
     saveEntry,
     deleteEntry,
   }

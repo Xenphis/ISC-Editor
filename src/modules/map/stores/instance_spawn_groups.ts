@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { InstanceSpawnGroup } from '../types/instance_spawn_groups'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
 import * as mapService from '../service'
 
 // ─── SQL helpers (composite key: instanceMapId + bossStateId + bossStates + spawnGroupId) ──
@@ -140,15 +139,6 @@ export const useInstanceSpawnGroupsStore = defineStore('instanceSpawnGroupsModul
     }
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    const query = originalValue.value
-      ? generateDiffQuery(originalValue.value, formData)
-      : generateFullQuery(formData)
-    if (!query) return []
-    return [{ table: 'instance_spawn_groups', entry: formData.instanceMapId, query }]
-  }
-
   return {
     entries,
     loading,
@@ -162,6 +152,5 @@ export const useInstanceSpawnGroupsStore = defineStore('instanceSpawnGroupsModul
     openNew,
     saveEntry,
     deleteEntry,
-    getAllDiffQueries,
   }
 })

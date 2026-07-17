@@ -11,7 +11,7 @@ import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
 import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 import type { Creature } from '@/modules/npc/types/creature/creature'
-import { getNpcs, deleteNpc, getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn } from '@/modules/npc/service'
+import { getNpcs, getCreatureSpawns, saveCreatureSpawn, deleteCreatureSpawn } from '@/modules/npc/service'
 import { useNpcModuleStore } from '@/modules/npc/store'
 import CreatureEditor, { type SpawnInspectorState } from './CreatureEditor.vue'
 import NpcTabGeneral from './editor/creature_template/GeneralTab.vue'
@@ -131,7 +131,7 @@ function onAdd() {
 
 async function onRemove(npc: CreatureTemplate) {
   try {
-    await deleteNpc(npc.entry)
+    await store.deleteCurrent(npc.entry)
     if (entryParam.value === npc.entry) {
       router.push('/npc/creature-template')
     }

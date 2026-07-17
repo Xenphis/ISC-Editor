@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { ExplorationBasexp } from '../types/exploration_basexp'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
+import { useSessionTracking } from '@/composables/useSessionTracking'
 import * as mapService from '../service'
 
 // ─── SQL helpers (primary key: level) ────────────────────────────────
@@ -72,6 +72,32 @@ export const useExplorationBasexpStore = defineStore('explorationBasexpModule', 
   const originalValue = ref<ExplorationBasexp | null>(null)
   const editorDataLoaded = ref(false)
 
+  // --- Session tracking ---
+  const tracking = useSessionTracking<ExplorationBasexp>({
+    scopeId: 'exploration_basexp',
+    table: 'exploration_basexp',
+    editorDataLoaded,
+    watchSources: [formData],
+    isNew: () => originalValue.value === null,
+    cloneCurrent: () => ({ ...formData }),
+    cloneOriginal: () => (originalValue.value ? { ...originalValue.value } : null),
+    getId: current => current.level,
+    buildStatements: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [`DELETE FROM \`exploration_basexp\` WHERE \`level\` = ${Number(id)};`]
+      }
+      if (original === null) return generateFullQuery(current).split('\n')
+      const query = generateDiffQuery(original, current)
+      return query ? [query] : []
+    },
+    buildFieldChanges: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [{ field: 'exploration_basexp', oldValue: `#${id}`, newValue: '(deleted)' }]
+      }
+      return getChangedFields(original ?? createDefault(), current)
+    },
+  })
+
   // ─── Actions ─────────────────────────────────────────────────────
 
   async function fetchEntries(search?: string, limit?: number, offset?: number) {
@@ -107,7 +133,11 @@ export const useExplorationBasexpStore = defineStore('explorationBasexpModule', 
   }
 
   async function saveEntry() {
+    tracking.flush()
     await mapService.saveExplorationBasexp(formData)
+    tracking.onSaved()
+    // Sync the unsaved layer with what was just persisted.
+    originalValue.value = { ...formData }
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
@@ -115,18 +145,10 @@ export const useExplorationBasexpStore = defineStore('explorationBasexpModule', 
 
   async function deleteEntry(level: number) {
     await mapService.deleteExplorationBasexp(level)
+    tracking.trackDeleted(level, entries.value.find(e => e.level === level) ?? { ...createDefault(), level })
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
-  }
-
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    const query = originalValue.value
-      ? generateDiffQuery(originalValue.value, formData)
-      : generateFullQuery(formData)
-    if (!query) return []
-    return [{ table: 'exploration_basexp', entry: formData.level, query }]
   }
 
   return {
@@ -142,6 +164,5 @@ export const useExplorationBasexpStore = defineStore('explorationBasexpModule', 
     openNew,
     saveEntry,
     deleteEntry,
-    getAllDiffQueries,
   }
 })

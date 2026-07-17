@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { InstanceEncounter } from '../types/instance_encounters'
 import type { FieldChange } from '@/composables/useQueryGenerator'
-import type { SessionQuery } from '@/stores/moduleStore'
 import * as mapService from '../service'
 
 // ─── SQL helpers (primary key: entry) ────────────────────────────────
@@ -127,15 +126,6 @@ export const useInstanceEncountersStore = defineStore('instanceEncountersModule'
     }
   }
 
-  function getAllDiffQueries(): SessionQuery[] {
-    if (!editorDataLoaded.value) return []
-    const query = originalValue.value
-      ? generateDiffQuery(originalValue.value, formData)
-      : generateFullQuery(formData)
-    if (!query) return []
-    return [{ table: 'instance_encounters', entry: formData.entry, query }]
-  }
-
   return {
     entries,
     loading,
@@ -149,6 +139,5 @@ export const useInstanceEncountersStore = defineStore('instanceEncountersModule'
     openNew,
     saveEntry,
     deleteEntry,
-    getAllDiffQueries,
   }
 })

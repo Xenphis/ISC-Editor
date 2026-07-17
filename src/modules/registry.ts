@@ -1,11 +1,4 @@
 import type { RouteRecordRaw } from 'vue-router'
-import type { ModuleStore } from '@/stores/moduleStore'
-import { useNpcModuleStore } from '@/modules/npc/store'
-import { useGameObjectModuleStore } from '@/modules/game_objects/store'
-import { useQuestModuleStore } from '@/modules/quests/store'
-import { useGameTeleStore } from '@/modules/map/stores/game_tele'
-import { useExplorationBasexpStore } from '@/modules/map/stores/exploration_basexp'
-import { useInstanceStore } from '@/modules/map/stores/instance'
 import { npcRoutes } from '@/modules/npc/routes'
 import { gameObjectRoutes } from '@/modules/game_objects/routes'
 import { itemRoutes } from '@/modules/item/routes'
@@ -60,8 +53,6 @@ export interface AppModuleDefinition {
   routes: RouteRecordRaw[]
   navigation?: ModuleNavigationDefinition
   i18n?: ModuleI18nDefinition
-  sessionStore?: () => ModuleStore
-  sessionStores?: (() => ModuleStore)[]
 }
 
 export interface ModuleI18nMessages {
@@ -81,7 +72,6 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/npc',
     navigation: { id: 'npc', icon: 'pi pi-users' },
     i18n: { en: npcEn, fr: npcFr },
-    sessionStore: useNpcModuleStore,
     routes: npcRoutes,
   },
   {
@@ -89,7 +79,6 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/gameobject',
     navigation: { id: 'gameobject', icon: 'pi pi-box' },
     i18n: { en: goEn, fr: goFr },
-    sessionStore: useGameObjectModuleStore,
     routes: gameObjectRoutes,
   },
   {
@@ -115,7 +104,6 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/quests',
     navigation: { id: 'quests', icon: 'pi pi-compass' },
     i18n: { en: questEn, fr: questFr },
-    sessionStore: useQuestModuleStore,
     routes: questRoutes,
   },
   {
@@ -123,11 +111,6 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/maps',
     navigation: { id: 'maps', icon: 'pi pi-map' },
     i18n: { en: mapEn, fr: mapFr },
-    sessionStores: [
-      useGameTeleStore,
-      useExplorationBasexpStore,
-      useInstanceStore,
-    ],
     routes: mapRoutes,
   },
   {
@@ -196,8 +179,3 @@ export const moduleI18nMessages = appModules.flatMap<ModuleI18nMessages>(module 
     { locale: 'en', messages: module.i18n.en },
   ]
 })
-
-export const sessionModuleStores = appModules.flatMap(module => [
-  ...(module.sessionStore ? [module.sessionStore] : []),
-  ...(module.sessionStores ?? []),
-])

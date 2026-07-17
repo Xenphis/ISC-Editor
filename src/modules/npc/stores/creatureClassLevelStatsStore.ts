@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, ref, computed } from 'vue'
 import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
 import type { FieldChange } from '@/composables/useQueryGenerator'
+import { useSessionTracking } from '@/composables/useSessionTracking'
 import * as npcService from '@/modules/npc/service'
 
 // ─── Class definitions ────────────────────────────────────────────────────────
@@ -95,6 +96,33 @@ export const useCreatureClassLevelStatsStore = defineStore('creatureClassLevelSt
   const originalValue = ref<CreatureClassLevelStats | null>(null)
   const editorDataLoaded = ref(false)
 
+  // --- Session tracking ---
+  const tracking = useSessionTracking<CreatureClassLevelStats>({
+    scopeId: 'creature_classlevelstats',
+    table: 'creature_classlevelstats',
+    editorDataLoaded,
+    watchSources: [formData],
+    isNew: () => originalValue.value === null,
+    cloneCurrent: () => ({ ...formData }),
+    cloneOriginal: () => (originalValue.value ? { ...originalValue.value } : null),
+    getId: current => `${current.level}:${current.class}`,
+    buildStatements: (original, current) => {
+      if (current === null) {
+        if (original === null) return []
+        return [`DELETE FROM \`creature_classlevelstats\` WHERE \`level\` = ${original.level} AND \`class\` = ${original.class};`]
+      }
+      if (original === null) return generateFullQuery(current).split('\n')
+      const query = generateDiffQuery(original, current)
+      return query ? [query] : []
+    },
+    buildFieldChanges: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [{ field: 'creature_classlevelstats', oldValue: `#${id}`, newValue: '(deleted)' }]
+      }
+      return getChangedFields(original ?? createDefault(), current)
+    },
+  })
+
   // --- Computed matrix ---
   // Map: level → (class → row)
   const matrixData = computed(() => {
@@ -137,7 +165,11 @@ export const useCreatureClassLevelStatsStore = defineStore('creatureClassLevelSt
   }
 
   async function saveEntry() {
+    tracking.flush()
     await npcService.saveCreatureClassLevelStat(formData)
+    tracking.onSaved()
+    // Sync the unsaved layer with what was just persisted.
+    originalValue.value = { ...formData }
     if (listLoaded.value) {
       await fetchEntries()
     }

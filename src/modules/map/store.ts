@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { AccessRequirement } from './types/access_requirement'
 import type { FieldChange } from '@/composables/useQueryGenerator'
+import { useSessionTracking } from '@/composables/useSessionTracking'
 import * as mapService from './service'
 
 // ─── SQL helpers (composite primary key: mapId + difficulty) ─────────
@@ -93,6 +94,33 @@ export const useMapModuleStore = defineStore('mapModule', () => {
   const originalValue = ref<AccessRequirement | null>(null)
   const editorDataLoaded = ref(false)
 
+  // --- Session tracking ---
+  const tracking = useSessionTracking<AccessRequirement>({
+    scopeId: 'access_requirement',
+    table: 'access_requirement',
+    editorDataLoaded,
+    watchSources: [formData],
+    isNew: () => originalValue.value === null,
+    cloneCurrent: () => ({ ...formData }),
+    cloneOriginal: () => (originalValue.value ? { ...originalValue.value } : null),
+    getId: current => `${current.mapId}:${current.difficulty}`,
+    buildStatements: (original, current) => {
+      if (current === null) {
+        if (original === null) return []
+        return [`DELETE FROM \`access_requirement\` WHERE \`mapId\` = ${original.mapId} AND \`difficulty\` = ${original.difficulty};`]
+      }
+      if (original === null) return generateFullQuery(current).split('\n')
+      const query = generateDiffQuery(original, current)
+      return query ? [query] : []
+    },
+    buildFieldChanges: (original, current, id) => {
+      if (current === null) {
+        return original === null ? [] : [{ field: 'access_requirement', oldValue: `#${id}`, newValue: '(deleted)' }]
+      }
+      return getChangedFields(original ?? createDefault(), current)
+    },
+  })
+
   // ─── Actions ─────────────────────────────────────────────────────
 
   async function fetchEntries(search?: string, limit?: number, offset?: number) {
@@ -128,7 +156,11 @@ export const useMapModuleStore = defineStore('mapModule', () => {
   }
 
   async function saveEntry() {
+    tracking.flush()
     await mapService.saveAccessRequirement(formData)
+    tracking.onSaved()
+    // Sync the unsaved layer with what was just persisted.
+    originalValue.value = { ...formData }
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }
@@ -136,6 +168,11 @@ export const useMapModuleStore = defineStore('mapModule', () => {
 
   async function deleteEntry(mapId: number, difficulty: number) {
     await mapService.deleteAccessRequirement(mapId, difficulty)
+    tracking.trackDeleted(
+      `${mapId}:${difficulty}`,
+      entries.value.find(e => e.mapId === mapId && e.difficulty === difficulty)
+        ?? { ...createDefault(), mapId, difficulty },
+    )
     if (listLoaded.value) {
       await fetchEntries(currentSearch.value)
     }

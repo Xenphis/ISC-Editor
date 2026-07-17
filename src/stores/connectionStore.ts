@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
 import type { ConnectionInfo } from '@/types/connection'
+import { useSessionTrackerStore } from '@/stores/sessionTracker'
 
 async function connectDb(
   host: string,
@@ -41,6 +42,8 @@ export const useConnectionStore = defineStore('connection', () => {
     } catch (e) {
       console.error('Disconnect error:', e)
     }
+    // A new connection (possibly to another database) starts a fresh session.
+    useSessionTrackerStore().reset()
     isConnected.value = false
     connectionInfo.host = ''
     connectionInfo.port = 3306

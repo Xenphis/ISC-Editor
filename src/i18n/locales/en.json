@@ -92,13 +92,20 @@
   },
   "sqlSession": {
     "title": "SQL Session",
-    "description": "Overview of all pending SQL modifications for this session",
+    "description": "Net changes since the session started, including already-executed ones",
     "copyAll": "Copy all",
     "entries": "modified entry(ies)",
     "fullScript": "Full Script",
-    "fullScriptDesc": "All queries combined, ready to execute",
-    "emptyTitle": "No pending changes",
-    "emptyDescription": "SQL queries will appear here when you modify entries"
+    "fullScriptDesc": "Net session patch: original state to current state of every modified entry",
+    "emptyTitle": "No changes this session",
+    "emptyDescription": "SQL queries will appear here when you modify entries",
+    "clearSession": "Clear session",
+    "clearSessionConfirm": "Click again to confirm",
+    "statusCreated": "created",
+    "statusModified": "modified",
+    "statusDeleted": "deleted",
+    "showSql": "Show SQL",
+    "hideSql": "Hide SQL"
   },
   "bitmaskField": {
     "currentValue": "Current value:",

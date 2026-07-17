@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useSessionChangesStore } from '@/stores/sessionChanges'
+import { useSessionTrackerStore } from '@/stores/sessionTracker'
 import { useConnectionStore } from '@/stores/connectionStore'
 import { useThemeStore } from '@/stores/themeStore'
 import { moduleNavigationItems } from '@/modules/registry'
@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'disconnect'): void
 }>()
 
-const session = useSessionChangesStore()
+const session = useSessionTrackerStore()
 const connection = useConnectionStore()
 const theme = useThemeStore()
 const modules = moduleNavigationItems
