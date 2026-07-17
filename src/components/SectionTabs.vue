@@ -75,7 +75,7 @@ watch(() => props.tabs.map(t => t.value).join('|'), () => {
       </TabList>
       <TabPanels>
         <TabPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
-          <slot :name="tab.value" :tab="tab" />
+          <slot v-if="tab.value === active" :name="tab.value" :tab="tab" />
         </TabPanel>
       </TabPanels>
     </Tabs>
