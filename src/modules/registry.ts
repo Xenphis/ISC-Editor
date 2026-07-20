@@ -63,7 +63,7 @@ export interface ModuleI18nMessages {
 export const sqlSessionRoute: RouteRecordRaw = {
   path: 'sql-session',
   name: 'sql-session',
-  component: () => import('@/pages/modules/sql-session/SqlSessionModule.vue'),
+  component: () => import('@/modules/sql_session/pages/SqlSessionModule.vue'),
 }
 
 export const appModules: AppModuleDefinition[] = [
@@ -125,7 +125,12 @@ export const appModules: AppModuleDefinition[] = [
     basePath: '/spells',
     navigation: { id: 'spells', icon: 'pi pi-star' },
     routes: [
-      { path: 'spells', name: 'spells', component: () => import('@/pages/PlaceholderModule.vue') },
+      {
+        path: 'spells',
+        name: 'spells',
+        component: () => import('@core/components/PlaceholderModule.vue'),
+        props: { moduleId: 'spells' },
+      },
     ],
   },
   {

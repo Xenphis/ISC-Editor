@@ -1,5 +1,5 @@
 import { computed, toRef } from 'vue'
-import { useQueryGenerator, getChangedFields } from '@/composables/useQueryGenerator'
+import { useQueryGenerator, getChangedFields } from '@core/composables/useQueryGenerator'
 import { useNpcModuleStore } from '@/modules/npc/store'
 import type { CreatureTemplate } from '@/modules/npc/types/creature_template/creature_template'
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import AppNavbar from '@/components/AppNavbar.vue'
-import SqlDebugViewer from '@/components/SqlDebugViewer.vue'
-import { useConnectionStore } from '@/stores/connectionStore'
-import { useDebugStore } from '@/stores/debugStore'
+import AppNavbar from '@core/components/AppNavbar.vue'
+import SqlDebugViewer from '@core/components/SqlDebugViewer.vue'
+import { useConnectionStore } from '@core/stores/connectionStore'
+import { useDebugStore } from '@core/stores/debugStore'
 import { useRouter } from 'vue-router'
 
 const connection = useConnectionStore()

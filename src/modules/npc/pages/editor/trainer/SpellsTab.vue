@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import EditableDataTable, { type ColumnDef } from '@/components/EditableDataTable.vue'
+import EditableDataTable, { type ColumnDef } from '@core/components/EditableDataTable.vue'
 import { useTrainerStore, type TrainerSpellEntry } from '@/modules/npc/stores/trainerStore'
 import { computed } from 'vue'
 

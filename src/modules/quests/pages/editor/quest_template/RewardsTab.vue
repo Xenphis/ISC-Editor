@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
 import Textarea from 'primevue/textarea'
-import EditorField from '@/components/EditorField.vue'
+import EditorField from '@core/components/EditorField.vue'
 import { useQuestModuleStore } from '@/modules/quests/store'
 
 const { t } = useI18n()

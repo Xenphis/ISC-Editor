@@ -7,8 +7,8 @@ import InputNumber from 'primevue/inputnumber'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import Button from 'primevue/button'
-import { useConnectionStore } from '@/stores/connectionStore'
-import SettingsDialog from '@/components/SettingsDialog.vue'
+import { useConnectionStore } from '@core/stores/connectionStore'
+import SettingsDialog from '@core/components/SettingsDialog.vue'
 
 const { t, locale } = useI18n()
 const router = useRouter()

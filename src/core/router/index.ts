@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import { useConnectionStore } from '@/stores/connectionStore'
+import { useConnectionStore } from '@core/stores/connectionStore'
 import { moduleRoutes, sqlSessionRoute } from '@/modules/registry'
 
 const router = createRouter({
@@ -8,12 +8,12 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/pages/LoginPage.vue'),
+      component: () => import('@core/pages/LoginPage.vue'),
       meta: { requiresAuth: false },
     },
     {
       path: '/',
-      component: () => import('@/components/AppLayout.vue'),
+      component: () => import('@core/components/AppLayout.vue'),
       meta: { requiresAuth: true },
       children: [
         { path: '', redirect: '/npc' },

@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
-import EntityListPanel from '@/components/workspace/EntityListPanel.vue'
+import EntityListPanel from '@core/components/workspace/EntityListPanel.vue'
 import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 import { searchModelTags } from '@/modules/model_search/service'
 import type { ModelKind, ModelTag } from '@/modules/model_search/types'

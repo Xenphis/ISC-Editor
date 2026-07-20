@@ -8,8 +8,8 @@ import TabList from 'primevue/tablist'
 import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
-import EditorField from '@/components/EditorField.vue'
-import { locale_options } from '@/types/common'
+import EditorField from '@core/components/EditorField.vue'
+import { locale_options } from '@core/types/common'
 import { useGameObjectModuleStore } from '@/modules/game_objects/store'
 
 const { t } = useI18n()

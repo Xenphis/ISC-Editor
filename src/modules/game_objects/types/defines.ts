@@ -1,5 +1,5 @@
-import type { BitmaskOption } from '@/types/common'
-import type { SelectOption } from '@/types/common'
+import type { BitmaskOption } from '@core/types/common'
+import type { SelectOption } from '@core/types/common'
 
 export const spawn_mask_options: BitmaskOption[] = [
   { value: 1,  hex: '0x01', name: '10 Player Normal',  comment: '10 player normal difficulty' },

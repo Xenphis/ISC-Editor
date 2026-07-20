@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { AccessRequirement } from './types/access_requirement'
-import type { FieldChange } from '@/composables/useQueryGenerator'
-import { useSessionTracking } from '@/composables/useSessionTracking'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
+import { useSessionTracking } from '@core/composables/useSessionTracking'
 import * as mapService from './service'
 
 // ─── SQL helpers (composite primary key: mapId + difficulty) ─────────

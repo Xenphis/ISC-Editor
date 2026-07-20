@@ -5,7 +5,7 @@ import InputNumber from 'primevue/inputnumber'
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import ToggleSwitch from 'primevue/toggleswitch'
-import type { BitmaskOption } from '@/types/common'
+import type { BitmaskOption } from '@core/types/common'
 
 const { t } = useI18n()
 

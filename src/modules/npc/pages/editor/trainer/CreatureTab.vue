@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import EditableDataTable, { type ColumnDef } from '@/components/EditableDataTable.vue'
+import EditableDataTable, { type ColumnDef } from '@core/components/EditableDataTable.vue'
 import { useTrainerStore, type CreatureDefaultTrainerEntry } from '@/modules/npc/stores/trainerStore'
 
 const { t } = useI18n()

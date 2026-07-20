@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
-import EditorField from '@/components/EditorField.vue'
+import EditorField from '@core/components/EditorField.vue'
 import { useTrainerStore } from '@/modules/npc/stores/trainerStore'
 import { useTrainerFieldModifiers } from '@/modules/npc/pages/useTrainerFieldModifiers'
 

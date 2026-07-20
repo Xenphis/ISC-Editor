@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import SelectButton from 'primevue/selectbutton'
 import ModelSearchPanel from '@/modules/model_search/components/ModelSearchPanel.vue'
 import type { ModelKind } from '@/modules/model_search/types'
-import { copyToClipboard } from '@/utils/clipboard'
+import { copyToClipboard } from '@core/utils/clipboard'
 
 const { t } = useI18n()
 

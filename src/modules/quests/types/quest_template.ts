@@ -1,4 +1,4 @@
-import type { BitmaskOption } from '../../../types/common';
+import type { BitmaskOption } from '../../../core/types/common';
 
 export const quest_flags_options: BitmaskOption[] = [
   { value: 0x000001, hex: '0x000001', name: 'STAY_ALIVE', comment: 'Fail if player dies' },

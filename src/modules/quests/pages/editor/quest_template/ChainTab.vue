@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import InputNumber from 'primevue/inputnumber'
-import EditorField from '@/components/EditorField.vue'
-import BitmaskField from '@/components/BitmaskField.vue'
+import EditorField from '@core/components/EditorField.vue'
+import BitmaskField from '@core/components/BitmaskField.vue'
 import { useQuestModuleStore } from '@/modules/quests/store'
 import { quest_special_flags_options } from '@/modules/quests/types/quest_template_addon'
 

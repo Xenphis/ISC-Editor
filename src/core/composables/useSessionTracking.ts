@@ -1,11 +1,11 @@
 import { computed, watch, type Ref } from 'vue'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 import {
   useSessionTrackerStore,
   type EntityId,
   type EntitySnapshot,
   type SessionSqlBuilder,
-} from '@/stores/sessionTracker'
+} from '@core/stores/sessionTracker'
 
 /**
  * Session-tracking hook for hand-written editor stores (the map module &

@@ -1,4 +1,4 @@
-import type { SelectOption } from '@/types/common';
+import type { SelectOption } from '@core/types/common';
 
 export interface SmartScript {
   entryorguid: number;

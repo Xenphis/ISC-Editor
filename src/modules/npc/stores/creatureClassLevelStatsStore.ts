@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { reactive, ref, computed } from 'vue'
 import type { CreatureClassLevelStats } from '@/modules/npc/types/creature_classlevelstats'
-import type { FieldChange } from '@/composables/useQueryGenerator'
-import { useSessionTracking } from '@/composables/useSessionTracking'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
+import { useSessionTracking } from '@core/composables/useSessionTracking'
 import * as npcService from '@/modules/npc/service'
 
 // ─── Class definitions ────────────────────────────────────────────────────────

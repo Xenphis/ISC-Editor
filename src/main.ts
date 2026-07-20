@@ -7,9 +7,9 @@ import { definePreset } from '@primeuix/themes'
 import 'primeicons/primeicons.css'
 import '@/style.css'
 import App from '@/App.vue'
-import i18n from '@/i18n'
-import router from '@/router'
-import { useThemeStore } from '@/stores/themeStore'
+import i18n from '@core/i18n'
+import router from '@core/router'
+import { useThemeStore } from '@core/stores/themeStore'
 
 const TrinityPreset = definePreset(Aura, {
   primitive: {

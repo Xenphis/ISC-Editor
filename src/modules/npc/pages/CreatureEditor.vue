@@ -4,9 +4,9 @@ import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
-import EditorHeader from '@/components/EditorHeader.vue'
-import SectionTabs, { type SectionTabItem } from '@/components/SectionTabs.vue'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import EditorHeader from '@core/components/EditorHeader.vue'
+import SectionTabs, { type SectionTabItem } from '@core/components/SectionTabs.vue'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 import type { Creature } from '@/modules/npc/types/creature/creature'
 import {
   movement_type_options,
@@ -30,9 +30,9 @@ import {
 import type { CreatureAddon } from '@/modules/npc/types/creature/creature_addon'
 import type { CreatureMovementOverride } from '@/modules/npc/types/creature/creature_movement_override'
 import { getCreatureSpawns, getCreatureAddon, getCreatureMovementOverride } from '@/modules/npc/service'
-import { useQueryGenerator } from '@/composables/useQueryGenerator'
-import BitmaskField from '@/components/BitmaskField.vue'
-import EditorField from '@/components/EditorField.vue'
+import { useQueryGenerator } from '@core/composables/useQueryGenerator'
+import BitmaskField from '@core/components/BitmaskField.vue'
+import EditorField from '@core/components/EditorField.vue'
 
 /** Shared reactive state pushed up to the workspace inspector (SQL + diff). */
 export interface SpawnInspectorState {

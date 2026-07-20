@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { highlightSql } from '@/utils/sql'
-import { copyToClipboard as clipboardCopy } from '@/utils/clipboard'
+import { highlightSql } from '@core/utils/sql'
+import { copyToClipboard as clipboardCopy } from '@core/utils/clipboard'
 
 const props = defineProps<{
   diffQuery: string

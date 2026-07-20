@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Trainer } from '@/modules/npc/types/trainer/trainer'
-import type { CompositeKeyConfig } from '@/composables/useQueryGenerator'
-import { ArraySubTable } from '@/stores/SubTableManager'
-import { createEntityEditorStore } from '@/stores/createEntityEditorStore'
+import type { CompositeKeyConfig } from '@core/composables/useQueryGenerator'
+import { ArraySubTable } from '@core/stores/SubTableManager'
+import { createEntityEditorStore } from '@core/stores/createEntityEditorStore'
 import * as npcService from '@/modules/npc/service'
 
 // ─── TrainerSpellEntry (store-side, no TrainerId needed) ─────────────────────

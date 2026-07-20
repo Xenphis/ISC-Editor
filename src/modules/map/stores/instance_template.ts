@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { InstanceTemplate } from '../types/instance_template'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 import * as mapService from '../service'
 
 // ─── SQL helpers (primary key: map) ──────────────────────────────────

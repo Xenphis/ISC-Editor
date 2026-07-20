@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
-import type { ConnectionInfo } from '@/types/connection'
-import { useSessionTrackerStore } from '@/stores/sessionTracker'
+import type { ConnectionInfo } from '@core/types/connection'
+import { useSessionTrackerStore } from '@core/stores/sessionTracker'
 
 async function connectDb(
   host: string,

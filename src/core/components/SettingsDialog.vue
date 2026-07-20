@@ -5,7 +5,7 @@ import Dialog from 'primevue/dialog'
 import ToggleSwitch from 'primevue/toggleswitch'
 import SelectButton from 'primevue/selectbutton'
 import InputText from 'primevue/inputtext'
-import { useDebugStore } from '@/stores/debugStore'
+import { useDebugStore } from '@core/stores/debugStore'
 import { useModelPreviewStore } from '@/modules/model_viewer/store'
 
 const { t } = useI18n()

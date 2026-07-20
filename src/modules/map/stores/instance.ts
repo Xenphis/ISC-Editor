@@ -3,8 +3,8 @@ import { reactive, ref } from 'vue'
 import type { InstanceTemplate } from '../types/instance_template'
 import type { InstanceSpawnGroup } from '../types/instance_spawn_groups'
 import type { InstanceEncounter } from '../types/instance_encounters'
-import type { FieldChange } from '@/composables/useQueryGenerator'
-import { useSessionTracking } from '@/composables/useSessionTracking'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
+import { useSessionTracking } from '@core/composables/useSessionTracking'
 import * as mapService from '../service'
 import {
   generateDiffQuery as tplDiff,

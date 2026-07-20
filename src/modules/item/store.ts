@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { ItemTemplate } from './item_template';
-import { createEntityEditorStore } from '@/stores/createEntityEditorStore';
+import { createEntityEditorStore } from '@core/stores/createEntityEditorStore';
 import * as itemService from './service';
 
 // ─── Default factory ────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 import { createI18n } from 'vue-i18n'
-import fr from '@/i18n/locales/fr.json'
-import en from '@/i18n/locales/en.json'
+import fr from '@core/i18n/locales/fr.json'
+import en from '@core/i18n/locales/en.json'
 import { moduleI18nMessages } from '@/modules/registry'
 
 const i18n = createI18n({

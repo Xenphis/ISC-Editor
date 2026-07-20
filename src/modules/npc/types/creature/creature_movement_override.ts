@@ -1,4 +1,4 @@
-import type { SelectOption } from '@/types/common';
+import type { SelectOption } from '@core/types/common';
 
 // TypeScript type for TrinityCore 'creature_movement_override' table
 // https://trinitycore.info/database/335/world/creature_movement_override

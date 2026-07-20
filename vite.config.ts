@@ -27,6 +27,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
+      '@core': resolve(__dirname, 'src/core'),
       '@': resolve(__dirname, 'src'),
     },
   },

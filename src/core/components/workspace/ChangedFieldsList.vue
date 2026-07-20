@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import type { FieldChange } from '@/composables/useQueryGenerator'
-import { formatValue } from '@/utils/sql'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
+import { formatValue } from '@core/utils/sql'
 
 defineProps<{
   changedFields: FieldChange[]

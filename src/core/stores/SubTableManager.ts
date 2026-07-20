@@ -1,6 +1,6 @@
 import { reactive, ref, markRaw, type Ref, type UnwrapRef } from 'vue'
-import { generateUpsertQuery, getChangedFields, type FieldChange } from '@/composables/useQueryGenerator'
-import { generateCompositeKeyDiffStatements, type CompositeKeyConfig } from '@/composables/useQueryGenerator'
+import { generateUpsertQuery, getChangedFields, type FieldChange } from '@core/composables/useQueryGenerator'
+import { generateCompositeKeyDiffStatements, type CompositeKeyConfig } from '@core/composables/useQueryGenerator'
 
 // ─── Common interface ────────────────────────────────────────────────
 

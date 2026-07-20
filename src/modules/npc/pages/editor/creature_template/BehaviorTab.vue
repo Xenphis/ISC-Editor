@@ -4,7 +4,7 @@ import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import { ground_movement_options, swim_movement_options, flight_movement_options, rooted_options, chase_movement_options, random_movement_options, movement_type_options } from '@/modules/npc/types/defines'
-import EditorField from '@/components/EditorField.vue'
+import EditorField from '@core/components/EditorField.vue'
 import { useNpcModuleStore } from '@/modules/npc/store'
 import { useNpcFieldModifiers } from '@/modules/npc/pages/useNpcFieldModifiers'
 

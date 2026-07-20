@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSessionTrackerStore, type SessionChangeKind } from '@/stores/sessionTracker'
-import ChangedFieldsList from '@/components/workspace/ChangedFieldsList.vue'
-import { highlightSql } from '@/utils/sql'
-import { copyToClipboard } from '@/utils/clipboard'
+import { useSessionTrackerStore, type SessionChangeKind } from '@core/stores/sessionTracker'
+import ChangedFieldsList from '@core/components/workspace/ChangedFieldsList.vue'
+import { highlightSql } from '@core/utils/sql'
+import { copyToClipboard } from '@core/utils/clipboard'
 
 const { t } = useI18n()
 const session = useSessionTrackerStore()

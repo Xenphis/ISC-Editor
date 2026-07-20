@@ -1,6 +1,6 @@
 import { computed, markRaw, ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 
 /**
  * Session-wide change tracker.

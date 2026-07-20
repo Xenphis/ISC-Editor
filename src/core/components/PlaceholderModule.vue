@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
-const route = useRoute()
 
-const moduleId = route.path.replace('/', '')
+defineProps<{ moduleId: string }>()
 </script>
 
 <template>

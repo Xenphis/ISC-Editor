@@ -1,4 +1,4 @@
-import type { SelectOption } from '@/types/common';
+import type { SelectOption } from '@core/types/common';
 
 // Item Class
 export const item_class_options: SelectOption[] = [

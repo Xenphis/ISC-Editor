@@ -1,5 +1,5 @@
 import { computed, toRef } from 'vue'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 
 /**
  * Generic field-modifier helper for the map sub-table editors.

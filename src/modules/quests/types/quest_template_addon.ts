@@ -1,4 +1,4 @@
-import type { BitmaskOption } from '../../../types/common';
+import type { BitmaskOption } from '../../../core/types/common';
 
 export const quest_special_flags_options: BitmaskOption[] = [
   { value: 0x01, hex: '0x01', name: 'REPEATABLE', comment: 'Quest can be repeated' },

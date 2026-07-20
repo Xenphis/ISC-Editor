@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import { useSessionTrackerStore } from '@/stores/sessionTracker'
-import { useConnectionStore } from '@/stores/connectionStore'
-import { useThemeStore } from '@/stores/themeStore'
+import { useSessionTrackerStore } from '@core/stores/sessionTracker'
+import { useConnectionStore } from '@core/stores/connectionStore'
+import { useThemeStore } from '@core/stores/themeStore'
 import { moduleNavigationItems } from '@/modules/registry'
 
 const { t } = useI18n()

@@ -1,4 +1,4 @@
-import type { BitmaskOption, SelectOption } from "@/types/common";
+import type { BitmaskOption, SelectOption } from "@core/types/common";
 
 export const npc_flags: BitmaskOption[] = [
   { value: 1, hex: '0x00000001', name: 'Gossip', comment: 'If creature has more gossip options, add this flag to bring up a menu.' },

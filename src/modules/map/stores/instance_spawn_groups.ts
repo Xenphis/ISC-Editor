@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { reactive, ref } from 'vue'
 import type { InstanceSpawnGroup } from '../types/instance_spawn_groups'
-import type { FieldChange } from '@/composables/useQueryGenerator'
+import type { FieldChange } from '@core/composables/useQueryGenerator'
 import * as mapService from '../service'
 
 // ─── SQL helpers (composite key: instanceMapId + bossStateId + bossStates + spawnGroupId) ──

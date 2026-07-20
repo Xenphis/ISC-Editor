@@ -6,14 +6,14 @@ import {
   generateFullQueryStatements,
   getChangedFields,
   type FieldChange,
-} from '@/composables/useQueryGenerator'
-import { executeBatch } from '@/services/sql'
+} from '@core/composables/useQueryGenerator'
+import { executeBatch } from '@core/services/sql'
 import {
   useSessionTrackerStore,
   type EntitySnapshot,
   type SessionSqlBuilder,
-} from '@/stores/sessionTracker'
-import type { SubTableManager, SubTableSnapshot } from '@/stores/SubTableManager'
+} from '@core/stores/sessionTracker'
+import type { SubTableManager, SubTableSnapshot } from '@core/stores/SubTableManager'
 
 export interface EntityEditorCache<T extends object> {
   formData: T

@@ -1,6 +1,6 @@
 import { computed, type Ref } from 'vue'
 import { update, insert, delete_, rstr } from 'squel-ts'
-import { toSqlLiteral } from '@/utils/sql'
+import { toSqlLiteral } from '@core/utils/sql'
 
 type AnyRow = Record<string, unknown>
 

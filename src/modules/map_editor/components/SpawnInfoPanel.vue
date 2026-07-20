@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import ToggleButton from 'primevue/togglebutton'
-import ViewInfoPanel from '@/components/ViewInfoPanel.vue'
+import ViewInfoPanel from '@core/components/ViewInfoPanel.vue'
 import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 import type { CreatureSpawnMarker } from '../types'
 

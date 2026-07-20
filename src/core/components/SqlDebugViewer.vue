@@ -2,7 +2,7 @@
 import { ref, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Dialog from 'primevue/dialog'
-import { useDebugStore } from '@/stores/debugStore'
+import { useDebugStore } from '@core/stores/debugStore'
 
 const { t } = useI18n()
 const debug = useDebugStore()
