@@ -48,6 +48,7 @@ use commands::instance_encounters::{get_instance_encounters, get_instance_encoun
 use commands::instance_spawn_groups::{get_instance_spawn_groups, get_instance_spawn_groups_by_map, get_instance_spawn_group, save_instance_spawn_group, delete_instance_spawn_group};
 use commands::creature_classlevelstats::{get_creature_classlevelstats, get_creature_classlevelstat, save_creature_classlevelstat};
 use commands::creature_formations::{get_creature_formation_groups, get_creature_formation, get_creature_formation_of_member, search_creature_spawns, delete_creature_formation};
+use commands::npc_vendor::{get_npc_vendors, get_npc_vendor, search_vendor_creatures, search_vendor_items, delete_npc_vendor};
 use commands::quest::{get_quests, get_quest, save_quest, delete_quest};
 use commands::quest_template_addon::{get_quest_addon, save_quest_addon};
 use commands::quest_template_locale::{get_quest_locales, save_quest_locales};
@@ -233,6 +234,11 @@ pub fn run() {
       save_trainer_spells,
       get_creature_default_trainers,
       save_creature_default_trainers,
+      get_npc_vendors,
+      get_npc_vendor,
+      search_vendor_creatures,
+      search_vendor_items,
+      delete_npc_vendor,
       get_creature_questitem,
       save_creature_questitem,
       get_creature_onkill_reputation,

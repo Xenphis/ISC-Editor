@@ -13,6 +13,10 @@
           "title": "Trainer",
           "description": "Configurer les PNJ entraîneurs et leurs options d'entraînement"
         },
+        "vendor": {
+          "title": "Vendeur",
+          "description": "Gérer les créatures vendeuses et leur stock d'objets"
+        },
         "formation": {
           "title": "Formation",
           "description": "Gérer les formations de créatures et les patterns de spawn en groupe"
@@ -640,6 +644,43 @@
       "empty": "Aucun spawn trouvé",
       "alreadyHere": "Déjà dans cette formation",
       "movedFrom": "Actuellement dans la formation #{leader} — sera déplacé"
+    }
+  },
+  "vendor": {
+    "title": "Vendeur",
+    "description": "Gérer les créatures vendeuses et les objets qu'elles vendent",
+    "searchPlaceholder": "Rechercher par entry ou nom de créature...",
+    "editorTitle": "Vendeur",
+    "discard": "Annuler",
+    "execute": "Exécuter",
+    "itemCount": "1 objet | {count} objets",
+    "unknownItem": "(objet introuvable)",
+    "noItems": "Aucun objet vendu",
+    "addItem": "Ajouter un objet",
+    "notFlaggedWarning": "Cette créature n'a pas le npcflag Vendeur (0x80) : la fenêtre de vente ne s'ouvrira pas en jeu, même avec les objets listés ici.",
+    "columns": {
+      "item": "Objet",
+      "slot": "Slot",
+      "maxcount": "Quantité max",
+      "incrtime": "Réappro. (s)",
+      "extendedCost": "Coût étendu",
+      "entry": "Entry",
+      "npcflag": "npcflag",
+      "items": "Objets"
+    },
+    "groups": {
+      "stock": "Stock",
+      "stockDesc": "Une ligne par objet vendu (table npc_vendor). Une quantité max à 0 signifie illimité ; le réapprovisionnement est le délai en secondes au bout duquel les exemplaires limités reviennent."
+    },
+    "picker": {
+      "creatureTitle": "Choisir la créature vendeuse",
+      "itemTitle": "Ajouter un objet au stock",
+      "creaturePlaceholder": "Entry du template ou nom de créature",
+      "itemPlaceholder": "Entry ou nom de l'objet",
+      "empty": "Aucun résultat",
+      "alreadyVendor": "Vend déjà {count} objet(s)",
+      "notFlagged": "npcflag Vendeur absent",
+      "alreadySold": "Déjà dans le stock"
     }
   }
 }

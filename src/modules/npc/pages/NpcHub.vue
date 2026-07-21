@@ -25,6 +25,15 @@ const submodules = [
     route: '/npc/trainer',
   },
   {
+    key: 'vendor',
+    icon: 'pi pi-shopping-cart',
+    color: '#f472b6',
+    gradient: 'linear-gradient(135deg, #be185d, #f472b6)',
+    shadow: 'rgba(244, 114, 182, 0.25)',
+    available: true,
+    route: '/npc/vendor',
+  },
+  {
     key: 'formation',
     icon: 'pi pi-sitemap',
     color: '#4ade80',

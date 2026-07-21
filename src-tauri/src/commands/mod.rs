@@ -34,6 +34,7 @@ pub mod movement;
 pub mod npc;
 pub mod npc_text;
 pub mod npc_text_locale;
+pub mod npc_vendor;
 pub mod resistance;
 pub mod spell;
 pub mod creature_questitem;

@@ -13,6 +13,10 @@
           "title": "Trainer",
           "description": "Configure NPC trainers and their available training options"
         },
+        "vendor": {
+          "title": "Vendor",
+          "description": "Manage vendor creatures and their item stock"
+        },
         "formation": {
           "title": "Formation",
           "description": "Manage creature formations and group spawn patterns"
@@ -642,6 +646,43 @@
       "empty": "No spawn found",
       "alreadyHere": "Already in this formation",
       "movedFrom": "Currently in formation #{leader} — will be moved"
+    }
+  },
+  "vendor": {
+    "title": "Vendor",
+    "description": "Manage vendor creatures and the items they sell",
+    "searchPlaceholder": "Search by creature entry or name...",
+    "editorTitle": "Vendor",
+    "discard": "Discard",
+    "execute": "Execute",
+    "itemCount": "1 item | {count} items",
+    "unknownItem": "(missing item)",
+    "noItems": "No item sold yet",
+    "addItem": "Add item",
+    "notFlaggedWarning": "This creature does not have the Vendor npcflag (0x80): the vendor window will not open in game, even with items listed here.",
+    "columns": {
+      "item": "Item",
+      "slot": "Slot",
+      "maxcount": "Max count",
+      "incrtime": "Restock (s)",
+      "extendedCost": "Extended cost",
+      "entry": "Entry",
+      "npcflag": "npcflag",
+      "items": "Items"
+    },
+    "groups": {
+      "stock": "Stock",
+      "stockDesc": "One row per item sold (npc_vendor table). Max count 0 means unlimited; restock is the delay in seconds after which limited copies come back."
+    },
+    "picker": {
+      "creatureTitle": "Pick the vendor creature",
+      "itemTitle": "Add an item to the stock",
+      "creaturePlaceholder": "Template entry or creature name",
+      "itemPlaceholder": "Item entry or item name",
+      "empty": "No result",
+      "alreadyVendor": "Already sells {count} item(s)",
+      "notFlagged": "Missing the Vendor npcflag",
+      "alreadySold": "Already in the stock"
     }
   }
 }

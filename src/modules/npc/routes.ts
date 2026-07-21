@@ -32,4 +32,12 @@ export const npcRoutes: RouteRecordRaw[] = [
     name: 'npc-trainer',
     component: () => import('@/modules/npc/pages/TrainerWorkspace.vue'),
   },
+  {
+    // Keyed by the vendor's creature_template entry. Like the formation, there
+    // is no 'new' mode: a vendor exists as soon as it owns one npc_vendor row,
+    // so creating one starts by picking the creature that will sell.
+    path: 'npc/vendor/:entry?',
+    name: 'npc-vendor',
+    component: () => import('@/modules/npc/pages/VendorWorkspace.vue'),
+  },
 ]

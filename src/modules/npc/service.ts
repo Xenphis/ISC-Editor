@@ -23,6 +23,7 @@ import type { GossipMenuOptionLocale } from '@/modules/npc/types/gossip/gossip_m
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
 import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
 import type { CreatureFormationGroup, CreatureFormationMember, CreatureSpawnOption } from '@/modules/npc/types/misc/creature_formations'
+import type { NpcVendorGroup, NpcVendorItem, VendorCreatureOption, VendorItemOption } from '@/modules/npc/types/npc/npc_vendor'
 
 export interface NpcListResult {
   data: CreatureTemplate[]
@@ -286,4 +287,26 @@ export async function searchCreatureSpawns(query: string, map: number | null, li
 
 export async function deleteCreatureFormation(leaderGuid: number): Promise<void> {
   return invoke('delete_creature_formation', { leaderGuid })
+}
+
+// ─── npc_vendor ──────────────────────────────────────────────────────────────
+
+export async function getNpcVendors(): Promise<NpcVendorGroup[]> {
+  return invoke('get_npc_vendors')
+}
+
+export async function getNpcVendor(entry: number): Promise<NpcVendorItem[]> {
+  return invoke('get_npc_vendor', { entry })
+}
+
+export async function searchVendorCreatures(query: string, limit?: number): Promise<VendorCreatureOption[]> {
+  return invoke('search_vendor_creatures', { query, limit })
+}
+
+export async function searchVendorItems(query: string, limit?: number): Promise<VendorItemOption[]> {
+  return invoke('search_vendor_items', { query, limit })
+}
+
+export async function deleteNpcVendor(entry: number): Promise<void> {
+  return invoke('delete_npc_vendor', { entry })
 }
