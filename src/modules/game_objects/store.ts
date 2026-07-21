@@ -157,6 +157,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
   const gameObjects = ref<GameObjectTemplate[]>([])
   const loading = ref(false)
   const currentSearch = ref('')
+  const currentTypeFilter = ref<number | null>(null)
   const listLoaded = ref(false)
 
   // --- Sub-table managers ---
@@ -291,7 +292,7 @@ export const useGameObjectModuleStore = defineStore('gameObjectModule', () => {
   }
 
   return {
-    gameObjects, loading, currentSearch, listLoaded,
+    gameObjects, loading, currentSearch, currentTypeFilter, listLoaded,
     addon, loot, spawnAddon, spawnOverrides, questStarters, questEnders, questItems, locales,
     ...editor,
     editingEntry: editor.editingId,

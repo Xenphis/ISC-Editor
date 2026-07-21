@@ -7,6 +7,7 @@ import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
 import Button from 'primevue/button'
 import Column from 'primevue/column'
+import Popover from 'primevue/popover'
 import { game_object_type_options } from '@/modules/game_objects/types/defines'
 import type { GameObjectTemplate } from '@/modules/game_objects/types/gameobject_template/gameobject_template'
 import type { GameObject } from '@/modules/game_objects/types/gameobject/gameobject'
@@ -63,7 +64,7 @@ function metaOf(go: GameObjectTemplate): string {
 async function loadGameObjects() {
   store.loading = true
   try {
-    const result = await getGameObjects(store.currentSearch || undefined, 50)
+    const result = await getGameObjects(store.currentSearch || undefined, store.currentTypeFilter ?? undefined, 50)
     store.setGameObjects(result.data)
     store.markListLoaded()
   } catch (e) {
@@ -77,6 +78,22 @@ async function onListSearch(query: string) {
   store.currentSearch = query
   await loadGameObjects()
 }
+
+// --- Type filter ---
+const typeFilterPopover = ref<InstanceType<typeof Popover> | null>(null)
+
+const typeFilter = computed<number | null>({
+  get: () => store.currentTypeFilter,
+  set: (val) => { store.currentTypeFilter = val ?? null },
+})
+
+function onTypeFilterToggle(event: Event) {
+  typeFilterPopover.value?.toggle(event)
+}
+
+watch(typeFilter, () => {
+  loadGameObjects()
+})
 
 function onListSelect(go: GameObjectTemplate) {
   router.push(`/gameobject/${go.entry}`)
@@ -327,7 +344,30 @@ const mainTabs = computed<SectionTabItem[]>(() => [
         @add="onListAdd"
         @search="onListSearch"
         @remove="onListRemove"
-      />
+      >
+        <template #filters>
+          <button
+            type="button"
+            class="type-filter-toggle"
+            :class="{ active: typeFilter !== null }"
+            v-tooltip.bottom="t('gameobject.filterByType')"
+            @click="onTypeFilterToggle"
+          >
+            <i class="pi pi-filter"></i>
+          </button>
+          <Popover ref="typeFilterPopover">
+            <Select
+              v-model="typeFilter"
+              :options="typeOptions"
+              optionLabel="label"
+              optionValue="value"
+              :placeholder="t('gameobject.filterByType')"
+              showClear
+              class="type-filter-select"
+            />
+          </Popover>
+        </template>
+      </EntityListPanel>
     </template>
 
     <template #editor>
@@ -638,6 +678,38 @@ const mainTabs = computed<SectionTabItem[]>(() => [
 </template>
 
 <style scoped>
+.type-filter-toggle {
+  width: var(--input-height-sm);
+  height: var(--input-height-sm);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.type-filter-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent-focus);
+  background: var(--accent-soft);
+}
+
+.type-filter-toggle.active {
+  color: var(--accent);
+  border-color: var(--accent-focus);
+  background: var(--accent-soft);
+}
+
+.type-filter-select {
+  width: 14rem;
+}
+
 .editor-loading {
   display: flex;
   justify-content: center;

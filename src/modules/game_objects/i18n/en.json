@@ -3,6 +3,7 @@
     "title": "Game Objects Database",
     "description": "Manage world objects, containers and interactive elements",
     "searchPlaceholder": "Search by name, ID or type...",
+    "filterByType": "Filter by type",
     "addButton": "Add Game Object",
     "columns": {
       "entry": "Entry",

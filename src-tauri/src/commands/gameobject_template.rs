@@ -89,6 +89,7 @@ pub async fn get_gameobjects(
     app: tauri::AppHandle,
     debug: State<'_, DebugState>,
     search: Option<String>,
+    gameobject_type: Option<u8>,
     limit: Option<i64>,
     offset: Option<i64>,
 ) -> Result<GameObjectListResult, String> {
@@ -97,35 +98,85 @@ pub async fn get_gameobjects(
 
     let limit = limit.unwrap_or(50);
     let offset = offset.unwrap_or(0);
+    let pattern = search.as_ref().filter(|q| !q.is_empty()).map(|q| format!("%{}%", q));
 
-    let (data, total) = match &search {
-        Some(q) if !q.is_empty() => {
-            let pattern = format!("%{}%", q);
-            const SQL_DATA: &str = "SELECT * FROM gameobject_template WHERE name LIKE ? OR entry LIKE ? ORDER BY entry LIMIT ? OFFSET ?";
+    let (data, total) = match (&pattern, gameobject_type) {
+        (Some(pattern), Some(t)) => {
+            const SQL_DATA: &str = "SELECT * FROM gameobject_template WHERE (name LIKE ? OR entry LIKE ?) AND type = ? ORDER BY entry LIMIT ? OFFSET ?";
             let rows: Vec<GameObjectTemplate> = debug_sql!(app, debug, SQL_DATA,
                 sqlx::query_as(SQL_DATA)
-                .bind(&pattern)
-                .bind(&pattern)
+                .bind(pattern)
+                .bind(pattern)
+                .bind(t)
                 .bind(limit)
                 .bind(offset)
                 .fetch_all(pool)
                 .await,
-                &pattern, &pattern, limit, offset
+                pattern, pattern, t, limit, offset
+            ).map_err(|e| format!("Query failed: {}", e))?;
+
+            const SQL_COUNT: &str = "SELECT COUNT(*) FROM gameobject_template WHERE (name LIKE ? OR entry LIKE ?) AND type = ?";
+            let count: (i64,) = debug_sql!(app, debug, SQL_COUNT,
+                sqlx::query_as(SQL_COUNT)
+                .bind(pattern)
+                .bind(pattern)
+                .bind(t)
+                .fetch_one(pool)
+                .await,
+                pattern, pattern, t
+            ).map_err(|e| format!("Count query failed: {}", e))?;
+
+            (rows, count.0)
+        }
+        (Some(pattern), None) => {
+            const SQL_DATA: &str = "SELECT * FROM gameobject_template WHERE name LIKE ? OR entry LIKE ? ORDER BY entry LIMIT ? OFFSET ?";
+            let rows: Vec<GameObjectTemplate> = debug_sql!(app, debug, SQL_DATA,
+                sqlx::query_as(SQL_DATA)
+                .bind(pattern)
+                .bind(pattern)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await,
+                pattern, pattern, limit, offset
             ).map_err(|e| format!("Query failed: {}", e))?;
 
             const SQL_COUNT: &str = "SELECT COUNT(*) FROM gameobject_template WHERE name LIKE ? OR entry LIKE ?";
             let count: (i64,) = debug_sql!(app, debug, SQL_COUNT,
                 sqlx::query_as(SQL_COUNT)
-                .bind(&pattern)
-                .bind(&pattern)
+                .bind(pattern)
+                .bind(pattern)
                 .fetch_one(pool)
                 .await,
-                &pattern, &pattern
+                pattern, pattern
             ).map_err(|e| format!("Count query failed: {}", e))?;
 
             (rows, count.0)
         }
-        _ => {
+        (None, Some(t)) => {
+            const SQL_DATA: &str = "SELECT * FROM gameobject_template WHERE type = ? ORDER BY entry LIMIT ? OFFSET ?";
+            let rows: Vec<GameObjectTemplate> = debug_sql!(app, debug, SQL_DATA,
+                sqlx::query_as(SQL_DATA)
+                .bind(t)
+                .bind(limit)
+                .bind(offset)
+                .fetch_all(pool)
+                .await,
+                t, limit, offset
+            ).map_err(|e| format!("Query failed: {}", e))?;
+
+            const SQL_COUNT: &str = "SELECT COUNT(*) FROM gameobject_template WHERE type = ?";
+            let count: (i64,) = debug_sql!(app, debug, SQL_COUNT,
+                sqlx::query_as(SQL_COUNT)
+                .bind(t)
+                .fetch_one(pool)
+                .await,
+                t
+            ).map_err(|e| format!("Count query failed: {}", e))?;
+
+            (rows, count.0)
+        }
+        (None, None) => {
             const SQL_DATA: &str = "SELECT * FROM gameobject_template ORDER BY entry LIMIT ? OFFSET ?";
             let rows: Vec<GameObjectTemplate> = debug_sql!(app, debug, SQL_DATA,
                 sqlx::query_as(SQL_DATA)

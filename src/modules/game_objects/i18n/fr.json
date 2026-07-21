@@ -3,6 +3,7 @@
     "title": "Base d'objets de jeu",
     "description": "Gérer les objets du monde, conteneurs et éléments interactifs",
     "searchPlaceholder": "Rechercher par nom, ID ou type...",
+    "filterByType": "Filtrer par type",
     "addButton": "Ajouter un objet",
     "columns": {
       "entry": "Entrée",

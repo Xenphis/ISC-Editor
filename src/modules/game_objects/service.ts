@@ -21,10 +21,11 @@ export interface EntityQuestRelations {
 
 export async function getGameObjects(
   search?: string,
+  gameobjectType?: number,
   limit?: number,
   offset?: number
 ): Promise<GameObjectListResult> {
-  return invoke('get_gameobjects', { search, limit, offset })
+  return invoke('get_gameobjects', { search, gameobjectType, limit, offset })
 }
 
 export async function getGameObject(entry: number): Promise<GameObjectTemplate> {
