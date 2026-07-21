@@ -99,8 +99,6 @@
     "fullScriptDesc": "Patch net de la session : de l'état d'origine à l'état actuel de chaque entrée modifiée",
     "emptyTitle": "Aucune modification cette session",
     "emptyDescription": "Les requêtes SQL apparaîtront ici lorsque vous modifierez des entrées",
-    "clearSession": "Vider la session",
-    "clearSessionConfirm": "Cliquer à nouveau pour confirmer",
     "statusCreated": "créé",
     "statusModified": "modifié",
     "statusDeleted": "supprimé",

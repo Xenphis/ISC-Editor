@@ -21,6 +21,8 @@ import NpcTabBehavior from './editor/creature_template/BehaviorTab.vue'
 import NpcTabLoot from './editor/creature_template/LootTab.vue'
 import NpcTabAdvanced from './editor/creature_template/AdvancedTab.vue'
 import NpcTabSpawn from './editor/creature_template/SpawnTab.vue'
+import SmartScriptsPanel from '@/modules/smart_scripts/pages/SmartScriptsPanel.vue'
+import { useSmartScriptsStore } from '@/modules/smart_scripts/stores/smartScriptsStore'
 import NpcTabText from './editor/creature_template/TextTab.vue'
 
 const { t } = useI18n()
@@ -152,6 +154,11 @@ async function onSave() {
   try {
     const savedEntry = form.entry
     await store.saveCurrent()
+    // The SmartAI tab edits smart_scripts through its own store: save it under
+    // the same button so "execute" covers everything shown in this editor.
+    if (saiHasChanges.value) {
+      await saiStore.saveScript()
+    }
     await loadNpcs()
     if (entryParam.value === null && savedEntry) {
       router.push(`/npc/creature-template/${savedEntry}`)
@@ -163,6 +170,9 @@ async function onSave() {
 
 function onDiscard() {
   store.discardChanges()
+  if (saiHasChanges.value) {
+    saiStore.discardChanges()
+  }
 }
 
 // --- Spawn sub-editor ---
@@ -194,6 +204,11 @@ async function onCreatureEditorSave(data: Creature) {
   }
 }
 
+// --- SmartAI tab (separate store, folded into this editor's save/discard) ---
+const saiStore = useSmartScriptsStore()
+const saiHasChanges = computed(() => Boolean(form.entry) && saiStore.hasChangesFor(form.entry, 0))
+const editorHasChanges = computed(() => store.combinedHasChanges || saiHasChanges.value)
+
 // --- Tabs ---
 const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'general', label: t('creature_template.tabs.general') },
@@ -204,6 +219,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'text', label: t('creature_template.tabs.text') },
   { value: 'advanced', label: t('creature_template.tabs.advanced') },
   { value: 'spawn', label: t('creature_template.tabs.spawn'), count: spawns.value.length },
+  { value: 'sai', label: t('creature_template.tabs.sai') },
 ])
 </script>
 
@@ -244,7 +260,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
           :id="form.entry"
           table="creature_template"
           :showBack="false"
-          :hasChanges="store.combinedHasChanges"
+          :hasChanges="editorHasChanges"
           :discardLabel="t('creature_template.discard')"
           :executeLabel="t('creature_template.execute')"
           @discard="onDiscard"
@@ -265,6 +281,9 @@ const mainTabs = computed<SectionTabItem[]>(() => [
           <template #advanced><NpcTabAdvanced /></template>
           <template #spawn>
             <NpcTabSpawn :spawns="spawns" @edit="onEditSpawn" @delete="onDeleteSpawn" />
+          </template>
+          <template #sai>
+            <SmartScriptsPanel v-if="form.entry" :entryorguid="form.entry" :sourceType="0" />
           </template>
         </SectionTabs>
       </template>

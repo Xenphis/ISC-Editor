@@ -23,6 +23,8 @@ import ModelViewer from '@/modules/model_viewer/components/ModelViewer.vue'
 import ModelSearchDialog from '@/modules/model_search/components/ModelSearchDialog.vue'
 import EditorField from '@core/components/EditorField.vue'
 import StyledDataTable from '@core/components/StyledDataTable.vue'
+import SmartScriptsPanel from '@/modules/smart_scripts/pages/SmartScriptsPanel.vue'
+import { useSmartScriptsStore } from '@/modules/smart_scripts/stores/smartScriptsStore'
 import ActionsColumn from '@core/components/ActionsColumn.vue'
 import EditableDataTable, { type ColumnDef } from '@core/components/EditableDataTable.vue'
 import { useGameObjectModuleStore } from '@/modules/game_objects/store'
@@ -246,6 +248,11 @@ async function onSave() {
   try {
     const savedEntry = form.entry
     await store.saveCurrent()
+    // The SmartAI tab edits smart_scripts through its own store: save it under
+    // the same button so "execute" covers everything shown in this editor.
+    if (saiHasChanges.value) {
+      await saiStore.saveScript()
+    }
     await loadGameObjects()
     if (entryParam.value === null && savedEntry) {
       router.push(`/gameobject/${savedEntry}`)
@@ -257,6 +264,9 @@ async function onSave() {
 
 function onDiscard() {
   store.discardChanges()
+  if (saiHasChanges.value) {
+    saiStore.discardChanges()
+  }
 }
 
 // --- Load data on selection change ---
@@ -281,6 +291,11 @@ watch(entryParam, async (val) => {
   loadSpawns()
 }, { immediate: true })
 
+// --- SmartAI tab (separate store, folded into this editor's save/discard) ---
+const saiStore = useSmartScriptsStore()
+const saiHasChanges = computed(() => Boolean(form.entry) && saiStore.hasChangesFor(form.entry, 1))
+const editorHasChanges = computed(() => store.combinedHasChanges || saiHasChanges.value)
+
 // --- Tabs ---
 const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'general', label: t('gameobjectEditor.tabs.general') },
@@ -288,6 +303,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'loot', label: t('gameobjectEditor.tabs.loot') },
   { value: 'locale', label: t('gameobjectEditor.tabs.locale') },
   { value: 'spawn', label: t('gameobjectEditor.tabs.spawn'), count: spawns.value.length },
+  { value: 'sai', label: t('gameobjectEditor.tabs.sai') },
 ])
 </script>
 
@@ -328,7 +344,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
           :id="form.entry"
           table="gameobject_template"
           :showBack="false"
-          :hasChanges="store.combinedHasChanges"
+          :hasChanges="editorHasChanges"
           :discardLabel="t('gameobjectEditor.discard')"
           :executeLabel="t('gameobjectEditor.execute')"
           @discard="onDiscard"
@@ -557,6 +573,11 @@ const mainTabs = computed<SectionTabItem[]>(() => [
               </Column>
             </StyledDataTable>
           </div>
+        </template>
+
+        <!-- ==================== SMARTAI ==================== -->
+        <template #sai>
+          <SmartScriptsPanel v-if="form.entry" :entryorguid="form.entry" :sourceType="1" />
         </template>
         </SectionTabs>
       </template>

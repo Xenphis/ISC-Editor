@@ -11,8 +11,6 @@ const session = useSessionTrackerStore()
 
 const copiedId = ref<string | null>(null)
 const expandedSql = ref(new Set<string>())
-const clearArmed = ref(false)
-let clearArmTimer: ReturnType<typeof setTimeout> | null = null
 
 async function copyText(text: string, id: string) {
   await copyToClipboard(text)
@@ -28,18 +26,6 @@ function toggleSql(key: string) {
     next.add(key)
   }
   expandedSql.value = next
-}
-
-// Two-step confirm: the first click arms the button for 3 s.
-function onClearClick() {
-  if (!clearArmed.value) {
-    clearArmed.value = true
-    clearArmTimer = setTimeout(() => { clearArmed.value = false }, 3000)
-    return
-  }
-  if (clearArmTimer != null) clearTimeout(clearArmTimer)
-  clearArmed.value = false
-  session.reset()
 }
 
 function kindLabel(kind: SessionChangeKind): string {
@@ -58,16 +44,6 @@ function kindLabel(kind: SessionChangeKind): string {
       <div>
         <h2 class="session-title">{{ t('sqlSession.title') }}</h2>
         <p class="session-description">{{ t('sqlSession.description') }}</p>
-      </div>
-      <div v-if="session.totalChanges > 0" class="session-actions">
-        <button
-          class="clear-session-btn"
-          :class="{ armed: clearArmed }"
-          @click="onClearClick"
-        >
-          <i class="pi pi-trash" />
-          {{ clearArmed ? t('sqlSession.clearSessionConfirm') : t('sqlSession.clearSession') }}
-        </button>
       </div>
     </div>
 
@@ -185,38 +161,6 @@ function kindLabel(kind: SessionChangeKind): string {
   color: var(--text-muted);
   font-size: 0.95rem;
   margin: 0;
-}
-
-.session-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.clear-session-btn {
-  all: unset;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.9rem;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-default);
-  color: var(--danger);
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.clear-session-btn:hover {
-  background: var(--surface-elevated);
-  border-color: var(--danger);
-}
-
-.clear-session-btn.armed {
-  background: var(--danger);
-  border-color: var(--danger);
-  color: #fff;
 }
 
 /* Empty state */

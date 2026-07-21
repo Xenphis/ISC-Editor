@@ -8,6 +8,7 @@ import { lootAndItemRoutes } from '@/modules/loot_and_item/routes'
 import { mapViewerRoutes } from '@/modules/map_viewer/routes'
 import { mapEditorRoutes } from '@/modules/map_editor/routes'
 import { modelSearchRoutes } from '@/modules/model_search/routes'
+import { smartScriptsRoutes } from '@/modules/smart_scripts/routes'
 import npcFr from '@/modules/npc/i18n/fr.json'
 import npcEn from '@/modules/npc/i18n/en.json'
 import goFr from '@/modules/game_objects/i18n/fr.json'
@@ -28,6 +29,8 @@ import mapEditorFr from '@/modules/map_editor/i18n/fr.json'
 import mapEditorEn from '@/modules/map_editor/i18n/en.json'
 import modelSearchFr from '@/modules/model_search/i18n/fr.json'
 import modelSearchEn from '@/modules/model_search/i18n/en.json'
+import smartScriptsFr from '@/modules/smart_scripts/i18n/fr.json'
+import smartScriptsEn from '@/modules/smart_scripts/i18n/en.json'
 
 export type AppLocale = 'en' | 'fr'
 
@@ -119,6 +122,15 @@ export const appModules: AppModuleDefinition[] = [
     navigation: { id: 'loot-items', icon: 'pi pi-box' },
     i18n: { en: lootItemEn, fr: lootItemFr },
     routes: lootAndItemRoutes,
+  },
+  {
+    // SmartAI scripts are edited from the creature / gameobject editors' "SmartAI"
+    // tab. This standalone workspace stays reachable through the "Misc" hub card
+    // for sources that have no host editor (areatriggers, timed actionlists).
+    id: 'smart-scripts',
+    basePath: '/smart-scripts',
+    i18n: { en: smartScriptsEn, fr: smartScriptsFr },
+    routes: smartScriptsRoutes,
   },
   {
     id: 'spells',

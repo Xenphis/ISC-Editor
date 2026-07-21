@@ -37,7 +37,8 @@
       "data": "Data",
       "loot": "Loot & Quests",
       "locale": "Locale",
-      "spawn": "Spawns"
+      "spawn": "Spawns",
+      "sai": "SmartAI"
     },
     "groups": {
       "identification": "Identification",

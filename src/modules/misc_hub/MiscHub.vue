@@ -18,6 +18,18 @@ const cards = [
     route: '/model-search',
     available: true,
   },
+  {
+    // Creature/GO scripts are edited from their own editor's SmartAI tab; this
+    // entry covers areatriggers and timed actionlists, which have no host editor.
+    key: 'smart-scripts',
+    titleKey: 'smartScripts.title',
+    descKey: 'smartScripts.hubDescription',
+    icon: 'pi pi-sitemap',
+    gradient: 'linear-gradient(135deg, #6d28d9, #8b5cf6)',
+    shadow: 'rgba(139, 92, 246, 0.25)',
+    route: '/smart-scripts',
+    available: true,
+  },
 ]
 
 function onCardClick(card: typeof cards[number]) {

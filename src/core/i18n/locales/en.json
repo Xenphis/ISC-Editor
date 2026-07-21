@@ -99,8 +99,6 @@
     "fullScriptDesc": "Net session patch: original state to current state of every modified entry",
     "emptyTitle": "No changes this session",
     "emptyDescription": "SQL queries will appear here when you modify entries",
-    "clearSession": "Clear session",
-    "clearSessionConfirm": "Click again to confirm",
     "statusCreated": "created",
     "statusModified": "modified",
     "statusDeleted": "deleted",

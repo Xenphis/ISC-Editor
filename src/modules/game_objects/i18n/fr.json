@@ -37,7 +37,8 @@
       "data": "Données",
       "loot": "Butin & Quêtes",
       "locale": "Traductions",
-      "spawn": "Spawns"
+      "spawn": "Spawns",
+      "sai": "SmartAI"
     },
     "groups": {
       "identification": "Identification",

@@ -58,7 +58,8 @@
       "quests": "Quêtes",
       "gossip": "Gossip",
       "advanced": "Avancé",
-      "spawn": "Spawns"
+      "spawn": "Spawns",
+      "sai": "SmartAI"
     },
     "groups": {
       "identification": "Identification",

@@ -58,7 +58,8 @@
       "quests": "Quests",
       "gossip": "Gossip",
       "advanced": "Advanced",
-      "spawn": "Spawns"
+      "spawn": "Spawns",
+      "sai": "SmartAI"
     },
     "groups": {
       "identification": "Identification",
@@ -468,7 +469,6 @@
     "editorTitle": "Edit Class Level Stats",
     "description": "Base health, mana, armor and damage stats per creature class and level",
     "noData": "No entries found in creature_classlevelstats",
-    "searchPlaceholder": "Filter by level (number) or class name…",
     "searchPlaceholder": "Filter by level (number) or class name…",
     "classes": {
       "1": "Warrior",
