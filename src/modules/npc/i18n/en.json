@@ -30,6 +30,7 @@
     "title": "NPC Database",
     "description": "Manage non-player characters, their attributes, and behaviors",
     "searchPlaceholder": "Search NPCs by name, ID, or type...",
+    "filterByType": "Filter by type",
     "addButton": "Add NPC",
     "columns": {
       "entry": "Entry",

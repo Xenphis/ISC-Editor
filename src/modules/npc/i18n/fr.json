@@ -30,6 +30,7 @@
     "title": "Base de PNJs",
     "description": "Gérer les personnages non-joueurs, leurs attributs et comportements",
     "searchPlaceholder": "Rechercher des PNJs par nom, ID ou type...",
+    "filterByType": "Filtrer par type",
     "addButton": "Ajouter un PNJ",
     "columns": {
       "entry": "Entrée",

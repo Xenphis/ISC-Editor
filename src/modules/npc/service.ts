@@ -38,10 +38,11 @@ export interface EntityQuestRelations {
 
 export async function getNpcs(
   search?: string,
+  creatureType?: number,
   limit?: number,
   offset?: number
 ): Promise<NpcListResult> {
-  return invoke('get_npcs', { search, limit, offset })
+  return invoke('get_npcs', { search, creatureType, limit, offset })
 }
 
 export async function getNpc(entry: number): Promise<CreatureTemplate> {

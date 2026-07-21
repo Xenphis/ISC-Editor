@@ -52,6 +52,7 @@ watch(search, value => {
           fluid
         />
       </div>
+      <slot name="filters" />
       <button
         v-if="showAdd"
         class="entity-list-add"

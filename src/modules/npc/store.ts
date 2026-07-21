@@ -446,6 +446,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
   const npcs = ref<CreatureTemplate[]>([])
   const loading = ref(false)
   const currentSearch = ref('')
+  const currentTypeFilter = ref<number | null>(null)
   const listLoaded = ref(false)
   const gossipMenuIds = ref<number[]>([])
   const gossipMenuIdsLoading = ref(false)
@@ -863,7 +864,7 @@ export const useNpcModuleStore = defineStore('npcModule', () => {
 
   return {
     // List state
-    npcs, loading, currentSearch, listLoaded, gossipMenuIds, gossipMenuIdsLoading,
+    npcs, loading, currentSearch, currentTypeFilter, listLoaded, gossipMenuIds, gossipMenuIdsLoading,
     // Sub-table managers
     resistances, movement, addon, locales, equips, spells, texts, textLocales, questItems, questStarters, questEnders, onKillRep,
     gossipMenus, gossipOptions, gossipOptionLocales, npcTexts, npcTextLocales,
