@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSessionTrackerStore, type SessionChangeKind } from '@core/stores/sessionTracker'
+import { useRouter } from 'vue-router'
+import { useSessionTrackerStore, type SessionChange, type SessionChangeKind } from '@core/stores/sessionTracker'
+import { resolveEntityRoute } from '@/modules/sql_session/entityRoutes'
 import ChangedFieldsList from '@core/components/workspace/ChangedFieldsList.vue'
 import { highlightSql } from '@core/utils/sql'
 import { copyToClipboard } from '@core/utils/clipboard'
 
 const { t } = useI18n()
+const router = useRouter()
 const session = useSessionTrackerStore()
 
 const copiedId = ref<string | null>(null)
@@ -26,6 +29,11 @@ function toggleSql(key: string) {
     next.add(key)
   }
   expandedSql.value = next
+}
+
+// Deleted entities have no editor to open any more.
+function openTarget(change: SessionChange): string | null {
+  return change.kind === 'deleted' ? null : resolveEntityRoute(change.table, change.id)
 }
 
 function kindLabel(kind: SessionChangeKind): string {
@@ -76,6 +84,14 @@ function kindLabel(kind: SessionChangeKind): string {
             <span class="kind-badge" :class="`kind-${change.kind}`">{{ kindLabel(change.kind) }}</span>
           </div>
           <div class="query-card-actions">
+            <button
+              v-if="openTarget(change)"
+              class="copy-icon-btn"
+              :title="t('sqlSession.openEntity')"
+              @click="router.push(openTarget(change)!)"
+            >
+              <i class="pi pi-external-link" />
+            </button>
             <button
               class="copy-icon-btn"
               :title="expandedSql.has(change.key) ? t('sqlSession.hideSql') : t('sqlSession.showSql')"

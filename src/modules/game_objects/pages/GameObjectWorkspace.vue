@@ -296,6 +296,9 @@ const saiStore = useSmartScriptsStore()
 const saiHasChanges = computed(() => Boolean(form.entry) && saiStore.hasChangesFor(form.entry, 1))
 const editorHasChanges = computed(() => store.combinedHasChanges || saiHasChanges.value)
 
+// Deep links from the SQL session panel land straight on the SmartAI tab.
+const initialTab = computed(() => (route.query.tab === 'sai' ? 'sai' : 'general'))
+
 // --- Tabs ---
 const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'general', label: t('gameobjectEditor.tabs.general') },
@@ -355,7 +358,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
           <i class="pi pi-spin pi-spinner"></i>
         </div>
 
-        <SectionTabs v-else :tabs="mainTabs" variant="plain" defaultValue="general">
+        <SectionTabs v-else :tabs="mainTabs" variant="plain" :defaultValue="initialTab">
         <!-- ==================== GENERAL ==================== -->
         <template #general>
           <!-- Identification -->

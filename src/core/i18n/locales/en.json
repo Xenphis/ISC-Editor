@@ -103,7 +103,8 @@
     "statusModified": "modified",
     "statusDeleted": "deleted",
     "showSql": "Show SQL",
-    "hideSql": "Hide SQL"
+    "hideSql": "Hide SQL",
+    "openEntity": "Open in editor"
   },
   "bitmaskField": {
     "currentValue": "Current value:",
