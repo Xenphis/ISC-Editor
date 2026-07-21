@@ -21,6 +21,13 @@ export const npcRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/npc/pages/ClassLevelStatsWorkspace.vue'),
   },
   {
+    // The formation is keyed by its leader spawn GUID; there is no 'new' mode,
+    // creating one starts by picking an existing spawn as leader.
+    path: 'npc/formation/:leaderGuid?',
+    name: 'npc-formation',
+    component: () => import('@/modules/npc/pages/FormationWorkspace.vue'),
+  },
+  {
     path: 'npc/trainer/:id?',
     name: 'npc-trainer',
     component: () => import('@/modules/npc/pages/TrainerWorkspace.vue'),

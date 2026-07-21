@@ -401,7 +401,9 @@
       "script": "Script",
       "scriptDesc": "Script name and identifiers",
       "spawnSettings": "Spawn Settings",
-      "spawnSettingsDesc": "Spawn mask, phase, model and equipment"
+      "spawnSettingsDesc": "Spawn mask, phase, model and equipment",
+      "formation": "Formation",
+      "formationDesc": "Formation this spawn belongs to (creature_formations table) — edited in the Formation module."
     },
     "fields": {
       "guid": "GUID",
@@ -462,6 +464,14 @@
       "movr_chase": "Chase",
       "movr_random": "Random",
       "movr_interaction_pause": "Interaction Pause Timer (ms)"
+    },
+    "formation": {
+      "asLeader": "Leader",
+      "asMember": "Member",
+      "leaderLabel": "Formation #{guid} — {name}",
+      "placement": "dist {dist}, angle {angle}°",
+      "open": "Open formation",
+      "none": "This spawn does not belong to any formation."
     }
   },
   "creature_classlevelstats": {
@@ -588,5 +598,50 @@
     "add": "Add",
     "empty": "No quests",
     "questPlaceholder": "Quest ID"
+  },
+  "formation": {
+    "title": "Formation",
+    "description": "Group creature spawns into a formation around a leader",
+    "searchPlaceholder": "Search by leader GUID, entry or name...",
+    "editorTitle": "Formation",
+    "discard": "Discard",
+    "execute": "Execute",
+    "leader": "Leader",
+    "memberCount": "1 member | {count} members",
+    "unknownSpawn": "(missing spawn)",
+    "noMembers": "No member yet",
+    "addMember": "Add member",
+    "applyGroupAIToAll": "Apply to every member",
+    "columns": {
+      "memberGUID": "Member GUID",
+      "dist": "Dist",
+      "angle": "Angle",
+      "point_1": "Point 1",
+      "point_2": "Point 2",
+      "entry": "Entry",
+      "map": "Map",
+      "members": "Members"
+    },
+    "groups": {
+      "shape": "Shape",
+      "shapeDesc": "Top-down view, leader at the centre facing up. Angles are stored in degrees and TrinityCore adds 180 deg when placing a member, so 0 deg is right behind the leader.",
+      "members": "Members",
+      "membersDesc": "One row per spawn of the formation (creature_formations table). The leader owns a row too, with dist and angle forced to 0."
+    },
+    "fields": {
+      "groupAI": "Group AI",
+      "groupAITooltip": "Assist flags read by the core for each row. Members of one formation normally share the same value."
+    },
+    "preview": {
+      "hint": "Drag a member to set its distance and angle."
+    },
+    "picker": {
+      "leaderTitle": "Pick the leader spawn",
+      "memberTitle": "Add a member spawn",
+      "placeholder": "GUID, template entry or creature name",
+      "empty": "No spawn found",
+      "alreadyHere": "Already in this formation",
+      "movedFrom": "Currently in formation #{leader} — will be moved"
+    }
   }
 }

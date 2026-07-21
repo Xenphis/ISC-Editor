@@ -30,8 +30,8 @@ const submodules = [
     color: '#4ade80',
     gradient: 'linear-gradient(135deg, #15803d, #4ade80)',
     shadow: 'rgba(74, 222, 128, 0.25)',
-    available: false,
-    route: null,
+    available: true,
+    route: '/npc/formation',
   },
   {
     key: 'specClassTemplate',

@@ -7,6 +7,7 @@ pub mod instance_template;
 pub mod instance_encounters;
 pub mod instance_spawn_groups;
 pub mod creature_classlevelstats;
+pub mod creature_formations;
 pub mod connection;
 pub mod creature;
 pub mod creature_addon;

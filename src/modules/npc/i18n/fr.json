@@ -399,7 +399,9 @@
       "movementOverride": "Surcharge de déplacement",
       "movementOverrideDesc": "Capacités de mouvement spécifiques à ce spawn (table creature_movement_override)",
       "aura": "Auras",
-      "auraDesc": "Auras appliquées à ce spawn"
+      "auraDesc": "Auras appliquées à ce spawn",
+      "formation": "Formation",
+      "formationDesc": "Formation à laquelle ce spawn appartient (table creature_formations) — édition dans le module Formation."
     },
     "fields": {
       "guid": "GUID",
@@ -460,6 +462,14 @@
       "movr_chase": "Poursuite",
       "movr_random": "Aléatoire",
       "movr_interaction_pause": "Pause d'interaction (ms)"
+    },
+    "formation": {
+      "asLeader": "Leader",
+      "asMember": "Membre",
+      "leaderLabel": "Formation #{guid} — {name}",
+      "placement": "dist {dist}, angle {angle}°",
+      "open": "Ouvrir la formation",
+      "none": "Ce spawn n'appartient à aucune formation."
     }
   },
   "creature_classlevelstats": {
@@ -586,5 +596,50 @@
     "add": "Ajouter",
     "empty": "Aucune quête",
     "questPlaceholder": "Quest ID"
+  },
+  "formation": {
+    "title": "Formation",
+    "description": "Regrouper des spawns de créatures en formation autour d'un leader",
+    "searchPlaceholder": "Rechercher par GUID du leader, entry ou nom...",
+    "editorTitle": "Formation",
+    "discard": "Annuler",
+    "execute": "Exécuter",
+    "leader": "Leader",
+    "memberCount": "1 membre | {count} membres",
+    "unknownSpawn": "(spawn introuvable)",
+    "noMembers": "Aucun membre",
+    "addMember": "Ajouter un membre",
+    "applyGroupAIToAll": "Appliquer à tous les membres",
+    "columns": {
+      "memberGUID": "GUID du membre",
+      "dist": "Dist",
+      "angle": "Angle",
+      "point_1": "Point 1",
+      "point_2": "Point 2",
+      "entry": "Entry",
+      "map": "Map",
+      "members": "Membres"
+    },
+    "groups": {
+      "shape": "Disposition",
+      "shapeDesc": "Vue du dessus, leader au centre orienté vers le haut. L'angle est stocké en degrés et TrinityCore ajoute 180° au placement : 0° place donc le membre juste derrière le leader.",
+      "members": "Membres",
+      "membersDesc": "Une ligne par spawn de la formation (table creature_formations). Le leader possède aussi sa ligne, avec dist et angle forcés à 0."
+    },
+    "fields": {
+      "groupAI": "Group AI",
+      "groupAITooltip": "Flags d'assistance lus par le core sur chaque ligne. Les membres d'une même formation partagent normalement la même valeur."
+    },
+    "preview": {
+      "hint": "Glissez un membre pour définir sa distance et son angle."
+    },
+    "picker": {
+      "leaderTitle": "Choisir le spawn leader",
+      "memberTitle": "Ajouter un spawn membre",
+      "placeholder": "GUID, entry du template ou nom de créature",
+      "empty": "Aucun spawn trouvé",
+      "alreadyHere": "Déjà dans cette formation",
+      "movedFrom": "Actuellement dans la formation #{leader} — sera déplacé"
+    }
   }
 }

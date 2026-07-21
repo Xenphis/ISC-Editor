@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
@@ -29,7 +31,8 @@ import {
 } from '@/modules/npc/types/defines'
 import type { CreatureAddon } from '@/modules/npc/types/creature/creature_addon'
 import type { CreatureMovementOverride } from '@/modules/npc/types/creature/creature_movement_override'
-import { getCreatureSpawns, getCreatureAddon, getCreatureMovementOverride } from '@/modules/npc/service'
+import type { CreatureFormationMember } from '@/modules/npc/types/misc/creature_formations'
+import { getCreatureSpawns, getCreatureAddon, getCreatureMovementOverride, getCreatureFormationOfMember } from '@/modules/npc/service'
 import { useQueryGenerator } from '@core/composables/useQueryGenerator'
 import BitmaskField from '@core/components/BitmaskField.vue'
 import EditorField from '@core/components/EditorField.vue'
@@ -44,6 +47,7 @@ export interface SpawnInspectorState {
 }
 
 const { t } = useI18n()
+const router = useRouter()
 
 const props = defineProps<{
   spawnGuid: number
@@ -227,6 +231,17 @@ function onSave() {
   emit('save', { ...form })
 }
 
+// --- Formation membership (read-only; edited in the formation module) ---
+const formation = ref<CreatureFormationMember | null>(null)
+
+const isFormationLeader = computed(() =>
+  formation.value != null && formation.value.leaderGUID === formation.value.memberGUID)
+
+function openFormation() {
+  if (!formation.value) return
+  router.push(`/npc/formation/${formation.value.leaderGUID}`)
+}
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -266,6 +281,12 @@ onMounted(async () => {
     }
   } catch (e) {
     console.error('Failed to load creature movement override:', e)
+  }
+
+  try {
+    formation.value = await getCreatureFormationOfMember(props.spawnGuid)
+  } catch (e) {
+    console.error('Failed to load creature formation:', e)
   }
 })
 </script>
@@ -437,6 +458,37 @@ onMounted(async () => {
 
         <!-- ==================== BEHAVIOR ==================== -->
         <template #behavior>
+          <!-- Formation (read-only: edited in the formation module) -->
+          <div class="field-group">
+            <div class="field-group-header">
+              <h4>{{ t('creature.groups.formation') }}</h4>
+              <p>{{ t('creature.groups.formationDesc') }}</p>
+            </div>
+            <div v-if="formation" class="formation-status">
+              <div class="formation-status-text">
+                <span class="formation-badge" :class="{ 'is-leader': isFormationLeader }">
+                  <i :class="isFormationLeader ? 'pi pi-flag' : 'pi pi-sitemap'"></i>
+                  {{ isFormationLeader ? t('creature.formation.asLeader') : t('creature.formation.asMember') }}
+                </span>
+                <span class="formation-detail">
+                  {{ t('creature.formation.leaderLabel', { guid: formation.leaderGUID, name: formation.name ?? '—' }) }}
+                  <template v-if="!isFormationLeader">
+                    · {{ t('creature.formation.placement', { dist: formation.dist, angle: formation.angle }) }}
+                  </template>
+                </span>
+              </div>
+              <Button
+                icon="pi pi-external-link"
+                severity="secondary"
+                size="small"
+                outlined
+                :label="t('creature.formation.open')"
+                @click="openFormation"
+              />
+            </div>
+            <p v-else class="formation-none">{{ t('creature.formation.none') }}</p>
+          </div>
+
           <!-- Animation -->
           <div class="field-group">
             <div class="field-group-header">
@@ -541,4 +593,48 @@ onMounted(async () => {
 
 <style scoped>
 /* Layout primitives (.field-group, .field-grid) come from src/styles/forms.css. */
+
+.formation-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.formation-status-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: var(--font-field);
+}
+
+.formation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  color: var(--text-soft);
+  font-size: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.formation-badge.is-leader {
+  background: var(--accent-ring);
+  color: var(--accent);
+}
+
+.formation-detail {
+  color: var(--text-muted);
+}
+
+.formation-none {
+  margin: 0;
+  font-size: var(--font-field);
+  color: var(--text-muted);
+}
 </style>

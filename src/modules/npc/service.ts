@@ -22,6 +22,7 @@ import type { GossipMenuOption } from '@/modules/npc/types/gossip/gossip_menu_op
 import type { GossipMenuOptionLocale } from '@/modules/npc/types/gossip/gossip_menu_option_locale'
 import type { NpcText } from '@/modules/npc/types/gossip/npc_text'
 import type { NpcTextLocale, NpcTextLocaleKey } from '@/modules/npc/types/gossip/npc_text_locale'
+import type { CreatureFormationGroup, CreatureFormationMember, CreatureSpawnOption } from '@/modules/npc/types/misc/creature_formations'
 
 export interface NpcListResult {
   data: CreatureTemplate[]
@@ -263,4 +264,26 @@ export async function saveCreatureDefaultTrainers(trainerId: number, entries: Cr
 
 export async function getCreatureQuestRelations(id: number): Promise<EntityQuestRelations> {
   return invoke('get_creature_quest_relations', { id })
+}
+
+// ─── creature_formations ─────────────────────────────────────────────────────
+
+export async function getCreatureFormationGroups(): Promise<CreatureFormationGroup[]> {
+  return invoke('get_creature_formation_groups')
+}
+
+export async function getCreatureFormation(leaderGuid: number): Promise<CreatureFormationMember[]> {
+  return invoke('get_creature_formation', { leaderGuid })
+}
+
+export async function getCreatureFormationOfMember(memberGuid: number): Promise<CreatureFormationMember | null> {
+  return invoke('get_creature_formation_of_member', { memberGuid })
+}
+
+export async function searchCreatureSpawns(query: string, map: number | null, limit?: number): Promise<CreatureSpawnOption[]> {
+  return invoke('search_creature_spawns', { query, map, limit })
+}
+
+export async function deleteCreatureFormation(leaderGuid: number): Promise<void> {
+  return invoke('delete_creature_formation', { leaderGuid })
 }
