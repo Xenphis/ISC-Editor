@@ -50,6 +50,20 @@
   --danger: #b91c1c;
   --warn: #b45309;
 
+  /* Item quality (item_template.Quality 0-7).
+     Darkened rebuilds of the canonical WoW colours: those are meant for a
+     black game background and wash out on the cream surface — plain white
+     "Common" scores 1.06:1 against it, i.e. invisible. Every value below
+     clears 4.5:1 on --surface-base while keeping its hue recognisable. */
+  --quality-0: #6b6b6b; /* Poor */
+  --quality-1: #2b2218; /* Common */
+  --quality-2: #157f3c; /* Uncommon */
+  --quality-3: #0059b0; /* Rare */
+  --quality-4: #7b2fbe; /* Epic */
+  --quality-5: #b35300; /* Legendary */
+  --quality-6: #8a6d1f; /* Artifact */
+  --quality-7: #8a6d1f; /* Heirloom */
+
   /* SQL syntax highlighting */
   --sql-keyword: #b93a1f;
   --sql-string: #15803d;
@@ -125,6 +139,17 @@
   --success: #4ade80;
   --danger: #f87171;
   --warn: #fb923c;
+
+  /* Item quality — canonical WoW colours, which is what the dark slate
+     surface was made for (all clear 3.6:1 or better against it). */
+  --quality-0: #9d9d9d; /* Poor */
+  --quality-1: #ffffff; /* Common */
+  --quality-2: #1eff00; /* Uncommon */
+  --quality-3: #0070dd; /* Rare */
+  --quality-4: #a335ee; /* Epic */
+  --quality-5: #ff8000; /* Legendary */
+  --quality-6: #e6cc80; /* Artifact */
+  --quality-7: #e6cc80; /* Heirloom */
 
   /* SQL syntax highlighting */
   --sql-keyword: #22d3ee;
