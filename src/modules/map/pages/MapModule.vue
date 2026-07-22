@@ -25,15 +25,6 @@ const submodules = [
     route: '/maps/teleport',
   },
   {
-    key: 'explorationXP',
-    icon: 'pi pi-star',
-    color: '#f59e0b',
-    gradient: 'linear-gradient(135deg, #b45309, #f59e0b)',
-    shadow: 'rgba(245, 158, 11, 0.25)',
-    available: true,
-    route: '/maps/exploration',
-  },
-  {
     key: 'instances',
     icon: 'pi pi-building',
     color: '#8b5cf6',
@@ -66,15 +57,6 @@ const submodules = [
     gradient: 'linear-gradient(135deg, #1d4ed8, #60a5fa)',
     shadow: 'rgba(96, 165, 250, 0.25)',
     available: false,
-  },
-  {
-    key: 'mapCalibration',
-    icon: 'pi pi-map-marker',
-    color: '#10b981',
-    gradient: 'linear-gradient(135deg, #047857, #10b981)',
-    shadow: 'rgba(16, 185, 129, 0.25)',
-    available: true,
-    route: '/map-viewer/calibrate',
   },
 ]
 </script>

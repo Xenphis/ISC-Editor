@@ -30,6 +30,26 @@ const cards = [
     route: '/smart-scripts',
     available: true,
   },
+  {
+    key: 'exploration-xp',
+    titleKey: 'map.submodules.explorationXP.title',
+    descKey: 'map.submodules.explorationXP.description',
+    icon: 'pi pi-star',
+    gradient: 'linear-gradient(135deg, #b45309, #f59e0b)',
+    shadow: 'rgba(245, 158, 11, 0.25)',
+    route: '/maps/exploration',
+    available: true,
+  },
+  {
+    key: 'map-calibration',
+    titleKey: 'map.submodules.mapCalibration.title',
+    descKey: 'map.submodules.mapCalibration.description',
+    icon: 'pi pi-map-marker',
+    gradient: 'linear-gradient(135deg, #047857, #10b981)',
+    shadow: 'rgba(16, 185, 129, 0.25)',
+    route: '/map-viewer/calibrate',
+    available: true,
+  },
 ]
 
 function onCardClick(card: typeof cards[number]) {
