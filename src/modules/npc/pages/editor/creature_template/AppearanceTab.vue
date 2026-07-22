@@ -66,25 +66,25 @@ function removeEquip(index: number) {
       <EditorField :label="t('creature_template.fields.modelid1')" :modified="isFieldModified('modelid1')">
         <div class="model-field">
           <InputNumber v-model="form.modelid1" :useGrouping="false" fluid />
-          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid1')" />
+          <Button type="button" icon="pi pi-search" severity="secondary" class="model-search-btn" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid1')" />
         </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid2')" :modified="isFieldModified('modelid2')">
         <div class="model-field">
           <InputNumber v-model="form.modelid2" :useGrouping="false" fluid />
-          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid2')" />
+          <Button type="button" icon="pi pi-search" severity="secondary" class="model-search-btn" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid2')" />
         </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid3')" :modified="isFieldModified('modelid3')">
         <div class="model-field">
           <InputNumber v-model="form.modelid3" :useGrouping="false" fluid />
-          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid3')" />
+          <Button type="button" icon="pi pi-search" severity="secondary" class="model-search-btn" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid3')" />
         </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.modelid4')" :modified="isFieldModified('modelid4')">
         <div class="model-field">
           <InputNumber v-model="form.modelid4" :useGrouping="false" fluid />
-          <Button type="button" icon="pi pi-search" severity="secondary" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid4')" />
+          <Button type="button" icon="pi pi-search" severity="secondary" class="model-search-btn" v-tooltip.bottom="t('modelSearch.searchTooltip')" @click="openModelSearch('modelid4')" />
         </div>
       </EditorField>
       <EditorField :label="t('creature_template.fields.scale')" :modified="isFieldModified('scale')">

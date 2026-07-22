@@ -421,6 +421,7 @@ const mainTabs = computed<SectionTabItem[]>(() => [
                     type="button"
                     icon="pi pi-search"
                     severity="secondary"
+                    class="model-search-btn"
                     v-tooltip.bottom="t('modelSearch.searchTooltip')"
                     @click="modelDialogVisible = true"
                   />
