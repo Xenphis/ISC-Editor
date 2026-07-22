@@ -34,8 +34,7 @@
     "database": "BDD :",
     "user": "Utilisateur :",
     "disconnect": "Déconnexion",
-    "themeToLight": "Passer en thème clair",
-    "themeToDark": "Passer en thème sombre",
+    "settings": "Paramètres",
     "modules": {
       "npc": "PNJs",
       "gameobject": "Objets de jeu",
@@ -119,6 +118,17 @@
   },
   "settings": {
     "title": "Paramètres",
+    "general": "Général",
+    "language": "Langue",
+    "languageDesc": "Langue de l'interface",
+    "theme": "Thème",
+    "themeDesc": "Apparence de l'interface",
+    "themeDark": "Sombre",
+    "themeLight": "Clair",
+    "mapEditorSection": "Éditeur de cartes",
+    "clientPath": "Dossier du client WoW",
+    "clientPathDesc": "Dossier du client 3.3.5 utilisé pour afficher les cartes",
+    "debugSection": "Debug",
     "sqlDebug": "Mode Debug SQL",
     "sqlDebugDesc": "Journaliser toutes les requêtes SQL exécutées par le backend en temps réel"
   },

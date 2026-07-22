@@ -9,6 +9,7 @@ import InputIcon from 'primevue/inputicon'
 import Button from 'primevue/button'
 import { useConnectionStore } from '@core/stores/connectionStore'
 import SettingsDialog from '@core/components/SettingsDialog.vue'
+import { setLocale } from '@core/i18n'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -16,14 +17,36 @@ const connection = useConnectionStore()
 const settingsVisible = ref(false)
 
 function toggleLocale() {
-  locale.value = locale.value === 'fr' ? 'en' : 'fr'
+  setLocale(locale.value === 'fr' ? 'en' : 'fr')
 }
 
-const host = ref('')
-const port = ref(3306)
-const username = ref('')
+const CONNECTION_KEY = 'isc.connection'
+
+/** Last successful connection params (never the password) to prefill the form. */
+function readStoredConnection() {
+  try {
+    const raw = localStorage.getItem(CONNECTION_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as Record<string, unknown>
+      return {
+        host: typeof parsed.host === 'string' ? parsed.host : '',
+        port: typeof parsed.port === 'number' && Number.isFinite(parsed.port) ? parsed.port : 3306,
+        username: typeof parsed.username === 'string' ? parsed.username : '',
+        database: typeof parsed.database === 'string' && parsed.database ? parsed.database : 'world',
+      }
+    }
+  } catch {
+    /* ignore corrupted storage */
+  }
+  return { host: '', port: 3306, username: '', database: 'world' }
+}
+
+const stored = readStoredConnection()
+const host = ref(stored.host)
+const port = ref(stored.port)
+const username = ref(stored.username)
 const password = ref('')
-const database = ref('world')
+const database = ref(stored.database)
 const loading = ref(false)
 const error = ref('')
 
@@ -41,6 +64,16 @@ async function handleSubmit() {
       password: password.value,
       database: database.value,
     })
+    try {
+      localStorage.setItem(CONNECTION_KEY, JSON.stringify({
+        host: host.value,
+        port: port.value,
+        username: username.value,
+        database: database.value,
+      }))
+    } catch {
+      /* ignore storage quota errors */
+    }
     router.push('/npc')
   } catch (e: any) {
     error.value = typeof e === 'string' ? e : e.message || t('login.connectionError')

@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { open } from '@tauri-apps/plugin-dialog'
 import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import SelectButton from 'primevue/selectbutton'
 import ToggleButton from 'primevue/togglebutton'
@@ -136,19 +134,13 @@ async function load() {
   }
 }
 
-/** Native folder picker; loads the client right away on selection. */
-async function browse() {
-  const dir = await open({
-    directory: true,
-    multiple: false,
-    title: t('mapEditor.clientPath.browseTitle'),
-    defaultPath: store.clientPath.trim() || undefined,
-  })
-  if (typeof dir === 'string') {
-    store.clientPath = dir
-    void load()
-  }
-}
+// The path is set in Settings; reload when it changes while the module is
+// open. Debounced so typing in the Settings input doesn't spam the backend.
+let pathReloadTimer: ReturnType<typeof setTimeout> | undefined
+watch(() => store.clientPath, () => {
+  clearTimeout(pathReloadTimer)
+  pathReloadTimer = setTimeout(() => void load(), 800)
+})
 
 onMounted(() => {
   if (store.clientPath && store.maps.length === 0) {
@@ -167,28 +159,6 @@ onMounted(() => {
     </div>
 
     <div class="editor-toolbar">
-      <InputText
-        v-model="store.clientPath"
-        class="client-path"
-        :placeholder="t('mapEditor.clientPath.placeholder')"
-        :disabled="loading"
-        @keyup.enter="load"
-      />
-      <Button
-        icon="pi pi-folder-open"
-        severity="secondary"
-        :aria-label="t('mapEditor.clientPath.browse')"
-        v-tooltip.bottom="t('mapEditor.clientPath.browse')"
-        :disabled="loading"
-        @click="browse"
-      />
-      <Button
-        :label="t('mapEditor.clientPath.load')"
-        icon="pi pi-refresh"
-        :loading="loading"
-        :disabled="!store.clientPath.trim()"
-        @click="load"
-      />
       <Select
         v-if="store.maps.length > 0"
         v-model="store.lastMapId"
@@ -319,11 +289,6 @@ onMounted(() => {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
-
-.client-path {
-  flex: 1;
-  min-width: 16rem;
 }
 
 .map-select {

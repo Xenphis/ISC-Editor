@@ -4,7 +4,6 @@
     "description": "Browse the game world rendered from your client's minimap data",
     "clientPath": {
       "placeholder": "Path to your 3.3.5 client folder (or its Data folder)",
-      "load": "Load",
       "browse": "Browse…",
       "browseTitle": "Select the WoW 3.3.5 client folder"
     },
@@ -39,7 +38,7 @@
       "close": "Close"
     },
     "states": {
-      "noClient": "Point the editor at a 3.3.5 client folder to browse its maps.",
+      "noClient": "Set the WoW client folder in Settings to browse its maps.",
       "loading": "Indexing the client archives…",
       "error": "Failed to load the client: {message}"
     }

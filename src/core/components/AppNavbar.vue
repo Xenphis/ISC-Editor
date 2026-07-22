@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useSessionTrackerStore } from '@core/stores/sessionTracker'
 import { useConnectionStore } from '@core/stores/connectionStore'
-import { useThemeStore } from '@core/stores/themeStore'
+import SettingsDialog from '@core/components/SettingsDialog.vue'
 import { moduleNavigationItems } from '@/modules/registry'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const settingsVisible = ref(false)
 
 const emit = defineEmits<{
   (e: 'disconnect'): void
@@ -16,7 +18,6 @@ const emit = defineEmits<{
 
 const session = useSessionTrackerStore()
 const connection = useConnectionStore()
-const theme = useThemeStore()
 const modules = moduleNavigationItems
 
 function isActive(path: string): boolean {
@@ -71,10 +72,10 @@ const connectionTooltip = () =>
 
       <button
         class="navbar-icon-btn"
-        v-tooltip.bottom="theme.isDark ? t('navbar.themeToLight') : t('navbar.themeToDark')"
-        @click="theme.toggle()"
+        v-tooltip.bottom="t('navbar.settings')"
+        @click="settingsVisible = true"
       >
-        <i :class="theme.isDark ? 'pi pi-sun' : 'pi pi-moon'"></i>
+        <i class="pi pi-cog"></i>
       </button>
 
       <div class="navbar-connection" v-tooltip.bottom="connectionTooltip()">
@@ -90,6 +91,8 @@ const connectionTooltip = () =>
         <i class="pi pi-sign-out"></i>
       </button>
     </div>
+
+    <SettingsDialog v-model:visible="settingsVisible" />
   </header>
 </template>
 

@@ -4,7 +4,6 @@
     "description": "Parcourez le monde du jeu rendu depuis les minimaps de votre client",
     "clientPath": {
       "placeholder": "Chemin du client 3.3.5 (ou de son dossier Data)",
-      "load": "Charger",
       "browse": "Parcourir…",
       "browseTitle": "Sélectionnez le dossier du client WoW 3.3.5"
     },
@@ -39,7 +38,7 @@
       "close": "Fermer"
     },
     "states": {
-      "noClient": "Indiquez le dossier d'un client 3.3.5 pour parcourir ses cartes.",
+      "noClient": "Renseignez le dossier du client WoW dans les Paramètres pour parcourir ses cartes.",
       "loading": "Indexation des archives du client…",
       "error": "Échec du chargement du client : {message}"
     }

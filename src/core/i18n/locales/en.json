@@ -34,8 +34,7 @@
     "database": "DB:",
     "user": "User:",
     "disconnect": "Disconnect",
-    "themeToLight": "Switch to light theme",
-    "themeToDark": "Switch to dark theme",
+    "settings": "Settings",
     "modules": {
       "npc": "NPCs",
       "gameobject": "Game Objects",
@@ -119,6 +118,17 @@
   },
   "settings": {
     "title": "Settings",
+    "general": "General",
+    "language": "Language",
+    "languageDesc": "Interface language",
+    "theme": "Theme",
+    "themeDesc": "Interface color scheme",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "mapEditorSection": "Map Editor",
+    "clientPath": "WoW client folder",
+    "clientPathDesc": "3.3.5 client folder used to render maps",
+    "debugSection": "Debug",
     "sqlDebug": "SQL Debug Mode",
     "sqlDebugDesc": "Log all SQL queries executed by the backend in real-time"
   },
