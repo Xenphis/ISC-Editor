@@ -80,6 +80,20 @@ pub struct MinimapData {
     /// CreatureDisplayInfo/ModelData.dbc: display id -> M2 model + scale, built
     /// lazily on the first creature-spawn request (empty if the DBCs are gone).
     creature_models: Option<HashMap<u32, CreatureModelInfo>>,
+    /// WorldMapArea.dbc: AreaTable zone id -> world bounds, parsed lazily on
+    /// the first zone-bounds request (empty if the DBC is gone).
+    zone_bounds: Option<HashMap<u32, ZoneWorldBounds>>,
+}
+
+/// World-space rectangle of a zone's UI map (WorldMapArea.dbc), used to scope
+/// per-zone queries on tables that only store raw positions (game_tele).
+#[derive(Serialize, Clone, Copy)]
+#[serde(rename_all = "camelCase")]
+pub struct ZoneWorldBounds {
+    pub min_x: f32,
+    pub max_x: f32,
+    pub min_y: f32,
+    pub max_y: f32,
 }
 
 /// The client asset needed to render one creature display: the `.m2` model path
@@ -145,6 +159,22 @@ impl MinimapData {
             self.creature_models = Some(resolved);
         }
         self.creature_models.as_ref().unwrap()
+    }
+
+    /// AreaTable zone id -> world bounds, parsed from WorldMapArea.dbc on
+    /// first use (empty if the DBC is missing — zone scoping then no-ops).
+    fn zone_bounds(&mut self) -> &HashMap<u32, ZoneWorldBounds> {
+        if self.zone_bounds.is_none() {
+            let bounds = match self.chain.read_file("DBFilesClient\\WorldMapArea.dbc") {
+                Ok(bytes) => parse_world_map_area(&bytes).unwrap_or_default(),
+                Err(e) => {
+                    log::warn!("minimap: WorldMapArea.dbc unavailable, zones unscoped: {e}");
+                    HashMap::new()
+                }
+            };
+            self.zone_bounds = Some(bounds);
+        }
+        self.zone_bounds.as_ref().unwrap()
     }
 }
 
@@ -568,11 +598,75 @@ fn build_data(archives: Vec<(PathBuf, i32)>, cache_dir: PathBuf) -> Result<Minim
         read_cache: ReadCache::default(),
         liquid_types: None,
         creature_models: None,
+        zone_bounds: None,
     })
 }
 
 /// Minimal WDBC reader for Map.dbc: field 0 is the map id, field 1 the
 /// Directory string. Returns lowercased-directory -> (id, Directory).
+/// WorldMapArea.dbc (3.3.5, build 12340): field 2 = AreaTable id (0 on the
+/// whole-continent overview rows), fields 4-7 = locLeft/locRight/locTop/
+/// locBottom in world yards (left/right run along Y, top/bottom along X).
+/// Normalized to min/max so callers never deal with the sign conventions.
+fn parse_world_map_area(bytes: &[u8]) -> Option<HashMap<u32, ZoneWorldBounds>> {
+    let u32_at = |offset: usize| -> Option<u32> {
+        Some(u32::from_le_bytes(bytes.get(offset..offset + 4)?.try_into().ok()?))
+    };
+    let f32_at = |offset: usize| -> Option<f32> {
+        Some(f32::from_le_bytes(bytes.get(offset..offset + 4)?.try_into().ok()?))
+    };
+    if bytes.get(..4)? != b"WDBC" {
+        return None;
+    }
+    let record_count = u32_at(4)? as usize;
+    let record_size = u32_at(12)? as usize;
+    if record_size < 32 {
+        return None;
+    }
+
+    let mut out = HashMap::new();
+    for record in 0..record_count {
+        let base = 20 + record * record_size;
+        let area_id = u32_at(base + 8)?;
+        if area_id == 0 {
+            continue;
+        }
+        let loc_left = f32_at(base + 16)?;
+        let loc_right = f32_at(base + 20)?;
+        let loc_top = f32_at(base + 24)?;
+        let loc_bottom = f32_at(base + 28)?;
+        out.insert(
+            area_id,
+            ZoneWorldBounds {
+                min_x: loc_top.min(loc_bottom),
+                max_x: loc_top.max(loc_bottom),
+                min_y: loc_left.min(loc_right),
+                max_y: loc_left.max(loc_right),
+            },
+        );
+    }
+    Some(out)
+}
+
+/// World bounds of one zone (WorldMapArea.dbc); None when the zone has no
+/// world map entry. Errors while no client is loaded.
+#[tauri::command]
+pub async fn minimap_zone_bounds(
+    app: tauri::AppHandle,
+    zone_id: u32,
+) -> Result<Option<ZoneWorldBounds>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = app.state::<MinimapState>();
+        let Some(mut inner) = wait_for_data(&state) else {
+            return Err("client not loaded".to_string());
+        };
+        let data = inner.data.as_mut().unwrap();
+        Ok(data.zone_bounds().get(&zone_id).copied())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
 fn parse_map_dbc(bytes: &[u8]) -> Option<HashMap<String, (u32, String)>> {
     let u32_at = |offset: usize| -> Option<u32> {
         Some(u32::from_le_bytes(bytes.get(offset..offset + 4)?.try_into().ok()?))

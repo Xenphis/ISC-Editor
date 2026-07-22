@@ -2,17 +2,27 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Button from 'primevue/button'
-import Select from 'primevue/select'
 import SelectButton from 'primevue/selectbutton'
 import ToggleButton from 'primevue/togglebutton'
+import EntityWorkspace from '@core/components/workspace/EntityWorkspace.vue'
+import EntityListPanel from '@core/components/workspace/EntityListPanel.vue'
 import { useMapEditorStore } from '../store'
 import { loadClient } from '../service'
-import type { CreatureSpawnMarker, MinimapMapInfo, PickedPosition, WorldPosition } from '../types'
+import { ZONES, ZONE_BY_ID } from '../data/zones'
+import type {
+  CreatureSpawnMarker,
+  FocusPosition,
+  MinimapMapInfo,
+  PickedPosition,
+  WorldPosition,
+  ZoneDefinition,
+} from '../types'
 import WorldMap from '../components/WorldMap.vue'
 import WorldScene3D from '../components/WorldScene3D.vue'
 import SpawnInfoPanel from '../components/SpawnInfoPanel.vue'
+import ZoneTablesPanel from '../components/ZoneTablesPanel.vue'
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const store = useMapEditorStore()
 
 const loading = ref(false)
@@ -28,6 +38,56 @@ const viewCenter = ref<WorldPosition | null>(null)
 /** Position picked with right-click, shown in the toolbar with a copy action. */
 const picked = ref<PickedPosition | null>(null)
 const copied = ref(false)
+
+// ── Zones ──────────────────────────────────────────────────────────────
+// The zone list is the only navigation: selecting a zone switches the map.
+const zoneSearch = ref('')
+
+/** Localized zone name; a zone without a translation shows its raw id. */
+function zoneName(zone: ZoneDefinition): string {
+  const key = `mapEditor.zones.names.${zone.id}`
+  return te(key) ? t(key) : zone.id
+}
+
+const filteredZones = computed(() => {
+  const query = zoneSearch.value.trim().toLowerCase()
+  const zones = query
+    ? ZONES.filter(zone => zoneName(zone).toLowerCase().includes(query))
+    : [...ZONES]
+  // Continents in map order, zones alphabetically within each (per locale).
+  return zones.sort((a, b) => a.map - b.map || zoneName(a).localeCompare(zoneName(b)))
+})
+const selectedZone = computed(() => ZONE_BY_ID.get(store.lastZoneId) ?? null)
+/** Camera/view target; each assignment is a fresh object so the views re-trigger. */
+const focusTarget = ref<FocusPosition | null>(null)
+/** Selected table row position, shown as a dot on the 2D map. */
+const rowMarker = ref<FocusPosition | null>(null)
+
+/** A table row was selected: fly there and mark the spot. */
+function onFly(target: { x: number; y: number; z: number }) {
+  focusTarget.value = { ...target }
+  rowMarker.value = { ...target }
+}
+
+function selectZone(zone: ZoneDefinition) {
+  store.lastZoneId = zone.id
+  focusTarget.value = { ...zone.origin }
+  rowMarker.value = null
+  // May remount the 3D view; initialPosition then reads focusTarget. A zone
+  // whose map has no minimap data clears the map (dedicated empty state).
+  const info = store.maps.find(m => m.mapId === zone.map)
+  store.lastMapId = info?.id ?? ''
+}
+
+function onCenter(center: WorldPosition) {
+  viewCenter.value = center
+  // Panning away from the focused spot dissolves the focus: the 2D center
+  // seeds the 3D camera again (the focus only carried its exact height).
+  const focus = focusTarget.value
+  if (focus && Math.hypot(center.x - focus.x, center.y - focus.y) > 5) {
+    focusTarget.value = null
+  }
+}
 
 function formatCoord(value: number): string {
   return value.toFixed(2)
@@ -106,6 +166,7 @@ watch(() => store.lastMapId, () => {
   viewCenter.value = null
   cursor.value = null
   picked.value = null
+  rowMarker.value = null
   clearSelectedSpawn()
 })
 
@@ -121,10 +182,12 @@ async function load() {
   error.value = ''
   try {
     store.maps = await loadClient(path)
-    if (!store.maps.some(m => m.id === store.lastMapId)) {
-      // Sensible default: the biggest map is a continent.
-      const biggest = [...store.maps].sort((a, b) => b.tileCount - a.tileCount)[0]
-      store.lastMapId = biggest?.id ?? ''
+    if (selectedZone.value) {
+      // Restore the persisted zone: map + camera back at its origin.
+      selectZone(selectedZone.value)
+    } else {
+      // No zone yet: nothing to display (the map only follows the zone).
+      store.lastMapId = ''
     }
   } catch (e) {
     store.maps = []
@@ -158,105 +221,131 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="editor-toolbar">
-      <Select
-        v-if="store.maps.length > 0"
-        v-model="store.lastMapId"
-        :options="store.maps"
-        optionLabel="name"
-        optionValue="id"
-        :placeholder="t('mapEditor.map')"
-        filter
-        class="map-select"
-      >
-        <template #option="{ option }">
-          <span>{{ option.name }}</span>
-          <span class="map-option-tiles">{{ t('mapEditor.tiles', { count: option.tileCount }) }}</span>
-        </template>
-      </Select>
-      <SelectButton
-        v-if="selectedMap"
-        v-model="viewMode"
-        :options="viewModes"
-        optionLabel="label"
-        optionValue="value"
-        :allowEmpty="false"
-      />
-      <ToggleButton
-        v-if="selectedMap && viewMode === '3d'"
-        v-model="store.showSpawns"
-        :disabled="!spawnsAvailable"
-        onIcon="pi pi-users"
-        offIcon="pi pi-users"
-        :onLabel="t('mapEditor.spawns.toggle')"
-        :offLabel="t('mapEditor.spawns.toggle')"
-        v-tooltip.bottom="spawnsAvailable ? t('mapEditor.spawns.toggleHint') : t('mapEditor.spawns.noMapId')"
-      />
-      <span v-if="cursor" class="cursor-coords">
-        X {{ cursor.x.toFixed(1) }} · Y {{ cursor.y.toFixed(1) }}
-      </span>
-      <span v-if="picked" class="picked-chip">
-        <i class="pi pi-map-marker"></i>
-        <span class="picked-value">{{ pickedText }}</span>
-        <Button
-          :icon="copied ? 'pi pi-check' : 'pi pi-copy'"
-          text
-          size="small"
-          :aria-label="t('mapEditor.picked.copy')"
-          v-tooltip.bottom="t('mapEditor.picked.copy')"
-          @click="copyPicked"
+    <EntityWorkspace storageKey="mapEditor" listWidth="240px" class="editor-workspace">
+      <!-- Curated zones (data/zones.ts); selecting one drives map + camera. -->
+      <template #list>
+        <EntityListPanel
+          :items="filteredZones"
+          :idOf="zone => zone.id"
+          :titleOf="zoneName"
+          :metaOf="zone => t('mapEditor.zones.mapMeta', { map: zone.map })"
+          :selectedId="store.lastZoneId || null"
+          :showAdd="false"
+          :searchPlaceholder="t('mapEditor.zones.searchPlaceholder')"
+          @search="zoneSearch = $event"
+          @select="selectZone"
         />
-        <Button
-          icon="pi pi-times"
-          text
-          size="small"
-          :aria-label="t('mapEditor.picked.clear')"
-          @click="picked = null"
+      </template>
+
+      <template #editor>
+        <div class="editor-toolbar">
+          <SelectButton
+            v-if="selectedMap"
+            v-model="viewMode"
+            :options="viewModes"
+            optionLabel="label"
+            optionValue="value"
+            :allowEmpty="false"
+          />
+          <ToggleButton
+            v-if="selectedMap && viewMode === '3d'"
+            v-model="store.showSpawns"
+            :disabled="!spawnsAvailable"
+            onIcon="pi pi-users"
+            offIcon="pi pi-users"
+            :onLabel="t('mapEditor.spawns.toggle')"
+            :offLabel="t('mapEditor.spawns.toggle')"
+            v-tooltip.bottom="spawnsAvailable ? t('mapEditor.spawns.toggleHint') : t('mapEditor.spawns.noMapId')"
+          />
+          <span v-if="cursor" class="cursor-coords">
+            X {{ cursor.x.toFixed(1) }} · Y {{ cursor.y.toFixed(1) }}
+          </span>
+          <span v-if="picked" class="picked-chip">
+            <i class="pi pi-map-marker"></i>
+            <span class="picked-value">{{ pickedText }}</span>
+            <Button
+              :icon="copied ? 'pi pi-check' : 'pi pi-copy'"
+              text
+              size="small"
+              :aria-label="t('mapEditor.picked.copy')"
+              v-tooltip.bottom="t('mapEditor.picked.copy')"
+              @click="copyPicked"
+            />
+            <Button
+              icon="pi pi-times"
+              text
+              size="small"
+              :aria-label="t('mapEditor.picked.clear')"
+              @click="picked = null"
+            />
+          </span>
+        </div>
+
+        <p v-if="error" class="editor-error">{{ t('mapEditor.states.error', { message: error }) }}</p>
+
+        <div class="map-stage">
+          <WorldMap
+            v-if="selectedMap && viewMode === '2d'"
+            :map="selectedMap"
+            :focus="focusTarget"
+            :marker="rowMarker"
+            class="editor-map"
+            @cursor="cursor = $event"
+            @center="onCenter"
+            @pick="picked = $event"
+          />
+          <WorldScene3D
+            v-else-if="selectedMap"
+            :key="selectedMap.id"
+            :map="selectedMap"
+            :initialPosition="focusTarget ?? viewCenter"
+            :focus="focusTarget"
+            :showSpawns="store.showSpawns"
+            :moveArmed="moveArmed"
+            class="editor-map"
+            @pick="picked = $event"
+            @select-spawn="onSelectSpawn"
+            @move-spawn="onMoveSpawn"
+          />
+          <div v-else class="editor-empty">
+            <i class="pi pi-map" style="font-size: 3rem; color: var(--text-placeholder)"></i>
+            <p>
+              {{
+                loading
+                  ? t('mapEditor.states.loading')
+                  : store.maps.length === 0
+                    ? t('mapEditor.states.noClient')
+                    : selectedZone
+                      ? t('mapEditor.states.noMinimap', { map: selectedZone.map })
+                      : t('mapEditor.states.noZone')
+              }}
+            </p>
+          </div>
+
+          <!-- Selected-spawn panel floats over the map so it never reflows the view. -->
+          <div v-if="viewMode === '3d' && selectedSpawn" class="spawn-overlay">
+            <SpawnInfoPanel
+              :spawn="selectedSpawn"
+              v-model:moveArmed="moveArmed"
+              :movedPosition="movedPosition"
+              :migrationSql="migrationSql"
+              :sqlCopied="sqlCopied"
+              @copy-sql="copyMigration"
+              @close="clearSelectedSpawn"
+            />
+          </div>
+        </div>
+      </template>
+
+      <!-- Zone tables live off the DB map id alone, minimap or not. -->
+      <template v-if="selectedZone" #inspector>
+        <ZoneTablesPanel
+          :map="selectedZone.map"
+          :zoneId="selectedZone.zoneId"
+          @fly="onFly"
         />
-      </span>
-    </div>
-
-    <p v-if="error" class="editor-error">{{ t('mapEditor.states.error', { message: error }) }}</p>
-
-    <div class="map-stage">
-      <WorldMap
-        v-if="selectedMap && viewMode === '2d'"
-        :map="selectedMap"
-        class="editor-map"
-        @cursor="cursor = $event"
-        @center="viewCenter = $event"
-        @pick="picked = $event"
-      />
-      <WorldScene3D
-        v-else-if="selectedMap"
-        :key="selectedMap.id"
-        :map="selectedMap"
-        :initialPosition="viewCenter"
-        :showSpawns="store.showSpawns"
-        :moveArmed="moveArmed"
-        class="editor-map"
-        @pick="picked = $event"
-        @select-spawn="onSelectSpawn"
-        @move-spawn="onMoveSpawn"
-      />
-      <div v-else class="editor-empty">
-        <i class="pi pi-map" style="font-size: 3rem; color: var(--text-placeholder)"></i>
-        <p>{{ loading ? t('mapEditor.states.loading') : t('mapEditor.states.noClient') }}</p>
-      </div>
-
-      <!-- Selected-spawn panel floats over the map so it never reflows the view. -->
-      <div v-if="viewMode === '3d' && selectedSpawn" class="spawn-overlay">
-        <SpawnInfoPanel
-          :spawn="selectedSpawn"
-          v-model:moveArmed="moveArmed"
-          :movedPosition="movedPosition"
-          :migrationSql="migrationSql"
-          :sqlCopied="sqlCopied"
-          @copy-sql="copyMigration"
-          @close="clearSelectedSpawn"
-        />
-      </div>
-    </div>
+      </template>
+    </EntityWorkspace>
   </div>
 </template>
 
@@ -284,21 +373,17 @@ onMounted(() => {
   font-size: 0.95rem;
 }
 
+/* Flex sizing beats the workspace's own height: 100% inside this column. */
+.editor-workspace {
+  flex: 1;
+  min-height: 0;
+}
+
 .editor-toolbar {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-}
-
-.map-select {
-  min-width: 14rem;
-}
-
-.map-option-tiles {
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  margin-left: 0.5rem;
 }
 
 .cursor-coords {

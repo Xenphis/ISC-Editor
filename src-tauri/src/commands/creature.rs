@@ -134,9 +134,12 @@ pub async fn get_creature_spawns_in_bounds(
         map, min_x, max_x, min_y, max_y, limit
     ).map_err(|e| format!("Query failed: {}", e))?;
 
-    Ok(rows
-        .into_iter()
-        .map(|r| CreatureSpawnMarker {
+    Ok(rows.into_iter().map(CreatureSpawnMarker::from).collect())
+}
+
+impl From<CreatureSpawnRow> for CreatureSpawnMarker {
+    fn from(r: CreatureSpawnRow) -> Self {
+        CreatureSpawnMarker {
             guid: r.guid,
             id: r.id,
             position_x: r.position_x,
@@ -147,8 +150,85 @@ pub async fn get_creature_spawns_in_bounds(
             display_id: if r.modelid != 0 { r.modelid } else { r.template_modelid.unwrap_or(0) },
             name: r.name.unwrap_or_default(),
             scale: r.scale.unwrap_or(1.0),
-        })
-        .collect())
+        }
+    }
+}
+
+/// Creature spawns on one map, searchable by template name, entry or guid.
+/// Backs the map editor's zone tables panel. Zone scoping is spatial (the
+/// zone's WorldMapArea world rectangle): the DB's `creature.zoneId` column is
+/// 0 on stock rows — the server computes it at runtime — so it can't be
+/// trusted for filtering. All-NULL bounds mean map-wide.
+#[tauri::command]
+pub async fn get_creature_spawns_by_map(
+    state: State<'_, DbState>,
+    app: tauri::AppHandle,
+    debug: State<'_, DebugState>,
+    map: u16,
+    search: Option<String>,
+    limit: i64,
+    min_x: Option<f32>,
+    max_x: Option<f32>,
+    min_y: Option<f32>,
+    max_y: Option<f32>,
+) -> Result<Vec<CreatureSpawnMarker>, String> {
+    let db = state.pool.read().await;
+    let pool = db.as_ref().ok_or("Not connected to database")?;
+
+    // The bounds filter binds min_x twice: NULL disables it (map-wide list).
+    let rows = match &search {
+        Some(q) if !q.is_empty() => {
+            let pattern = format!("%{}%", q);
+            const SQL: &str = "SELECT c.guid, c.id, c.position_x, c.position_y, c.position_z, c.orientation, \
+                 c.modelid, ct.modelid1 AS template_modelid, ct.name, ct.scale \
+                 FROM creature c \
+                 LEFT JOIN creature_template ct ON ct.entry = c.id \
+                 WHERE c.map = ? \
+                 AND (? IS NULL OR (c.position_x BETWEEN ? AND ? AND c.position_y BETWEEN ? AND ?)) \
+                 AND (ct.name LIKE ? OR c.id LIKE ? OR c.guid LIKE ?) \
+                 ORDER BY ct.name, c.guid LIMIT ?";
+            debug_sql!(app, debug, SQL,
+                sqlx::query_as::<_, CreatureSpawnRow>(SQL)
+                .bind(map)
+                .bind(min_x)
+                .bind(min_x)
+                .bind(max_x)
+                .bind(min_y)
+                .bind(max_y)
+                .bind(&pattern)
+                .bind(&pattern)
+                .bind(&pattern)
+                .bind(limit)
+                .fetch_all(pool)
+                .await,
+                map, min_x, min_x, max_x, min_y, max_y, &pattern, &pattern, &pattern, limit
+            ).map_err(|e| format!("Query failed: {}", e))?
+        }
+        _ => {
+            const SQL: &str = "SELECT c.guid, c.id, c.position_x, c.position_y, c.position_z, c.orientation, \
+                 c.modelid, ct.modelid1 AS template_modelid, ct.name, ct.scale \
+                 FROM creature c \
+                 LEFT JOIN creature_template ct ON ct.entry = c.id \
+                 WHERE c.map = ? \
+                 AND (? IS NULL OR (c.position_x BETWEEN ? AND ? AND c.position_y BETWEEN ? AND ?)) \
+                 ORDER BY ct.name, c.guid LIMIT ?";
+            debug_sql!(app, debug, SQL,
+                sqlx::query_as::<_, CreatureSpawnRow>(SQL)
+                .bind(map)
+                .bind(min_x)
+                .bind(min_x)
+                .bind(max_x)
+                .bind(min_y)
+                .bind(max_y)
+                .bind(limit)
+                .fetch_all(pool)
+                .await,
+                map, min_x, min_x, max_x, min_y, max_y, limit
+            ).map_err(|e| format!("Query failed: {}", e))?
+        }
+    };
+
+    Ok(rows.into_iter().map(CreatureSpawnMarker::from).collect())
 }
 
 #[tauri::command]

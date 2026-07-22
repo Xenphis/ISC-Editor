@@ -2,8 +2,8 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import type { MinimapMapInfo, PickedPosition, WorldPosition } from '../types'
-import { MIN_ZOOM, NATIVE_ZOOM, latLngToWorld, tileUrlTemplate } from '../service'
+import type { FocusPosition, MinimapMapInfo, PickedPosition, WorldPosition } from '../types'
+import { MIN_ZOOM, NATIVE_ZOOM, latLngToWorld, tileUrlTemplate, worldToLatLng } from '../service'
 
 /**
  * Leaflet viewport over the `minimap://` tile pyramid.
@@ -15,6 +15,10 @@ import { MIN_ZOOM, NATIVE_ZOOM, latLngToWorld, tileUrlTemplate } from '../servic
 
 const props = defineProps<{
   map: MinimapMapInfo
+  /** Position to center on (zone origin, table row); assign a fresh object to re-center. */
+  focus?: FocusPosition | null
+  /** Selected table row position, shown as a dot (kept while panning). */
+  marker?: FocusPosition | null
 }>()
 
 const emit = defineEmits<{
@@ -29,9 +33,35 @@ const emit = defineEmits<{
  * the very first display render thousands of BLPs before anything shows. */
 const INITIAL_MIN_ZOOM = 6
 
+/** Zoom applied when centering on a focus position (close but not maxed). */
+const FOCUS_ZOOM = NATIVE_ZOOM - 1
+
 const container = ref<HTMLDivElement>()
 let leafletMap: L.Map | null = null
 let tileLayer: L.TileLayer | null = null
+let markerLayer: L.CircleMarker | null = null
+
+/** Blue dot: matches the 3D row marker, distinct from Leaflet's default pin
+ * (whose image assets Vite doesn't bundle anyway). */
+const MARKER_STYLE: L.CircleMarkerOptions = {
+  radius: 7,
+  color: '#60a5fa',
+  weight: 2,
+  fillColor: '#60a5fa',
+  fillOpacity: 0.35,
+}
+
+function applyMarker(position: FocusPosition | null | undefined) {
+  if (!leafletMap) return
+  if (!position) {
+    markerLayer?.remove()
+    markerLayer = null
+    return
+  }
+  const latlng = worldToLatLng(position)
+  if (markerLayer) markerLayer.setLatLng(latlng)
+  else markerLayer = L.circleMarker(latlng, MARKER_STYLE).addTo(leafletMap)
+}
 
 function tileBounds(info: MinimapMapInfo): L.LatLngBounds {
   // Cells [minX..maxX]×[minY..maxY] — +1 because a cell spans one unit.
@@ -57,6 +87,10 @@ function showMap(info: MinimapMapInfo) {
   }).addTo(leafletMap)
 
   leafletMap.setMaxBounds(bounds.pad(0.5))
+  if (props.focus) {
+    leafletMap.setView(worldToLatLng(props.focus), FOCUS_ZOOM)
+    return
+  }
   leafletMap.fitBounds(bounds)
   if (leafletMap.getZoom() < INITIAL_MIN_ZOOM) {
     leafletMap.setView(bounds.getCenter(), INITIAL_MIN_ZOOM)
@@ -84,6 +118,7 @@ onMounted(() => {
     emit('pick', { ...latLngToWorld(event.latlng), z: null })
   })
   showMap(props.map)
+  applyMarker(props.marker)
 })
 
 watch(
@@ -91,10 +126,23 @@ watch(
   info => showMap(info),
 )
 
+watch(
+  () => props.focus,
+  focus => {
+    if (focus && leafletMap) leafletMap.setView(worldToLatLng(focus), FOCUS_ZOOM)
+  },
+)
+
+watch(
+  () => props.marker,
+  marker => applyMarker(marker),
+)
+
 onBeforeUnmount(() => {
   leafletMap?.remove()
   leafletMap = null
   tileLayer = null
+  markerLayer = null
 })
 </script>
 

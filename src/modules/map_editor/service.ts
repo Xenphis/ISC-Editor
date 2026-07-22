@@ -1,5 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import type { LatLng } from 'leaflet'
+// Type-only import: the panel lists the same wire shape the map module edits.
+import type { GameTele } from '@/modules/map/types/game_tele'
 import type {
   CreatureModelInfo,
   CreatureSpawnMarker,
@@ -89,6 +91,50 @@ export function loadCreatureSpawnsInBounds(
     minY: bounds.minY,
     maxY: bounds.maxY,
     limit,
+  })
+}
+
+/** Teleports on one map, for the zone tables panel. `game_tele` has no zone
+ * column: pass the zone's world bounds to scope the list spatially. */
+export function loadGameTelesByMap(
+  map: number,
+  search?: string,
+  limit = 500,
+  bounds?: WorldBounds | null,
+): Promise<GameTele[]> {
+  return invoke<GameTele[]>('get_game_teles_by_map', {
+    map,
+    search,
+    limit,
+    minX: bounds?.minX,
+    maxX: bounds?.maxX,
+    minY: bounds?.minY,
+    maxY: bounds?.maxY,
+  })
+}
+
+/** World rectangle of a zone's UI map (WorldMapArea.dbc from the client);
+ * null when the zone has no world map entry. Rejects while no client loaded. */
+export function loadZoneWorldBounds(zoneId: number): Promise<WorldBounds | null> {
+  return invoke<WorldBounds | null>('minimap_zone_bounds', { zoneId })
+}
+
+/** Creature spawns on one map, searchable. Zone scoping is spatial (the DB's
+ * `creature.zoneId` is 0 on stock rows): pass the zone's world bounds. */
+export function loadCreatureSpawnsByMap(
+  map: number,
+  search?: string,
+  limit = 500,
+  bounds?: WorldBounds | null,
+): Promise<CreatureSpawnMarker[]> {
+  return invoke<CreatureSpawnMarker[]>('get_creature_spawns_by_map', {
+    map,
+    search,
+    limit,
+    minX: bounds?.minX,
+    maxX: bounds?.maxX,
+    minY: bounds?.minY,
+    maxY: bounds?.maxY,
   })
 }
 

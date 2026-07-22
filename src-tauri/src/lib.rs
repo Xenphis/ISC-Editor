@@ -9,11 +9,11 @@ mod wmo;
 use db::DbState;
 use debug::{DebugState, set_debug_mode, get_debug_mode};
 use minimap::{MinimapState, minimap_load_client, minimap_adt_liquids};
-use minimap::{minimap_adt_wmo_placements, minimap_global_wmo_placements, minimap_wmo_model, minimap_creature_models};
+use minimap::{minimap_adt_wmo_placements, minimap_global_wmo_placements, minimap_wmo_model, minimap_creature_models, minimap_zone_bounds};
 use commands::addon::{get_npc_addon, save_npc_addon};
 use commands::batch::execute_batch;
 use commands::connection::{connect_db, disconnect_db};
-use commands::creature::{get_creature_spawns, get_creature_spawns_in_bounds, save_creature_spawn, delete_creature_spawn};
+use commands::creature::{get_creature_spawns, get_creature_spawns_in_bounds, get_creature_spawns_by_map, save_creature_spawn, delete_creature_spawn};
 use commands::creature_addon::{get_creature_addon, save_creature_addon};
 use commands::creature_movement_override::{get_creature_movement_override, save_creature_movement_override};
 use commands::creature_text::{get_creature_texts, save_creature_texts};
@@ -42,7 +42,7 @@ use commands::movement::{get_npc_movement, save_npc_movement};
 use commands::resistance::{get_npc_resistances, save_npc_resistances};
 use commands::access_requirement::{get_access_requirements, get_access_requirement, save_access_requirement, delete_access_requirement};
 use commands::exploration_basexp::{get_exploration_basexps, get_exploration_basexp, save_exploration_basexp, delete_exploration_basexp};
-use commands::game_tele::{get_game_teles, get_game_tele, save_game_tele, delete_game_tele};
+use commands::game_tele::{get_game_teles, get_game_teles_by_map, get_game_tele, save_game_tele, delete_game_tele};
 use commands::instance_template::{get_instance_templates, get_instance_template, save_instance_template, delete_instance_template};
 use commands::instance_encounters::{get_instance_encounters, get_instance_encounters_by_map, get_instance_encounter, save_instance_encounter, delete_instance_encounter};
 use commands::instance_spawn_groups::{get_instance_spawn_groups, get_instance_spawn_groups_by_map, get_instance_spawn_group, save_instance_spawn_group, delete_instance_spawn_group};
@@ -123,6 +123,7 @@ pub fn run() {
       save_npc_addon,
       get_creature_spawns,
       get_creature_spawns_in_bounds,
+      get_creature_spawns_by_map,
       save_creature_spawn,
       delete_creature_spawn,
       get_npc_equip,
@@ -182,6 +183,7 @@ pub fn run() {
       save_exploration_basexp,
       delete_exploration_basexp,
       get_game_teles,
+      get_game_teles_by_map,
       get_game_tele,
       save_game_tele,
       delete_game_tele,
@@ -252,6 +254,7 @@ pub fn run() {
       minimap_global_wmo_placements,
       minimap_wmo_model,
       minimap_creature_models,
+      minimap_zone_bounds,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

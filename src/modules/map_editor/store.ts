@@ -7,6 +7,7 @@ const STORAGE_KEY = 'mapEditor:settings'
 interface PersistedState {
   clientPath: string
   lastMapId: string
+  lastZoneId: string
   showSpawns: boolean
 }
 
@@ -18,13 +19,14 @@ function readInitial(): PersistedState {
       return {
         clientPath: typeof parsed.clientPath === 'string' ? parsed.clientPath : '',
         lastMapId: typeof parsed.lastMapId === 'string' ? parsed.lastMapId : '',
+        lastZoneId: typeof parsed.lastZoneId === 'string' ? parsed.lastZoneId : '',
         showSpawns: typeof parsed.showSpawns === 'boolean' ? parsed.showSpawns : false,
       }
     }
   } catch {
     /* ignore corrupted storage */
   }
-  return { clientPath: '', lastMapId: '', showSpawns: false }
+  return { clientPath: '', lastMapId: '', lastZoneId: '', showSpawns: false }
 }
 
 /**
@@ -35,18 +37,21 @@ export const useMapEditorStore = defineStore('mapEditor', () => {
   const initial = readInitial()
   const clientPath = ref<string>(initial.clientPath)
   const lastMapId = ref<string>(initial.lastMapId)
+  /** Selected zone slug (data/zones.ts); '' when browsing maps directly. */
+  const lastZoneId = ref<string>(initial.lastZoneId)
   /** Show creature spawns in the 3D view (streamed around the camera). */
   const showSpawns = ref<boolean>(initial.showSpawns)
   /** Maps returned by the last successful minimap_load_client call. */
   const maps = ref<MinimapMapInfo[]>([])
 
-  watch([clientPath, lastMapId, showSpawns], () => {
+  watch([clientPath, lastMapId, lastZoneId, showSpawns], () => {
     try {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
           clientPath: clientPath.value,
           lastMapId: lastMapId.value,
+          lastZoneId: lastZoneId.value,
           showSpawns: showSpawns.value,
         }),
       )
@@ -55,5 +60,5 @@ export const useMapEditorStore = defineStore('mapEditor', () => {
     }
   })
 
-  return { clientPath, lastMapId, showSpawns, maps }
+  return { clientPath, lastMapId, lastZoneId, showSpawns, maps }
 })

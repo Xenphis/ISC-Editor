@@ -25,6 +25,26 @@ export interface PickedPosition extends WorldPosition {
   z: number | null
 }
 
+/** A world position with optional height, used to focus/fly the views. */
+export interface FocusPosition extends WorldPosition {
+  z?: number | null
+}
+
+/** A curated zone of the world (static list, edited in code: data/zones.ts).
+ * Display names are localized in the module i18n files under
+ * `mapEditor.zones.names.<id>`. */
+export interface ZoneDefinition {
+  /** Stable slug: persisted as the selected zone, keys the i18n name. */
+  id: string
+  /** DB map id (Map.dbc / creature.map / game_tele.map). */
+  map: number
+  /** Camera / view start position. */
+  origin: { x: number; y: number; z: number }
+  /** AreaTable zone id — keys the WorldMapArea lookup that scopes the zone
+   * tables (teleports, spawns) to the zone's world rectangle. */
+  zoneId?: number
+}
+
 /** Liquid geometry for one category (water/ocean/magma/slime) in a tile. */
 export interface LiquidLayer {
   category: string

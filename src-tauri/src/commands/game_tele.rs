@@ -70,6 +70,72 @@ pub async fn get_game_teles(
     Ok(GameTeleListResult { data, total })
 }
 
+/// Teleports on one map, for the map editor's zone tables panel. `game_tele`
+/// has no zone column, so the optional bounds (the zone's WorldMapArea world
+/// rectangle) scope the list spatially; all-NULL bounds mean map-wide.
+#[tauri::command]
+pub async fn get_game_teles_by_map(
+    state: State<'_, DbState>,
+    app: tauri::AppHandle,
+    debug: State<'_, DebugState>,
+    map: u16,
+    search: Option<String>,
+    limit: Option<i64>,
+    min_x: Option<f32>,
+    max_x: Option<f32>,
+    min_y: Option<f32>,
+    max_y: Option<f32>,
+) -> Result<Vec<GameTele>, String> {
+    let db = state.pool.read().await;
+    let pool = db.as_ref().ok_or("Not connected to database")?;
+    let limit = limit.unwrap_or(500);
+
+    // The bounds filter binds min_x twice: NULL disables it (map-wide list).
+    let rows = match &search {
+        Some(q) if !q.is_empty() => {
+            let pattern = format!("%{}%", q);
+            const SQL: &str = "SELECT * FROM game_tele WHERE map = ? \
+                 AND (? IS NULL OR (position_x BETWEEN ? AND ? AND position_y BETWEEN ? AND ?)) \
+                 AND (name LIKE ? OR id LIKE ?) ORDER BY name LIMIT ?";
+            debug_sql!(app, debug, SQL,
+                sqlx::query_as::<_, GameTele>(SQL)
+                    .bind(map)
+                    .bind(min_x)
+                    .bind(min_x)
+                    .bind(max_x)
+                    .bind(min_y)
+                    .bind(max_y)
+                    .bind(&pattern)
+                    .bind(&pattern)
+                    .bind(limit)
+                    .fetch_all(pool)
+                    .await,
+                map, min_x, min_x, max_x, min_y, max_y, &pattern, &pattern, limit
+            ).map_err(|e| format!("Query failed: {}", e))?
+        }
+        _ => {
+            const SQL: &str = "SELECT * FROM game_tele WHERE map = ? \
+                 AND (? IS NULL OR (position_x BETWEEN ? AND ? AND position_y BETWEEN ? AND ?)) \
+                 ORDER BY name LIMIT ?";
+            debug_sql!(app, debug, SQL,
+                sqlx::query_as::<_, GameTele>(SQL)
+                    .bind(map)
+                    .bind(min_x)
+                    .bind(min_x)
+                    .bind(max_x)
+                    .bind(min_y)
+                    .bind(max_y)
+                    .bind(limit)
+                    .fetch_all(pool)
+                    .await,
+                map, min_x, min_x, max_x, min_y, max_y, limit
+            ).map_err(|e| format!("Query failed: {}", e))?
+        }
+    };
+
+    Ok(rows)
+}
+
 #[tauri::command]
 pub async fn get_game_tele(
     state: State<'_, DbState>,

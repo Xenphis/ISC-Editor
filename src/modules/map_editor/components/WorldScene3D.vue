@@ -2,7 +2,7 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import * as THREE from 'three'
 import { MapManager } from '@wowserhq/scene'
-import type { CreatureSpawnMarker, MinimapMapInfo, PickedPosition, WorldPosition } from '../types'
+import type { CreatureSpawnMarker, FocusPosition, MinimapMapInfo, PickedPosition } from '../types'
 import { ADT_GRID_CENTER, MPQ_ASSET_BASE_URL, TILE_YARDS } from '../service'
 import { LiquidManager } from './LiquidManager'
 import { WmoManager } from './WmoManager'
@@ -35,7 +35,9 @@ import { CreatureSpawnManager } from './CreatureSpawnManager'
 const props = defineProps<{
   map: MinimapMapInfo
   /** Starting spot (e.g. the 2D view's center); defaults to the map center. */
-  initialPosition: WorldPosition | null
+  initialPosition: FocusPosition | null
+  /** Fly-to target (zone origin, table row); assign a fresh object to re-trigger. */
+  focus: FocusPosition | null
   /** Stream & show creature spawns as models around the camera. */
   showSpawns: boolean
   /** When true, the next terrain right-click relocates the selected spawn. */
@@ -52,6 +54,8 @@ const emit = defineEmits<{
 
 /** Height the camera starts at before the terrain under it is known. */
 const FALLBACK_HEIGHT = 200
+/** Camera height above a known ground/target position. */
+const EYE_HEIGHT = 3
 /** How long to keep probing for ground under the start position. */
 const GROUND_PROBE_INTERVAL_MS = 400
 const GROUND_PROBE_ATTEMPTS = 50
@@ -147,7 +151,7 @@ function isSceneKeyTarget(target: EventTarget | null): boolean {
   return target === document.body || (!!container.value && container.value.contains(target as Node))
 }
 
-function startPosition(): WorldPosition {
+function startPosition(): FocusPosition {
   if (props.initialPosition) {
     return props.initialPosition
   }
@@ -237,28 +241,49 @@ onMounted(() => {
   }
 
   const start = startPosition()
-  camera.position.set(start.x, start.y, FALLBACK_HEIGHT)
+  // A known height (zone origin, focused row) skips the ground probe entirely.
+  if (start.z != null) {
+    camera.position.set(start.x, start.y, start.z + EYE_HEIGHT)
+    grounded.value = true
+  } else {
+    camera.position.set(start.x, start.y, FALLBACK_HEIGHT)
+  }
   applyOrientation()
 
-  // The terrain height under the start position is unknown until the first
-  // areas stream in: probe with a downward ray and settle the camera on hit.
   const raycaster = new THREE.Raycaster()
-  const down = new THREE.Vector3(0, 0, -1)
-  let attempts = 0
-  probeTimer = setInterval(() => {
-    if (!mapManager) return
-    attempts += 1
-    raycaster.set(new THREE.Vector3(start.x, start.y, 5000), down)
-    const hit = raycaster.intersectObject(mapManager.root, true)[0]
-    if (hit) {
-      camera.position.set(start.x, start.y, hit.point.z + 3)
-      grounded.value = true
-    }
-    if (hit || attempts >= GROUND_PROBE_ATTEMPTS) {
+  if (start.z == null) {
+    // The terrain height under the start position is unknown until the first
+    // areas stream in: probe with a downward ray and settle the camera on hit.
+    const down = new THREE.Vector3(0, 0, -1)
+    let attempts = 0
+    probeTimer = setInterval(() => {
+      if (!mapManager) return
+      attempts += 1
+      raycaster.set(new THREE.Vector3(start.x, start.y, 5000), down)
+      const hit = raycaster.intersectObject(mapManager.root, true)[0]
+      if (hit) {
+        camera.position.set(start.x, start.y, hit.point.z + EYE_HEIGHT)
+        grounded.value = true
+      }
+      if (hit || attempts >= GROUND_PROBE_ATTEMPTS) {
+        clearInterval(probeTimer)
+        probeTimer = undefined
+      }
+    }, GROUND_PROBE_INTERVAL_MS)
+  }
+
+  // Fly-to: teleport the camera onto the target; the terrain streams to the
+  // new position on its own (setTarget follows the camera every frame).
+  watch(() => props.focus, focus => {
+    if (!focus) return
+    if (probeTimer !== undefined) {
       clearInterval(probeTimer)
       probeTimer = undefined
     }
-  }, GROUND_PROBE_INTERVAL_MS)
+    camera.position.set(focus.x, focus.y, (focus.z ?? FALLBACK_HEIGHT) + EYE_HEIGHT)
+    applyOrientation()
+    if (focus.z != null) grounded.value = true
+  })
 
   // ── Fly-cam keyboard movement ─────────────────────────────────────────
   const onKeyDown = (event: KeyboardEvent) => {
