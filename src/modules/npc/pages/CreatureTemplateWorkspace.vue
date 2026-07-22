@@ -20,19 +20,22 @@ import CreatureEditor, { type SpawnInspectorState } from './CreatureEditor.vue'
 import NpcTabGeneral from './editor/creature_template/GeneralTab.vue'
 import NpcTabCombat from './editor/creature_template/CombatTab.vue'
 import NpcTabAppearance from './editor/creature_template/AppearanceTab.vue'
-import NpcTabBehavior from './editor/creature_template/BehaviorTab.vue'
 import NpcTabLoot from './editor/creature_template/LootTab.vue'
 import NpcTabAdvanced from './editor/creature_template/AdvancedTab.vue'
 import NpcTabSpawn from './editor/creature_template/SpawnTab.vue'
 import SmartScriptsPanel from '@/modules/smart_scripts/pages/SmartScriptsPanel.vue'
 import { useSmartScriptsStore } from '@/modules/smart_scripts/stores/smartScriptsStore'
 import NpcTabText from './editor/creature_template/TextTab.vue'
+import EditorField from '@core/components/EditorField.vue'
+import InputText from 'primevue/inputtext'
+import { useNpcFieldModifiers } from '@/modules/npc/pages/useNpcFieldModifiers'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useNpcModuleStore()
 const form = store.formData
+const { isFieldModified } = useNpcFieldModifiers()
 
 const typeMap: Record<number, string> = {
   0: 'None', 1: 'Beast', 2: 'Dragonkin', 3: 'Demon', 4: 'Elemental', 5: 'Giant',
@@ -237,7 +240,6 @@ const mainTabs = computed<SectionTabItem[]>(() => [
   { value: 'general', label: t('creature_template.tabs.general') },
   { value: 'combat', label: t('creature_template.tabs.combat') },
   { value: 'appearance', label: t('creature_template.tabs.appearance') },
-  { value: 'behavior', label: t('creature_template.tabs.behavior') },
   { value: 'loot', label: t('creature_template.tabs.loot') },
   { value: 'text', label: t('creature_template.tabs.text') },
   { value: 'advanced', label: t('creature_template.tabs.advanced') },
@@ -321,7 +323,6 @@ const mainTabs = computed<SectionTabItem[]>(() => [
           <template #general><NpcTabGeneral /></template>
           <template #combat><NpcTabCombat /></template>
           <template #appearance><NpcTabAppearance /></template>
-          <template #behavior><NpcTabBehavior /></template>
           <template #loot><NpcTabLoot /></template>
           <template #text><NpcTabText /></template>
           <template #advanced><NpcTabAdvanced /></template>
@@ -329,6 +330,20 @@ const mainTabs = computed<SectionTabItem[]>(() => [
             <NpcTabSpawn :spawns="spawns" @edit="onEditSpawn" @delete="onDeleteSpawn" />
           </template>
           <template #sai>
+            <div class="field-group">
+              <div class="field-group-header">
+                <h4>{{ t('creature_template.groups.aiBehavior') }}</h4>
+                <p>{{ t('creature_template.groups.aiBehaviorDesc') }}</p>
+              </div>
+              <div class="field-grid">
+                <EditorField :label="t('creature_template.fields.AIName')" :modified="isFieldModified('AIName')">
+                  <InputText v-model="form.AIName" fluid />
+                </EditorField>
+                <EditorField :label="t('creature_template.fields.ScriptName')" :modified="isFieldModified('ScriptName')">
+                  <InputText v-model="form.ScriptName" fluid />
+                </EditorField>
+              </div>
+            </div>
             <SmartScriptsPanel v-if="form.entry" :entryorguid="form.entry" :sourceType="0" />
           </template>
         </SectionTabs>

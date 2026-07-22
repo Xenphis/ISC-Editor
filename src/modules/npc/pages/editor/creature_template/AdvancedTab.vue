@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n'
 import InputText from 'primevue/inputtext'
 import InputNumber from 'primevue/inputnumber'
 import Select from 'primevue/select'
-import { npc_flags, unit_flags_options, unit_flags2_options, dynamicflags_options, type_flags_options, flags_extra_options } from '@/modules/npc/types/defines'
+import { npc_flags, unit_flags_options, unit_flags2_options, dynamicflags_options, type_flags_options, flags_extra_options, ground_movement_options, swim_movement_options, flight_movement_options, rooted_options, chase_movement_options, random_movement_options, movement_type_options } from '@/modules/npc/types/defines'
 import EditorField from '@core/components/EditorField.vue'
 import BitmaskField from '@core/components/BitmaskField.vue'
 import { useNpcModuleStore } from '@/modules/npc/store'
@@ -11,21 +11,20 @@ import { useNpcFieldModifiers } from '@/modules/npc/pages/useNpcFieldModifiers'
 
 const { t } = useI18n()
 const store = useNpcModuleStore()
-const { isFieldModified, isOnKillRepModified } = useNpcFieldModifiers()
+const { isFieldModified, isMovementModified, isAddonModified } = useNpcFieldModifiers()
 
 const form = store.formData
-const repForm = store.onKillRep.newEntry
+const movementForm = store.movement.newEntry
+const addonForm = store.addon.newEntry
 
-const maxStandingOptions = [
-  { label: 'Hated (0)',      value: 0 },
-  { label: 'Hostile (1)',    value: 1 },
-  { label: 'Unfriendly (2)', value: 2 },
-  { label: 'Neutral (3)',    value: 3 },
-  { label: 'Friendly (4)',   value: 4 },
-  { label: 'Honored (5)',    value: 5 },
-  { label: 'Revered (6)',    value: 6 },
-  { label: 'Exalted (7)',    value: 7 },
-]
+const groundOptions = ground_movement_options.map(o => ({ value: o.value, label: o.name }))
+const swimOptions = swim_movement_options.map(o => ({ value: o.value, label: o.name }))
+const flightOptions = flight_movement_options.map(o => ({ value: o.value, label: o.name }))
+const rootedOptions = rooted_options.map(o => ({ value: o.value, label: o.name }))
+const chaseOptions = chase_movement_options.map(o => ({ value: o.value, label: o.name }))
+const randomOptions = random_movement_options.map(o => ({ value: o.value, label: o.name }))
+
+const movementTypeOptions = movement_type_options.map(o => ({ value: o.value, label: o.name }))
 </script>
 
 <template>
@@ -79,42 +78,58 @@ const maxStandingOptions = [
     </div>
   </div>
 
-  <!-- Réputations -->
+  <!-- Movement -->
   <div class="field-group">
     <div class="field-group-header">
-      <h4>{{ t('creature_template.groups.reputations') }}</h4>
-      <p>{{ t('creature_template.groups.reputationsDesc') }}</p>
+      <h4>{{ t('creature_template.groups.movement') }}</h4>
+      <p>{{ t('creature_template.groups.movementDesc') }}</p>
     </div>
-    <div class="field-grid field-grid-4">
-      <!-- Faction 1 -->
-      <EditorField :label="t('creature_template.fields.RewOnKillRepFaction1')" :modified="isOnKillRepModified('RewOnKillRepFaction1')">
-        <InputNumber v-model="repForm.RewOnKillRepFaction1" :useGrouping="false" fluid />
+    <div class="field-grid">
+      <EditorField :label="t('creature_template.fields.movementId')" :modified="isFieldModified('movementId')">
+        <InputNumber v-model="form.movementId" :useGrouping="false" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.RewOnKillRepValue1')" :modified="isOnKillRepModified('RewOnKillRepValue1')">
-        <InputNumber v-model="repForm.RewOnKillRepValue1" :useGrouping="false" fluid />
+      <EditorField :label="t('creature_template.fields.MovementType')" :modified="isFieldModified('MovementType')">
+        <Select v-model="form.MovementType" :options="movementTypeOptions" optionLabel="label" optionValue="value" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.MaxStanding1')" :modified="isOnKillRepModified('MaxStanding1')">
-        <Select v-model="repForm.MaxStanding1" :options="maxStandingOptions" optionLabel="label" optionValue="value" fluid />
+      <EditorField :label="t('creature_template.fields.speed_walk')" :modified="isFieldModified('speed_walk')">
+        <InputNumber v-model="form.speed_walk" :minFractionDigits="1" :maxFractionDigits="5" :useGrouping="false" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.IsTeamAward1')" :modified="isOnKillRepModified('IsTeamAward1')">
-        <InputNumber v-model="repForm.IsTeamAward1" :min="0" :max="1" :useGrouping="false" fluid />
+      <EditorField :label="t('creature_template.fields.speed_run')" :modified="isFieldModified('speed_run')">
+        <InputNumber v-model="form.speed_run" :minFractionDigits="1" :maxFractionDigits="5" :useGrouping="false" fluid />
       </EditorField>
-      <!-- Faction 2 -->
-      <EditorField :label="t('creature_template.fields.RewOnKillRepFaction2')" :modified="isOnKillRepModified('RewOnKillRepFaction2')">
-        <InputNumber v-model="repForm.RewOnKillRepFaction2" :useGrouping="false" fluid />
+      <EditorField :label="t('creature_template.fields.addon_path_id')" :modified="isAddonModified('path_id')">
+        <InputNumber v-model="addonForm.path_id" :useGrouping="false" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.RewOnKillRepValue2')" :modified="isOnKillRepModified('RewOnKillRepValue2')">
-        <InputNumber v-model="repForm.RewOnKillRepValue2" :useGrouping="false" fluid />
+    </div>
+  </div>
+
+  <!-- Movement Details (creature_template_movement) -->
+  <div class="field-group">
+    <div class="field-group-header">
+      <h4>{{ t('creature_template.groups.movementDetails') }}</h4>
+      <p>{{ t('creature_template.groups.movementDetailsDesc') }}</p>
+    </div>
+    <div class="field-grid">
+      <EditorField :label="t('creature_template.fields.movement_ground')" :modified="isMovementModified('Ground')">
+        <Select v-model="movementForm.Ground" :options="groundOptions" optionLabel="label" optionValue="value" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.MaxStanding2')" :modified="isOnKillRepModified('MaxStanding2')">
-        <Select v-model="repForm.MaxStanding2" :options="maxStandingOptions" optionLabel="label" optionValue="value" fluid />
+      <EditorField :label="t('creature_template.fields.movement_swim')" :modified="isMovementModified('Swim')">
+        <Select v-model="movementForm.Swim" :options="swimOptions" optionLabel="label" optionValue="value" fluid />
       </EditorField>
-      <EditorField :label="t('creature_template.fields.IsTeamAward2')" :modified="isOnKillRepModified('IsTeamAward2')">
-        <InputNumber v-model="repForm.IsTeamAward2" :min="0" :max="1" :useGrouping="false" fluid />
+      <EditorField :label="t('creature_template.fields.movement_flight')" :modified="isMovementModified('Flight')">
+        <Select v-model="movementForm.Flight" :options="flightOptions" optionLabel="label" optionValue="value" fluid />
       </EditorField>
-      <!-- Team Dependent -->
-      <EditorField :label="t('creature_template.fields.TeamDependent')" :modified="isOnKillRepModified('TeamDependent')">
-        <InputNumber v-model="repForm.TeamDependent" :min="0" :max="1" :useGrouping="false" fluid />
+      <EditorField :label="t('creature_template.fields.movement_rooted')" :modified="isMovementModified('Rooted')">
+        <Select v-model="movementForm.Rooted" :options="rootedOptions" optionLabel="label" optionValue="value" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.movement_chase')" :modified="isMovementModified('Chase')">
+        <Select v-model="movementForm.Chase" :options="chaseOptions" optionLabel="label" optionValue="value" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.movement_random')" :modified="isMovementModified('Random')">
+        <Select v-model="movementForm.Random" :options="randomOptions" optionLabel="label" optionValue="value" fluid />
+      </EditorField>
+      <EditorField :label="t('creature_template.fields.movement_interaction_pause')" :modified="isMovementModified('InteractionPauseTimer')">
+        <InputNumber v-model="movementForm.InteractionPauseTimer" :useGrouping="false" fluid />
       </EditorField>
     </div>
   </div>
@@ -122,8 +137,4 @@ const maxStandingOptions = [
 
 <style scoped>
 @import '../npc-editor.css';
-
-.field-grid-4 {
-  grid-template-columns: repeat(4, 1fr);
-}
 </style>
